@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ===== SEO: Default Meta Tags (تُحدَّث ديناميكياً بالـ JS) ===== -->
+<title id="seo-title">ملاذ — أفضل رعاية طبية منزلية في القاهرة والجيزة | كشف وتمريض وأشعة</title>
+<meta name="description" id="seo-desc" content="منصة ملاذ للرعاية الطبية المنزلية — كشف منزلي، تمريض منزلي، أشعة منزلية. أطباء معتمدون يصلون إليك في القاهرة والجيزة. احجز الآن بدون رسوم خفية.">
+<meta name="keywords" content="كشف منزلي, تمريض منزلي, أشعة منزلية, طبيب منزلي, رعاية منزلية, ملاذ, كشف في البيت, دكتور في البيت, مصر, القاهرة, الجيزة">
+<meta name="robots" content="index, follow">
+<link rel="canonical" id="seo-canonical" href="https://malaaz.com/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ملاذ">
+<meta property="og:title" id="og-title" content="ملاذ — رعاية طبية منزلية متكاملة">
+<meta property="og:description" id="og-desc" content="كشف منزلي، تمريض، وأشعة في بيتك. احجز الآن.">
+<meta property="og:image" content="https://malaaz.com/og-image.jpg">
+<meta property="og:url" id="og-url" content="https://malaaz.com/">
+<meta property="og:locale" content="ar_EG">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" id="tw-title" content="ملاذ — رعاية طبية منزلية">
+<meta name="twitter:description" id="tw-desc" content="كشف منزلي، تمريض، وأشعة في بيتك. احجز الآن.">
+
+<!-- ===== JSON-LD Schema Markup (MedicalBusiness + LocalBusiness) ===== -->
+<script type="application/ld+json" id="schema-org">
+{
+  "@context": "https://schema.org",
+  "@type": ["MedicalBusiness", "LocalBusiness"],
+  "name": "ملاذ — رعاية طبية منزلية",
+  "alternateName": "Malaaz Home Healthcare",
+  "description": "منصة رعاية طبية منزلية متكاملة — كشف منزلي، تمريض منزلي، أشعة منزلية. أطباء معتمدون في القاهرة والجيزة.",
+  "url": "https://malaaz.com",
+  "telephone": "+201006484908",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "EG",
+    "addressRegion": "القاهرة",
+    "addressLocality": "القاهرة"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "30.0444",
+    "longitude": "31.2357"
+  },
+  "areaServed": [
+    {"@type": "City", "name": "القاهرة"},
+    {"@type": "City", "name": "الجيزة"}
+  ],
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    "opens": "00:00",
+    "closes": "23:59"
+  }],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "خدمات الرعاية المنزلية",
+    "itemListElement": [
+      {"@type": "Offer", "itemOffered": {"@type": "MedicalTherapy", "name": "كشف منزلي"}, "priceRange": "200–800 ج.م"},
+      {"@type": "Offer", "itemOffered": {"@type": "MedicalTherapy", "name": "تمريض منزلي"}, "priceRange": "150–600 ج.م"},
+      {"@type": "Offer", "itemOffered": {"@type": "MedicalTherapy", "name": "أشعة منزلية"}, "priceRange": "250–900 ج.م"}
+    ]
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "0",
+    "bestRating": "5"
+  }
+}
+</script>
+
+<!-- ===== Fonts & Icons ===== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --dark:#1e2c2f;--dark2:#2d3b3e;--teal:#3a4a4e;--accent:#c9a84c;--accent2:#e8c56a;
+  --bg:#f5f2ec;--white:#fff;--text:#2d3b3e;--muted:#6b7c80;--border:rgba(58,74,78,0.12);
+  --green:#43A047;--success:#2e7d32;--danger:#c62828;--info:#1565c0;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overflow-x:hidden;}
+
+/* ===== NAVBAR ===== */
+nav{position:fixed;top:0;right:0;left:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 60px;height:72px;background:rgba(30,44,47,0.96);backdrop-filter:blur(16px);border-bottom:1px solid rgba(201,168,76,0.15);transition:all .3s;}
+nav.scrolled{height:62px;background:rgba(20,32,35,0.98);}
+.nav-logo{display:flex;align-items:baseline;gap:8px;cursor:pointer;text-decoration:none;}
+.nav-logo-ar{font-size:26px;font-weight:900;color:#fff;letter-spacing:-1px;font-family:'Tajawal',sans-serif;}
+.nav-logo-en{font-size:9px;font-weight:700;color:var(--accent);letter-spacing:5px;opacity:.8;}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{color:rgba(255,255,255,.65);font-size:14px;font-weight:600;text-decoration:none;transition:color .2s;cursor:pointer;}
+.nav-links a:hover,.nav-links a.active{color:var(--accent);}
+.nav-cta{background:var(--accent);color:var(--dark);border:none;border-radius:10px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.35);}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.nav-provider-btn{color:rgba(255,255,255,.5);font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;font-family:'Cairo',sans-serif;white-space:nowrap;}
+.nav-provider-btn:hover{color:var(--accent);}
+
+/* ===== HERO ===== */
+.hero{min-height:100vh;background:var(--dark);display:flex;align-items:center;position:relative;overflow:hidden;padding:100px 60px 60px;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 80% 50%,rgba(58,74,78,0.5) 0%,transparent 70%),radial-gradient(ellipse 40% 50% at 10% 80%,rgba(201,168,76,0.07) 0%,transparent 60%);}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 70% 80% at 50% 50%,black 0%,transparent 80%);}
+.hero-content{position:relative;z-index:2;max-width:620px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:30px;padding:7px 16px;margin-bottom:28px;font-size:12px;font-weight:700;color:var(--accent);}
+.hero-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
+/* ===== SEO: h1 رئيسي بكلمات مفتاحية مُحسَّنة ===== */
+h1{font-family:'Tajawal',sans-serif;font-size:clamp(46px,5vw,72px);font-weight:900;line-height:1.1;color:#fff;letter-spacing:-2px;margin-bottom:14px;}
+h1 span{color:var(--accent);}
+.hero-sub{font-size:18px;color:rgba(255,255,255,.55);line-height:1.8;margin-bottom:36px;font-weight:400;max-width:480px;}
+.hero-actions{display:flex;align-items:center;gap:14px;margin-bottom:48px;}
+.btn-primary{background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:16px 32px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;box-shadow:0 8px 32px rgba(201,168,76,.3);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(201,168,76,.4);}
+.btn-secondary{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:15px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;}
+.btn-secondary:hover{background:rgba(255,255,255,.12);}
+.hero-stats{display:flex;gap:32px;}
+.stat-item{text-align:center;}
+.stat-num{font-size:28px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;}
+.stat-num span{color:var(--accent);}
+.stat-lbl{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;font-weight:600;}
+
+/* Phone Frame */
+.hero-visual{position:absolute;left:60px;top:50%;transform:translateY(-50%);z-index:2;}
+.phone-frame{width:290px;height:580px;background:var(--dark2);border-radius:38px;border:2px solid rgba(255,255,255,.08);box-shadow:0 40px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden;position:relative;animation:float 7s ease-in-out infinite;}
+.phone-notch{width:90px;height:28px;background:var(--dark);border-radius:0 0 18px 18px;margin:0 auto;position:relative;z-index:2;}
+.phone-header{background:var(--dark2);padding:14px 14px 16px;color:#fff;text-align:center;}
+.phone-header .plogo{font-size:22px;font-weight:900;font-family:'Tajawal',sans-serif;}
+.phone-header .psub{font-size:8px;letter-spacing:4px;color:var(--accent);opacity:.8;}
+.phone-body{padding:12px;background:var(--bg);}
+.phone-section{font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.phone-services{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;}
+.ps{background:#fff;border-radius:11px;padding:10px 6px;text-align:center;border:.5px solid var(--border);}
+.ps-ico{font-size:20px;margin-bottom:4px;}
+.ps-lbl{font-size:9px;font-weight:700;}
+.phone-card{background:#fff;border-radius:12px;padding:11px;border:.5px solid var(--border);margin-bottom:8px;}
+.pc-top{display:flex;gap:9px;align-items:center;margin-bottom:9px;}
+.pc-ava{font-size:22px;width:38px;height:38px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+.pc-name{font-size:12px;font-weight:700;}
+.pc-spec{font-size:10px;color:var(--muted);}
+.pc-stars{color:var(--accent);font-size:9px;}
+.pc-bot{display:flex;justify-content:space-between;align-items:center;border-top:.5px solid var(--border);padding-top:8px;}
+.pc-price{font-size:13px;font-weight:900;color:var(--dark2);}
+.pc-btn{background:var(--dark2);color:#fff;border:none;border-radius:7px;padding:6px 11px;font-size:9px;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;}
+.float-badge{position:absolute;background:#fff;border-radius:12px;padding:8px 12px;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:7px;border:.5px solid var(--border);white-space:nowrap;}
+.fb-left{left:-90px;top:25%;animation:float 5s ease-in-out infinite;animation-delay:-2s;}
+.fb-right{right:-80px;top:55%;animation:float 5s ease-in-out infinite;animation-delay:-1s;}
+.fb-ico{font-size:16px;}
+.fb-txt{font-size:11px;font-weight:700;color:var(--text);}
+.fb-sub{font-size:9px;color:var(--muted);}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-18px);}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+
+/* Trust Bar */
+.trust-bar{background:var(--dark2);padding:18px 60px;display:flex;align-items:center;justify-content:center;gap:50px;border-top:1px solid rgba(201,168,76,.1);}
+.trust-item{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.5);font-size:13px;font-weight:600;}
+.trust-item strong{color:var(--accent);}
+
+/* Sections */
+.section{padding:90px 60px;}
+.section-tag{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;}
+/* ===== SEO: h2 مع كلمات مفتاحية ===== */
+.section-title{font-family:'Tajawal',sans-serif;font-size:clamp(32px,3.5vw,48px);font-weight:900;line-height:1.15;letter-spacing:-1px;margin-bottom:16px;}
+.section-sub{font-size:16px;color:var(--muted);line-height:1.8;max-width:520px;}
+.section-header{margin-bottom:52px;}
+
+/* Services */
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.svc-card{background:var(--white);border:.5px solid var(--border);border-radius:20px;padding:28px 24px;transition:all .25s;cursor:pointer;position:relative;overflow:hidden;}
+.svc-card:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(45,59,62,.1);border-color:rgba(201,168,76,.25);}
+.svc-ico-wrap{width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:18px;}
+.svc-name{font-size:18px;font-weight:700;margin-bottom:8px;}
+.svc-desc{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:16px;}
+.svc-price{display:flex;align-items:baseline;gap:4px;}
+.svc-from{font-size:12px;color:var(--muted);}
+.svc-num{font-size:22px;font-weight:900;color:var(--dark);}
+.svc-cur{font-size:13px;color:var(--muted);}
+.popular-tag{position:absolute;top:18px;left:18px;background:var(--accent);color:var(--dark);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;}
+
+/* How It Works */
+.how-section{background:var(--dark);padding:90px 60px;position:relative;overflow:hidden;}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;position:relative;z-index:1;}
+.step-card{text-align:center;padding:28px 20px;}
+.step-num{width:56px;height:56px;border-radius:18px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:var(--accent);margin:0 auto 16px;font-family:'Tajawal',sans-serif;}
+.step-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;}
+.step-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.8;}
+
+/* Doctors */
+.doctors-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.doc-card{background:var(--white);border:.5px solid var(--border);border-radius:20px;overflow:hidden;transition:all .25s;}
+.doc-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(45,59,62,.1);}
+.doc-header{background:var(--dark2);padding:24px;text-align:center;}
+.doc-ava{width:80px;height:80px;border-radius:22px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 12px;}
+.doc-name{font-size:17px;font-weight:700;color:#fff;}
+.doc-spec{font-size:13px;color:rgba(255,255,255,.5);margin-top:3px;}
+.doc-body{padding:18px;}
+.doc-stars{color:var(--accent);font-size:14px;margin-bottom:8px;}
+.doc-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.doc-badge{background:var(--bg);color:var(--text);border-radius:20px;font-size:11px;padding:5px 12px;font-weight:600;}
+.doc-avail{font-size:12px;font-weight:700;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:5px;}
+.doc-avail::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.doc-price-row{display:flex;justify-content:space-between;align-items:center;}
+.doc-from{font-size:10px;color:var(--muted);}
+.doc-price{font-size:22px;font-weight:900;color:var(--dark2);}
+.doc-btn{background:var(--dark2);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:background .2s;}
+.doc-btn:hover{background:var(--teal);}
+
+/* Testimonials */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.testi-card{background:var(--white);border:.5px solid var(--border);border-radius:20px;padding:28px 24px;position:relative;}
+.testi-card::before{content:'"';position:absolute;top:18px;left:24px;font-size:60px;color:var(--accent);opacity:.15;font-family:serif;line-height:1;}
+.testi-stars{color:var(--accent);font-size:16px;margin-bottom:12px;}
+.testi-text{font-size:15px;line-height:1.85;color:var(--text);margin-bottom:18px;}
+.testi-author{display:flex;align-items:center;gap:10px;border-top:.5px solid var(--border);padding-top:14px;}
+.testi-ava{width:38px;height:38px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.testi-name{font-size:14px;font-weight:700;}
+.testi-date{font-size:11px;color:var(--muted);}
+
+/* Pricing */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.price-card{background:#fff;border:.5px solid var(--border);border-radius:20px;overflow:hidden;transition:all .2s;}
+.price-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(45,59,62,.1);}
+.price-card-header{padding:24px;text-align:center;}
+.price-card-body{padding:20px;}
+.price-range-box{background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;}
+.price-range-label{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;}
+.price-row{display:flex;align-items:center;justify-content:center;gap:10px;}
+.price-min{font-size:22px;font-weight:900;color:#2eb872;}
+.price-max{font-size:22px;font-weight:900;color:var(--dark2);}
+.price-note{font-size:11px;color:var(--muted);margin-top:8px;}
+
+/* Sub-service grid */
+.sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+.sub-card{background:var(--white);border:.5px solid var(--border);border-radius:16px;padding:18px;transition:all .2s;cursor:pointer;position:relative;overflow:hidden;}
+.sub-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(45,59,62,.1);border-color:rgba(201,168,76,.25);}
+.sub-name{font-size:14px;font-weight:700;margin-bottom:6px;}
+.sub-duration{font-size:11px;color:var(--muted);margin-bottom:12px;}
+.sub-price-row{display:flex;align-items:baseline;gap:3px;}
+.sub-from{font-size:10px;color:var(--muted);}
+.sub-price{font-size:20px;font-weight:900;color:var(--dark2);}
+.sub-cur{font-size:11px;color:var(--muted);}
+.svc-section{margin-bottom:60px;}
+.svc-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.svc-section-left{display:flex;align-items:center;gap:14px;}
+.svc-section-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;}
+.svc-section-name{font-family:'Tajawal',sans-serif;font-size:24px;font-weight:900;}
+.svc-section-desc{font-size:13px;color:var(--muted);margin-top:3px;}
+.svc-range{background:var(--dark);color:#fff;border-radius:10px;padding:8px 16px;text-align:center;}
+.svc-range-lbl{font-size:10px;color:rgba(255,255,255,.4);font-weight:700;}
+.svc-range-val{font-size:15px;font-weight:900;color:var(--accent);margin-top:2px;}
+
+/* Coverage */
+.coverage-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;}
+.coverage-card{background:#fff;border:.5px solid var(--border);border-radius:20px;padding:28px;}
+.coverage-areas{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+.area-tag{background:var(--bg);color:var(--text);border-radius:20px;font-size:12px;padding:6px 14px;font-weight:600;}
+
+/* FAQ */
+.faq-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;margin-bottom:10px;}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;cursor:pointer;font-size:15px;font-weight:700;color:#fff;transition:background .2s;}
+.faq-q:hover{background:rgba(255,255,255,.04);}
+.faq-arrow{font-size:12px;color:var(--accent);transition:transform .3s;flex-shrink:0;margin-right:12px;}
+.faq-a{display:none;padding:0 20px 18px;font-size:14px;color:rgba(255,255,255,.55);line-height:1.85;}
+.faq-item.open .faq-a{display:block;}
+.faq-item.open .faq-arrow{transform:rotate(180deg);}
+
+/* Filters */
+.filters-bar{background:var(--white);border-bottom:1px solid var(--border);padding:16px 60px;display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none;position:sticky;top:72px;z-index:50;}
+.filter-btn{border:1.5px solid var(--border);border-radius:20px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;background:var(--white);color:var(--text);white-space:nowrap;transition:all .2s;font-family:'Cairo',sans-serif;}
+.filter-btn.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+
+/* Modal Overlay */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-panel{background:var(--dark);border-radius:28px 28px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;padding:28px;transform:translateY(40px);opacity:0;transition:all .35s cubic-bezier(.4,0,.2,1);}
+.modal-overlay.open .modal-panel{transform:translateY(0);opacity:1;}
+
+/* Booking Form */
+.bm-svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.bm-svc{border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;background:rgba(255,255,255,.04);transition:all .2s;color:#fff;}
+.bm-svc:hover,.bm-svc.sel{border-color:var(--accent);background:rgba(201,168,76,.12);}
+.bm-svc-ico{font-size:22px;margin-bottom:4px;}
+.bm-svc-name{font-size:12px;font-weight:700;}
+.bm-sub-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.bm-sub{border:1.5px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.04);color:rgba(255,255,255,.7);transition:all .15s;font-family:'Cairo',sans-serif;}
+.bm-sub.sel{background:rgba(201,168,76,.15);color:var(--accent);border-color:rgba(201,168,76,.3);}
+.bm-input{width:100%;padding:13px 16px;border:1.5px solid rgba(255,255,255,.12);border-radius:12px;font-size:14px;font-family:'Cairo',sans-serif;background:rgba(255,255,255,.06);color:#fff;outline:none;transition:border-color .2s;margin-bottom:12px;}
+.bm-input:focus{border-color:var(--accent);}
+.bm-input::placeholder{color:rgba(255,255,255,.3);}
+.bm-input option{background:var(--dark2);color:#fff;}
+.bm-section-title{font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.4);margin-bottom:10px;text-transform:uppercase;}
+
+/* Payment Options */
+.payment-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.pay-opt{border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;background:rgba(255,255,255,.04);color:rgba(255,255,255,.6);font-size:12px;font-weight:700;font-family:'Cairo',sans-serif;transition:all .2s;}
+.pay-opt.sel{border-color:var(--accent);background:rgba(201,168,76,.12);color:var(--accent);}
+.pay-opt-ico{font-size:18px;display:block;margin-bottom:4px;}
+
+/* Family Members */
+.family-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:rgba(255,255,255,.7);cursor:pointer;margin:3px;transition:all .2s;}
+.family-chip.sel{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.3);color:var(--accent);}
+
+/* Booking Success */
+.bm-success{text-align:center;padding:20px 0;}
+.bm-success-ico{font-size:56px;margin-bottom:16px;animation:pulse 2s ease-in-out infinite;}
+.bm-success-title{font-size:22px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;margin-bottom:8px;}
+.bm-success-sub{font-size:14px;color:rgba(255,255,255,.55);line-height:1.8;}
+
+/* Toast */
+.toast{position:fixed;top:90px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:var(--dark);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid rgba(201,168,76,.2);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Footer */
+footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,255,255,.04);}
+.footer-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+.footer-brand .fl-logo{font-size:30px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;letter-spacing:-1px;}
+.footer-brand .fl-sub{font-size:12px;color:rgba(255,255,255,.35);margin-top:6px;line-height:1.8;}
+.footer-col h4{font-size:13px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:14px;letter-spacing:.5px;}
+.footer-col a,.footer-col span{display:block;font-size:13px;color:rgba(255,255,255,.35);text-decoration:none;margin-bottom:10px;transition:color .2s;cursor:pointer;}
+.footer-col a:hover,.footer-col span:hover{color:var(--accent);}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.05);padding-top:24px;}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.25);}
+.footer-socials{display:flex;gap:12px;}
+.soc-btn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;transition:all .2s;text-decoration:none;}
+.soc-btn:hover{background:rgba(201,168,76,.15);color:var(--accent);}
+
+/* Pages */
+.page-wrapper{display:none;margin-top:72px;}
+.page-wrapper.active{display:block;}
+.page-hero{background:var(--dark);padding:100px 60px 60px;position:relative;overflow:hidden;}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 80% 50%,rgba(58,74,78,.4) 0%,transparent 70%);}
+.page-hero-inner{position:relative;z-index:2;max-width:700px;}
+.breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:13px;color:rgba(255,255,255,.4);}
+.breadcrumb span{cursor:pointer;transition:color .2s;}
+.breadcrumb span:hover,.breadcrumb span.active{color:var(--accent);}
+.page-tag{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;}
+.page-title{font-family:'Tajawal',sans-serif;font-size:clamp(36px,4vw,56px);font-weight:900;color:#fff;line-height:1.1;letter-spacing:-1px;margin-bottom:14px;}
+.page-title span{color:var(--accent);}
+.page-sub{font-size:17px;color:rgba(255,255,255,.5);line-height:1.8;max-width:500px;}
+.container{max-width:1200px;margin:0 auto;padding:60px;}
+
+/* Home page */
+#home-page{display:block;}
+
+/* Reveal */
+[data-reveal]{opacity:0;transform:translateY(24px);transition:all .6s ease;}
+[data-reveal].visible{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav id="navbar">
+  <a class="nav-logo" onclick="showPage('home')">
+    <span class="nav-logo-ar">ملاذ</span>
+    <span class="nav-logo-en">MALAAZ</span>
+  </a>
+  <div class="nav-links">
+    <a onclick="showPage('home')" class="active" id="nav-home">الرئيسية</a>
+    <a onclick="showPage('services')" id="nav-services">الخدمات</a>
+    <a onclick="showPage('doctors')" id="nav-doctors">مقدمو الخدمة</a>
+    <a onclick="showPage('pricing')" id="nav-pricing">الأسعار</a>
+  </div>
+  <div class="nav-right">
+    <button class="nav-provider-btn" onclick="window.open('provider.html','_blank')">مقدم خدمة؟ سجّل هنا</button>
+    <button class="nav-cta" onclick="openBookingModal()">احجز الآن <i class="fas fa-arrow-left" style="margin-right:5px;font-size:12px"></i></button>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- HOME PAGE -->
+<!-- ============================================================ -->
+<div id="home-page">
+
+  <!-- HERO -->
+  <section class="hero" aria-label="منصة ملاذ للرعاية الطبية المنزلية">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <div class="hero-badge"><i class="fas fa-circle-check"></i> أطباء معتمدون · خدمة 24 ساعة</div>
+      <!-- SEO: h1 يحتوي على الكلمة المفتاحية الرئيسية -->
+      <h1>رعاية طبية منزلية<br><span>كشف وتمريض وأشعة</span><br>في بيتك</h1>
+      <p class="hero-sub">أطباء وممرضون وأجهزة أشعة تصلك في أي مكان في القاهرة والجيزة — احجز خلال دقيقة واحدة</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="openBookingModal()"><i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز موعدك الآن</button>
+        <button class="btn-secondary" onclick="showPage('services')"><i class="fas fa-play-circle" style="margin-left:8px"></i> استعرض الخدمات</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><div class="stat-num" id="hero-bookings"><span>+</span>500</div><div class="stat-lbl">حجز ناجح</div></div>
+        <div class="stat-item"><div class="stat-num" id="hero-doctors"><span>+</span>50</div><div class="stat-lbl">مقدم خدمة</div></div>
+        <div class="stat-item"><div class="stat-num">4.9<span>★</span></div><div class="stat-lbl">تقييم العملاء</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div style="position:relative">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-header"><div class="plogo">ملاذ</div><div class="psub">M A L A A Z</div></div>
+          <div class="phone-body">
+            <div class="phone-section">اختر خدمتك</div>
+            <div class="phone-services">
+              <div class="ps"><div class="ps-ico">🩺</div><div class="ps-lbl">كشف</div></div>
+              <div class="ps"><div class="ps-ico">👩‍⚕️</div><div class="ps-lbl">تمريض</div></div>
+              <div class="ps"><div class="ps-ico">🔬</div><div class="ps-lbl">أشعة</div></div>
+            </div>
+            <div class="phone-section">متاحون الآن</div>
+            <div class="phone-card">
+              <div class="pc-top"><div class="pc-ava">🩺</div><div><div class="pc-name">د. أحمد حسن</div><div class="pc-spec">طب عام وأسرة</div><div class="pc-stars">★★★★★</div></div></div>
+              <div class="pc-bot"><div class="pc-price">350 ج.م</div><button class="pc-btn">احجز</button></div>
+            </div>
+            <div class="phone-card" style="opacity:.6">
+              <div class="pc-top"><div class="pc-ava">👩‍⚕️</div><div><div class="pc-name">أ. منى إبراهيم</div><div class="pc-spec">تمريض معتمد</div><div class="pc-stars">★★★★★</div></div></div>
+              <div class="pc-bot"><div class="pc-price">200 ج.م</div><button class="pc-btn">احجز</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="float-badge fb-left"><div class="fb-ico">✅</div><div><div class="fb-txt">تم التأكيد!</div><div class="fb-sub">الطبيب في طريقه</div></div></div>
+        <div class="float-badge fb-right"><div class="fb-ico">⭐</div><div><div class="fb-txt">4.9 / 5</div><div class="fb-sub">تقييم المرضى</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST BAR -->
+  <div class="trust-bar">
+    <div class="trust-item"><i class="fas fa-shield-alt"></i> <strong>أطباء</strong> معتمدون ومرخصون</div>
+    <div class="trust-item"><i class="fas fa-clock"></i> استجابة خلال <strong>60 دقيقة</strong></div>
+    <div class="trust-item"><i class="fas fa-map-marker-alt"></i> تغطية <strong>القاهرة والجيزة</strong></div>
+    <div class="trust-item"><i class="fas fa-credit-card"></i> دفع بعد الخدمة <strong>بدون مخاطرة</strong></div>
+  </div>
+
+  <!-- SERVICES -->
+  <section class="section" style="background:var(--white)" aria-labelledby="services-heading">
+    <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div>
+        <div class="section-tag">خدماتنا</div>
+        <!-- SEO: h2 بكلمات مفتاحية -->
+        <h2 class="section-title" id="services-heading">كشف منزلي، تمريض منزلي<br>وأشعة منزلية في بيتك</h2>
+        <p class="section-sub">كل خدمات الرعاية الطبية المنزلية في مكانك — بدون إجهاد المستشفيات</p>
+      </div>
+      <a onclick="showPage('services')" style="background:var(--dark);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;text-decoration:none;white-space:nowrap">عرض كل الخدمات <i class="fas fa-arrow-left" style="margin-right:4px;font-size:11px"></i></a>
+    </div>
+    <div class="services-grid" id="home-services-grid">
+      <div class="svc-card" style="opacity:.4"><div class="svc-ico-wrap" style="background:#faf4e6">🩺</div><div class="svc-name">جاري التحميل...</div></div>
+      <div class="svc-card" style="opacity:.4"><div class="svc-ico-wrap" style="background:#f4ece8">👩‍⚕️</div><div class="svc-name">جاري التحميل...</div></div>
+      <div class="svc-card" style="opacity:.4"><div class="svc-ico-wrap" style="background:#e8f0f4">🔬</div><div class="svc-name">جاري التحميل...</div></div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" aria-labelledby="how-heading">
+    <div style="text-align:center;margin-bottom:52px;position:relative;z-index:1">
+      <div class="section-tag" style="color:var(--accent)">كيف تعمل المنصة</div>
+      <h2 class="section-title" id="how-heading" style="color:#fff;margin:0 auto">4 خطوات وطبيبك في بيتك</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card" data-reveal>
+        <div class="step-num">١</div>
+        <div class="step-title">اختر خدمتك</div>
+        <div class="step-desc">كشف منزلي، تمريض، أو أشعة — اختار اللي محتاجه</div>
+      </div>
+      <div class="step-card" data-reveal data-reveal-delay="1">
+        <div class="step-num">٢</div>
+        <div class="step-title">حدد الموعد والمنطقة</div>
+        <div class="step-desc">اختار الوقت المناسب ومنطقتك في القاهرة أو الجيزة</div>
+      </div>
+      <div class="step-card" data-reveal data-reveal-delay="2">
+        <div class="step-num">٣</div>
+        <div class="step-title">نأكّد الحجز في 15 دقيقة</div>
+        <div class="step-desc">فريقنا يتواصل معك ويؤكد الحجز ويحدد المقدم المناسب</div>
+      </div>
+      <div class="step-card" data-reveal data-reveal-delay="3">
+        <div class="step-num">٤</div>
+        <div class="step-title">الخدمة في بيتك</div>
+        <div class="step-desc">الطبيب أو الممرض يصلك — الدفع بعد الانتهاء</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOCTORS -->
+  <section class="section" aria-labelledby="doctors-heading">
+    <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div>
+        <div class="section-tag">مقدمو الخدمة</div>
+        <h2 class="section-title" id="doctors-heading">أطباء وممرضون معتمدون<br>يصلون إليك الآن</h2>
+      </div>
+      <a onclick="showPage('doctors')" style="background:var(--dark);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;text-decoration:none;white-space:nowrap">عرض الكل <i class="fas fa-arrow-left" style="margin-right:4px;font-size:11px"></i></a>
+    </div>
+    <div class="doctors-grid" id="home-doctors-grid">
+      <div class="doc-card" style="opacity:.3"><div class="doc-header"><div class="doc-ava">🩺</div><div class="doc-name">جاري التحميل...</div></div></div>
+      <div class="doc-card" style="opacity:.3"><div class="doc-header"><div class="doc-ava">👩‍⚕️</div><div class="doc-name">جاري التحميل...</div></div></div>
+      <div class="doc-card" style="opacity:.3"><div class="doc-header"><div class="doc-ava">🔬</div><div class="doc-name">جاري التحميل...</div></div></div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section" style="background:var(--white)" aria-labelledby="reviews-heading">
+    <div class="section-header" style="text-align:center">
+      <div class="section-tag">آراء العملاء</div>
+      <h2 class="section-title" id="reviews-heading" style="margin:0 auto">ماذا قال عنا<br>عملاؤنا في مصر</h2>
+    </div>
+    <div class="testi-grid" id="testimonials-grid">
+      <!-- يُملأ من Supabase -->
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="background:var(--dark);padding:90px 60px;text-align:center;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 50% 50%,rgba(201,168,76,.07) 0%,transparent 70%)"></div>
+    <div style="position:relative;z-index:1">
+      <div class="section-tag">ابدأ الآن</div>
+      <h2 class="section-title" style="color:#fff;margin:0 auto 16px">احجز موعدك<br>ودكتورك في بيتك</h2>
+      <p style="color:rgba(255,255,255,.5);font-size:16px;margin-bottom:36px">الحجز مجاني · الدفع بعد الخدمة · كاش أو انستا باي</p>
+      <button class="btn-primary" style="font-size:18px;padding:18px 40px" onclick="openBookingModal()">
+        <i class="fas fa-calendar-check" style="margin-left:10px"></i> احجز الآن مجاناً
+      </button>
+    </div>
+  </section>
+
+  <!-- COVERAGE -->
+  <section class="section" aria-labelledby="coverage-heading">
+    <div class="section-header" style="text-align:center">
+      <div class="section-tag">مناطق التغطية</div>
+      <h2 class="section-title" id="coverage-heading" style="margin:0 auto">نوصلك في كل مكان<br>بالقاهرة والجيزة</h2>
+    </div>
+    <div class="coverage-grid">
+      <div class="coverage-card">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">🏙️ القاهرة</div>
+        <div class="coverage-areas" id="lp-areas-cairo"><span class="area-tag" style="opacity:.4">جاري التحميل...</span></div>
+      </div>
+      <div class="coverage-card">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">🌆 الجيزة</div>
+        <div class="coverage-areas" id="lp-areas-giza"><span class="area-tag" style="opacity:.4">جاري التحميل...</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section style="background:var(--dark);padding:90px 60px" aria-labelledby="faq-heading">
+    <div style="text-align:center;margin-bottom:52px">
+      <div class="section-tag">الأسئلة الشائعة</div>
+      <h2 class="section-title" id="faq-heading" style="color:#fff;margin:0 auto">عندك سؤال؟</h2>
+    </div>
+    <div style="max-width:700px;margin:0 auto">
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>هل الأطباء معتمدون ومرخصون؟</span><span class="faq-arrow">▼</span></div><div class="faq-a">نعم — كل مقدمي الخدمة لديهم ترخيص من النقابة المختصة ونقوم بالتحقق من بياناتهم قبل القبول.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>كيف يتم الدفع؟</span><span class="faq-arrow">▼</span></div><div class="faq-a">الدفع بعد الانتهاء من الخدمة — نقداً أو عبر انستا باي. يمكنك أيضاً الدفع من محفظة ملاذ الرقمية.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>ما هي مناطق التغطية؟</span><span class="faq-arrow">▼</span></div><div class="faq-a">نغطي معظم مناطق القاهرة الكبرى والجيزة. يمكنك التحقق من منطقتك عند الحجز.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>كم يستغرق وصول الطبيب؟</span><span class="faq-arrow">▼</span></div><div class="faq-a">نسعى للتأكيد خلال 15 دقيقة ووصول المقدم خلال ساعة من الحجز حسب المتاحية والمنطقة.</div></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="fl-logo">ملاذ</div>
+        <div class="fl-sub">منصة رعاية طبية منزلية متكاملة<br>كشف · تمريض · أشعة في بيتك</div>
+      </div>
+      <div class="footer-col">
+        <h4>الخدمات</h4>
+        <span onclick="showPage('services')">كشف منزلي</span>
+        <span onclick="showPage('services')">تمريض منزلي</span>
+        <span onclick="showPage('services')">أشعة منزلية</span>
+      </div>
+      <div class="footer-col">
+        <h4>المنصة</h4>
+        <span onclick="showPage('doctors')">مقدمو الخدمة</span>
+        <span onclick="showPage('pricing')">الأسعار</span>
+        <span onclick="window.open('provider.html','_blank')">انضم كمقدم خدمة</span>
+      </div>
+      <div class="footer-col">
+        <h4>تواصل معنا</h4>
+        <span>📱 01006484908</span>
+        <span>📧 info@malaaz.com</span>
+        <span>⏰ 24 ساعة / 7 أيام</span>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 ملاذ. جميع الحقوق محفوظة.</div>
+      <div class="footer-socials">
+        <a class="soc-btn" href="#"><i class="fab fa-facebook-f"></i></a>
+        <a class="soc-btn" href="#"><i class="fab fa-instagram"></i></a>
+        <a class="soc-btn" href="#"><i class="fab fa-whatsapp"></i></a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== SERVICES PAGE ===== -->
+<div id="services-page" class="page-wrapper">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">الرئيسية</span><span>/</span><span class="active">الخدمات</span></div>
+      <div class="page-tag">خدماتنا الطبية</div>
+      <h1 class="page-title">كشف منزلي · تمريض · <span>أشعة</span></h1>
+      <p class="page-sub">استعرض كل الخدمات الطبية المنزلية المتاحة وابدأ حجزك فوراً</p>
+    </div>
+  </div>
+  <div class="container">
+    <div id="services-content"><div style="text-align:center;padding:60px;color:var(--muted)">جاري تحميل الخدمات...</div></div>
+    <div style="background:var(--dark);border-radius:20px;padding:36px;display:flex;align-items:center;justify-content:space-between;margin-top:40px">
+      <div>
+        <div style="font-size:20px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;margin-bottom:6px">هل أنت طبيب أو ممرض؟</div>
+        <div style="font-size:14px;color:rgba(255,255,255,.45)">انضم لمنصة ملاذ وابدأ استقبال الحجوزات</div>
+      </div>
+      <button onclick="window.open('provider.html','_blank')" style="background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:14px 28px;font-size:15px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap">سجّل كمقدم خدمة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DOCTORS PAGE ===== -->
+<div id="doctors-page" class="page-wrapper">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">الرئيسية</span><span>/</span><span class="active">مقدمو الخدمة</span></div>
+      <div class="page-tag">فريقنا الطبي</div>
+      <h1 class="page-title">أطباء وممرضون <span>معتمدون</span></h1>
+      <p class="page-sub">فريق متخصص من الأطباء والممرضين المعتمدين — كلهم مرخصون وجاهزون</p>
+    </div>
+  </div>
+  <div class="filters-bar" id="doctors-filters">
+    <button class="filter-btn active" onclick="filterDocs(this,'all')">الكل</button>
+    <button class="filter-btn" onclick="filterDocs(this,'كشف منزلي')">🩺 كشف منزلي</button>
+    <button class="filter-btn" onclick="filterDocs(this,'تمريض منزلي')">👩‍⚕️ تمريض منزلي</button>
+    <button class="filter-btn" onclick="filterDocs(this,'أشعة منزلية')">🔬 أشعة منزلية</button>
+  </div>
+  <div class="container">
+    <div class="doctors-grid" id="doctors-grid"></div>
+  </div>
+</div>
+
+<!-- ===== PRICING PAGE ===== -->
+<div id="pricing-page" class="page-wrapper">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">الرئيسية</span><span>/</span><span class="active">الأسعار</span></div>
+      <div class="page-tag">الأسعار</div>
+      <h1 class="page-title">أسعار شفافة<br><span>بدون مفاجآت</span></h1>
+      <p class="page-sub">نطاقات الأسعار واضحة — الدفع بعد الخدمة فقط</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="pricing-grid" id="pricing-grid-content"></div>
+  </div>
+</div>
+
+<!-- ===== BOOKING MODAL ===== -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal-panel" id="bm-panel">
+    <!-- STEP 1: اختيار الخدمة -->
+    <div id="bm-step1">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="font-size:20px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif">احجز موعدك</div>
+        <button onclick="closeBookingModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">×</button>
+      </div>
+
+      <!-- اختيار الخدمة الرئيسية -->
+      <div class="bm-section-title">اختر الخدمة</div>
+      <div class="bm-svc-grid">
+        <div class="bm-svc sel" onclick="selectService(this,'كشف منزلي')"><div class="bm-svc-ico">🩺</div><div class="bm-svc-name">كشف منزلي</div></div>
+        <div class="bm-svc" onclick="selectService(this,'تمريض منزلي')"><div class="bm-svc-ico">👩‍⚕️</div><div class="bm-svc-name">تمريض منزلي</div></div>
+        <div class="bm-svc" onclick="selectService(this,'أشعة منزلية')"><div class="bm-svc-ico">🔬</div><div class="bm-svc-name">أشعة منزلية</div></div>
+      </div>
+
+      <!-- منطق خاص بالكشف المنزلي: أخصائي / استشاري -->
+      <div id="bm-grade-section" style="display:none;margin-bottom:14px">
+        <div class="bm-section-title">الدرجة العلمية</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="bm-svc" id="grade-specialist" onclick="selectGrade('أخصائي',this)">
+            <div class="bm-svc-ico">🩺</div>
+            <div class="bm-svc-name">أخصائي</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:3px" id="grade-spec-price">200–400 ج.م</div>
+          </div>
+          <div class="bm-svc" id="grade-consultant" onclick="selectGrade('استشاري',this)">
+            <div class="bm-svc-ico">👨‍⚕️</div>
+            <div class="bm-svc-name">استشاري</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:3px" id="grade-cons-price">400–800 ج.م</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- الخدمات الفرعية -->
+      <div class="bm-section-title" id="bm-sub-label">التخصص / النوع</div>
+      <div id="bm-sub-select-wrap" style="margin-bottom:14px">
+        <select id="bm-sub-select" class="bm-input" onchange="onSubSelectChange(this.value)">
+          <option value="">اختر...</option>
+        </select>
+        <div id="bm-sub-price-hint" style="font-size:11px;color:var(--accent);margin-top:5px;padding:5px 10px;background:rgba(201,168,76,.08);border-radius:6px;display:none"></div>
+      </div>
+
+      <button onclick="bmGoStep2()" style="width:100%;background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:4px">
+        التالي <i class="fas fa-arrow-left" style="margin-right:6px"></i>
+      </button>
+    </div>
+
+    <!-- STEP 2: بيانات الحجز -->
+    <div id="bm-step2" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <button onclick="bmGoStep1Back()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center"><i class="fas fa-arrow-right"></i></button>
+        <div style="font-size:18px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif" id="bm-step2-title">بيانات الحجز</div>
+        <button onclick="closeBookingModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;margin-right:auto">×</button>
+      </div>
+
+      <!-- ملخص الخدمة المختارة -->
+      <div id="bm-service-summary" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:rgba(255,255,255,.8);display:none"></div>
+
+      <!-- عضو الأسرة -->
+      <div class="bm-section-title">الحجز لـ</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px" id="family-selector">
+        <div class="family-chip sel" id="self-chip" onclick="selectFamilyMember(null,this)">👤 أنا شخصياً</div>
+      </div>
+
+      <!-- بيانات المريض -->
+      <div class="bm-section-title">بيانات المريض</div>
+      <input class="bm-input" id="bm-name" type="text" placeholder="اسم المريض *">
+      <input class="bm-input" id="bm-phone" type="tel" placeholder="رقم الموبايل * (01xxxxxxxxx)" dir="ltr">
+
+      <!-- المنطقة والموعد -->
+      <div class="bm-section-title">الموعد والمكان</div>
+      <select class="bm-input" id="bm-area"></select>
+
+      <!-- العنوان + GPS -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:flex-start">
+        <input class="bm-input" id="bm-address" type="text"
+          placeholder="العنوان التفصيلي *"
+          style="margin-bottom:0;flex:1">
+        <button onclick="detectClientLocation()"
+          id="gps-detect-btn"
+          style="background:rgba(46,184,114,.15);border:1.5px solid rgba(46,184,114,.3);color:#2eb872;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;flex-shrink:0;transition:all .2s"
+          title="تحديد موقعي بالـ GPS">
+          📍 موقعي
+        </button>
+      </div>
+      <div id="gps-status-client" style="font-size:11px;color:var(--muted);margin-bottom:10px;display:none;padding:6px 10px;background:rgba(46,184,114,.08);border-radius:6px"></div>
+
+      <select class="bm-input" id="bm-time">
+        <option value="">اختر الفترة *</option>
+        <option>صباحاً (8 - 12)</option>
+        <option>ظهراً (12 - 4)</option>
+        <option>مساءً (4 - 9)</option>
+        <option>أسرع وقت ممكن</option>
+      </select>
+      <textarea class="bm-input" id="bm-notes" rows="2" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+
+      <!-- طريقة الدفع -->
+      <div class="bm-section-title">طريقة الدفع</div>
+      <div class="payment-options">
+        <div class="pay-opt sel" onclick="selectPayment(this,'cash')"><span class="pay-opt-ico">💵</span>كاش</div>
+        <div class="pay-opt" onclick="selectPayment(this,'wallet')"><span class="pay-opt-ico">💳</span>محفظة</div>
+        <div class="pay-opt" onclick="selectPayment(this,'instapay')"><span class="pay-opt-ico">📱</span>انستا باي</div>
+      </div>
+      <div id="instapay-hint" style="display:none;background:rgba(201,168,76,.1);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--accent);margin-bottom:12px">
+        📱 <strong>انستا باي / محفظة إلكترونية:</strong><br>
+        برجاء تحويل المبلغ إلى حساب/محفظة الشركة الرسمية:<br>
+        <strong style="font-size:15px;color:#fff">📱 01006484908</strong><br>
+        وإظهار لقطة الشاشة لمقدم الخدمة عند الوصول.
+      </div>
+
+      <button onclick="bmSubmit()" id="bm-submit-btn" style="width:100%;background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif">
+        تأكيد الحجز <i class="fas fa-check" style="margin-right:8px"></i>
+      </button>
+      <div id="bm-error" style="color:#ff6b6b;font-size:12px;text-align:center;margin-top:8px;display:none"></div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div id="bm-success" style="display:none">
+      <button onclick="closeBookingModal()" style="position:absolute;top:20px;left:20px;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">×</button>
+      <div class="bm-success" style="padding-top:30px">
+        <div class="bm-success-ico">🎉</div>
+        <div class="bm-success-title">تم الحجز بنجاح!</div>
+        <div class="bm-success-sub">فريقنا سيتواصل معك خلال 15 دقيقة لتأكيد الموعد<br><span id="bm-booking-ref" style="color:var(--accent);font-weight:700"></span></div>
+        <button onclick="closeBookingModal()" style="margin-top:24px;background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">حسناً، شكراً!</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ============================
+     QUICK BOOKING MODAL (لوجيك 2)
+     الحجز السريع — بيعرض رينج السعر
+     ============================ -->
+<div class="modal-overlay" id="quick-booking-modal">
+  <div class="modal-panel" style="border-radius:20px 20px 0 0;max-height:88vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:20px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif">⚡ حجز سريع</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:3px">اختر الخدمة وشوف نطاق السعر فوراً</div>
+      </div>
+      <button onclick="closeModal('quick-booking-modal')" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">×</button>
+    </div>
+
+    <!-- الخدمات الرئيسية -->
+    <div class="bm-section-title">اختر الخدمة التي تحتاجها</div>
+    <div id="qb-services-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
+      <div style="text-align:center;padding:20px;color:rgba(255,255,255,.4)">جاري التحميل...</div>
+    </div>
+
+    <!-- عرض نطاق السعر للخدمة المختارة -->
+    <div id="qb-price-section" style="display:none;margin-bottom:18px">
+      <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:8px;letter-spacing:1px">💰 نطاق السعر</div>
+        <div id="qb-price-display" style="font-size:22px;font-weight:900;color:var(--accent);font-family:'Tajawal',sans-serif"></div>
+        <div id="qb-price-note" style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">السعر النهائي يتحدد حسب التخصص والمنطقة</div>
+      </div>
+    </div>
+
+    <!-- الخدمات الفرعية مع أسعارها -->
+    <div id="qb-subs-section" style="display:none;margin-bottom:18px">
+      <div class="bm-section-title" id="qb-subs-label">اختر النوع (مع السعر)</div>
+      <div id="qb-subs-list"></div>
+    </div>
+
+    <!-- زر الانتقال لإتمام الحجز -->
+    <div id="qb-action" style="display:none">
+      <button onclick="proceedFromQuickBooking()" style="width:100%;background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif">
+        إتمام الحجز <i class="fas fa-arrow-left" style="margin-right:6px"></i>
+      </button>
+      <div style="text-align:center;margin-top:10px;font-size:12px;color:rgba(255,255,255,.35)">الدفع بعد الخدمة · بدون رسوم خفية</div>
+    </div>
+  </div>
+</div>
+
+</body>
+<script>
+// ============================================================
+// SUPABASE
+// ============================================================
+const SUPABASE_URL = "https://omsictbrqlsohrmxeuym.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ============================================================
+// SECURITY — Input Sanitization (XSS Protection)
+// ============================================================
+function sanitize(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;')
+    .trim();
+}
+function sanitizeNum(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+
+// ============================================================
+// SEO — Dynamic Meta Tags & Schema Update
+// ============================================================
+function updateSEO(service, area) {
+  const svcKeywords = {
+    'كشف منزلي': 'كشف منزلي في مصر',
+    'تمريض منزلي': 'تمريض منزلي في مصر',
+    'أشعة منزلية': 'أشعة منزلية وسونار في البيت',
+  };
+  const svc = svcKeywords[service] || 'رعاية طبية منزلية';
+  const areaStr = area || 'القاهرة والجيزة';
+
+  const title = `أفضل ${svc} في ${areaStr} | منصة ملاذ`;
+  const desc  = `احجز ${service || 'خدمة طبية'} منزلية في ${areaStr} — أطباء معتمدون يصلونك في أسرع وقت. كاش أو انستا باي.`;
+
+  // Update title
+  document.title = title;
+  setMeta('seo-title', title);
+  setMeta('seo-desc', desc);
+  setMeta('og-title', title);
+  setMeta('og-desc', desc);
+  setMeta('tw-title', title);
+  setMeta('tw-desc', desc);
+
+  // Update Schema JSON-LD rating from reviews
+  updateSchemaRating();
+}
+
+function setMeta(id, content) {
+  const el = document.getElementById(id);
+  if (el) {
+    if (el.tagName === 'SCRIPT') { /* skip */ }
+    else el.setAttribute('content', content);
+    // For title elements
+    if (id === 'seo-title' && document.title !== content) document.title = content;
+  }
+}
+
+async function updateSchemaRating() {
+  try {
+    const { data } = await sb.from('reviews').select('rating').eq('is_approved', true);
+    if (!data || !data.length) return;
+    const avg = (data.reduce((s, r) => s + r.rating, 0) / data.length).toFixed(1);
+    const schema = document.getElementById('schema-org');
+    if (schema) {
+      const json = JSON.parse(schema.textContent);
+      json.aggregateRating.ratingValue = avg;
+      json.aggregateRating.reviewCount = String(data.length);
+      schema.textContent = JSON.stringify(json, null, 2);
+    }
+  } catch(e) {}
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const pages = ['home','services','doctors','pricing'];
+function showPage(id) {
+  // Home
+  document.getElementById('home-page').style.display = id === 'home' ? 'block' : 'none';
+  // Other pages
+  pages.filter(p => p !== 'home').forEach(p => {
+    const el = document.getElementById(p + '-page');
+    if (el) el.classList.toggle('active', p === id);
+  });
+  // Nav links
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + id);
+  if (navEl) navEl.classList.add('active');
+
+  // Load on demand
+  if (id === 'services' && !window._sl) { window._sl = true; loadServices(); }
+  if (id === 'doctors' && !window._dl) { window._dl = true; loadDoctors(); }
+  if (id === 'pricing' && !window._pl) { window._pl = true; loadPricing(); }
+
+  window.scrollTo({top:0,behavior:'smooth'});
+  history.pushState({}, '', '#' + id);
+}
+
+// ============================================================
+// LOAD HOME DATA
+// ============================================================
+async function loadHomeServices() {
+  const { data } = await sb.from('services').select('*').eq('is_active', true).order('created_at');
+  const grid = document.getElementById('home-services-grid');
+  if (!grid || !data?.length) return;
+  const colors = ['#faf4e6','#f4ece8','#e8f0f4'];
+  grid.innerHTML = data.map((s, i) => `
+    <div class="svc-card" onclick="openBookingModal('${sanitize(s.name)}')" data-reveal>
+      ${i === 0 ? '<div class="popular-tag">⭐ الأكثر طلباً</div>' : ''}
+      <div class="svc-ico-wrap" style="background:${colors[i % colors.length]}">${sanitize(s.icon || '🔧')}</div>
+      <h3 class="svc-name">${sanitize(s.name)}</h3>
+      <p class="svc-desc">${sanitize(s.description || '')}</p>
+      <div class="svc-price">
+        <span class="svc-from">ابتداء من</span>
+        <span class="svc-num">${s.price_min}</span>
+        <span class="svc-cur">ج.م</span>
+      </div>
+    </div>`).join('');
+}
+
+async function loadHomeDoctors() {
+  const grid = document.getElementById('home-doctors-grid');
+  if (!grid) return;
+  const { data } = await sb.from('providers').select('*').eq('status','active').eq('is_available',true).order('rating',{ascending:false}).limit(3);
+  const docs = data?.length ? data : [];
+  if (!docs.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">لا يوجد مقدمو خدمة متاحون حالياً</div>'; return; }
+  grid.innerHTML = docs.map((p, i) => renderDocCard(p, i)).join('');
+}
+
+async function loadAreas() {
+  const { data } = await sb.from('coverage_areas').select('*').eq('is_active', true).order('name');
+  if (!data) return;
+  const cairo = data.filter(a => a.city === 'القاهرة');
+  const giza  = data.filter(a => a.city === 'الجيزة');
+  const tagHtml = list => list.map(a => `<span class="area-tag"><i class="fas fa-map-marker-alt" style="font-size:9px;margin-left:3px;color:var(--muted)"></i>${sanitize(a.name)}</span>`).join('');
+  const cEl = document.getElementById('lp-areas-cairo');
+  const gEl = document.getElementById('lp-areas-giza');
+  if (cEl) cEl.innerHTML = cairo.length ? tagHtml(cairo) : '<span style="color:var(--muted)">لا توجد مناطق</span>';
+  if (gEl) gEl.innerHTML = giza.length  ? tagHtml(giza)  : '<span style="color:var(--muted)">لا توجد مناطق</span>';
+
+  // ملء مناطق الـ booking modal
+  const areaSelect = document.getElementById('bm-area');
+  if (areaSelect) {
+    areaSelect.innerHTML = '<option value="">اختر المنطقة *</option>';
+    data.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = sanitize(a.name);
+      opt.textContent = sanitize(a.name);
+      areaSelect.appendChild(opt);
+    });
+  }
+}
+
+async function loadTestimonials() {
+  const { data } = await sb.from('testimonials').select('*').eq('is_active', true).order('created_at', {ascending: false}).limit(6);
+  const grid = document.getElementById('testimonials-grid');
+  if (!grid) return;
+  if (!data?.length) {
+    // Fallback testimonials
+    const fallback = [
+      {client_name:'سارة محمود',client_emoji:'👩',rating:5,text:'تجربة ممتازة! الطبيب وصل في الوقت المحدد وكان محترم ومتفهم. أنصح بالمنصة جداً.',service_type:'كشف منزلي'},
+      {client_name:'محمد السيد',client_emoji:'👨',rating:5,text:'خدمة التمريض كانت على أعلى مستوى. الممرضة تعاملت مع والدتي باحترام شديد.',service_type:'تمريض منزلي'},
+      {client_name:'أميرة إبراهيم',client_emoji:'👩',rating:5,text:'الأشعة المنزلية رائعة — من غير ما نتحمل إجهاد المستشفى. الجهاز حديث والتقرير جه سريع.',service_type:'أشعة منزلية'},
+    ];
+    grid.innerHTML = fallback.map(t => renderTestiCard(t)).join('');
+    return;
+  }
+  grid.innerHTML = data.map(t => renderTestiCard(t)).join('');
+  // Update Schema rating
+  await updateSchemaRating();
+}
+
+function renderTestiCard(t) {
+  const stars = '★'.repeat(t.rating || 5) + '☆'.repeat(5 - (t.rating || 5));
+  return `<div class="testi-card" data-reveal>
+    <div class="testi-stars">${stars}</div>
+    <p class="testi-text">${sanitize(t.text)}</p>
+    <div class="testi-author">
+      <div class="testi-ava">${sanitize(t.client_emoji || '👤')}</div>
+      <div>
+        <div class="testi-name">${sanitize(t.client_name)}</div>
+        <div class="testi-date">${sanitize(t.service_type || 'عميل ملاذ')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// SERVICES PAGE
+// ============================================================
+async function loadServices() {
+  const { data: services } = await sb.from('services').select('*').eq('is_active', true).order('created_at');
+  const { data: subs } = await sb.from('sub_services').select('*').eq('is_active', true);
+  const el = document.getElementById('services-content');
+  if (!el || !services?.length) return;
+  const colors = ['#faf4e6','#f4ece8','#e8f0f4'];
+  el.innerHTML = services.map((svc, i) => {
+    const svcSubs = subs ? subs.filter(s => s.service_name === svc.name) : [];
+    return `<section class="svc-section" aria-labelledby="svc-${i}">
+      <div class="svc-section-header">
+        <div class="svc-section-left">
+          <div class="svc-section-ico" style="background:${colors[i%3]}">${sanitize(svc.icon||'🔧')}</div>
+          <div>
+            <h2 class="svc-section-name" id="svc-${i}">${sanitize(svc.name)}</h2>
+            <div class="svc-section-desc">${sanitize(svc.description||'')}</div>
+          </div>
+        </div>
+        <div class="svc-range">
+          <div class="svc-range-lbl">نطاق الأسعار</div>
+          <div class="svc-range-val">${svc.price_min} – ${svc.price_max} ج.م</div>
+        </div>
+      </div>
+      <div class="sub-grid">
+        ${svcSubs.map(sub => `
+          <article class="sub-card" onclick="openBookingModal('${sanitize(svc.name)}','${sanitize(sub.name)}')">
+            <div class="sub-name">${sanitize(sub.name)}</div>
+            <div class="sub-duration"><i class="fas fa-clock" style="font-size:10px;margin-left:3px"></i>${sanitize(sub.duration||'أقرب وقت ممكن')}</div>
+            <div class="sub-price-row">
+              <span class="sub-from">ابتداء من</span>
+              <span class="sub-price">${sub.price_min || svc.price_min}</span>
+              <span class="sub-cur"> ج.م</span>
+            </div>
+          </article>`).join('')}
+        ${!svcSubs.length ? `<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);font-size:14px">
+          <button onclick="openBookingModal('${sanitize(svc.name)}')" style="background:var(--dark);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">
+            <i class="fas fa-calendar-check" style="margin-left:6px"></i> احجز ${sanitize(svc.name)}</button></div>` : ''}
+      </div>
+    </section>`;
+  }).join('');
+}
+
+// ============================================================
+// DOCTORS PAGE
+// ============================================================
+let allDocs = [];
+async function loadDoctors() {
+  const { data } = await sb.from('providers').select('*').eq('status','active').order('rating',{ascending:false});
+  allDocs = data || [];
+  renderDocs(allDocs);
+}
+
+function renderDocCard(p, i) {
+  const icons = {
+    'كشف منزلي' :'<i class="fas fa-stethoscope"></i>',
+    'تمريض منزلي':'<i class="fas fa-user-nurse"></i>',
+    'أشعة منزلية':'<i class="fas fa-x-ray"></i>'
+  };
+  const stars = '★'.repeat(Math.round(p.rating||5)) + '☆'.repeat(5 - Math.round(p.rating||5));
+  return `<div class="doc-card" data-reveal>
+    <div class="doc-header">
+      <div class="doc-ava">${icons[p.service_type] || '<i class="fas fa-user-md" style="font-size:40px;color:rgba(255,255,255,.7)"></i>'}</div>
+      <div class="doc-name">${sanitize(p.name)}</div>
+      <div class="doc-spec">${sanitize(p.specialty || '—')}</div>
+    </div>
+    <div class="doc-body">
+      <div class="doc-stars">${stars}</div>
+      <div class="doc-avail">متاح الآن</div>
+      <div class="doc-stats">
+        ${p.area ? `<span class="doc-badge"><i class="fas fa-map-marker-alt" style="margin-left:2px;font-size:9px"></i> ${sanitize(p.area)}</span>` : ''}
+        ${p.experience ? `<span class="doc-badge">${sanitize(String(p.experience))} سنة خبرة</span>` : ''}
+        <span class="doc-badge">${sanitize(p.service_type || '')}</span>
+      </div>
+      <div class="doc-price-row">
+        <div>
+          <div class="doc-from">ابتداء من</div>
+          <div class="doc-price">${p.price || '—'} <span style="font-size:13px;font-weight:400;color:var(--muted)">ج.م</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <button class="doc-btn" onclick='openProviderBooking(${JSON.stringify({id:p.id,name:p.name,service_type:p.service_type,price:p.price,area:p.area})})'>
+            احجز <i class="fas fa-arrow-left" style="margin-right:3px;font-size:10px"></i>
+          </button>
+          <button class="doc-btn" style="background:rgba(201,168,76,.15);color:var(--accent);font-size:11px"
+            onclick="viewProviderProfile('${p.id}')">
+            خدماته وأسعاره
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// عرض ملف مقدم الخدمة + خدماته الفرعية وأسعاره
+// ============================================================
+async function viewProviderProfile(providerId) {
+  const provider = allDocs.find(p => p.id === providerId);
+  if (!provider) return;
+
+  // جيب خدمات المقدم من Function الـ DB
+  const { data: provSvcs, error } = await sb.rpc('get_provider_services_with_prices', {
+    p_provider_id: providerId
+  });
+
+  // بناء HTML الملف الشخصي
+  let servicesHtml = '';
+  if (provSvcs?.length) {
+    // تجميع حسب service_name
+    const grouped = {};
+    provSvcs.forEach(ps => {
+      const key = ps.service_name || 'خدمات';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(ps);
+    });
+
+    const svcIcons = {'كشف منزلي':'🩺','تمريض منزلي':'👩‍⚕️','أشعة منزلية':'🔬'};
+    Object.entries(grouped).forEach(([svcName, subs]) => {
+      servicesHtml += `
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+            <span>${svcIcons[svcName] || '🔧'}</span> ${sanitize(svcName)}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            ${subs.map(ps => `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px;cursor:pointer"
+                onclick="openBookingModal('${sanitize(svcName)}','${sanitize(ps.sub_name)}')">
+                <div>
+                  <div style="font-size:13px;font-weight:700">${sanitize(ps.sub_name)}</div>
+                  ${ps.duration ? `<div style="font-size:11px;color:var(--muted)">⏱ ${sanitize(ps.duration)}</div>` : ''}
+                </div>
+                <div style="text-align:left">
+                  <div style="font-size:16px;font-weight:900;color:var(--dark)">${ps.custom_price || ps.price_min || '—'} <span style="font-size:11px;color:var(--muted)">ج.م</span></div>
+                  ${ps.price_min ? `<div style="font-size:10px;color:var(--muted)">نطاق: ${ps.price_min}–${ps.price_max}</div>` : ''}
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>`;
+    });
+  } else {
+    servicesHtml = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">لم يحدد هذا المقدم خدماته الفرعية بعد</div>`;
+  }
+
+  // إنشاء modal الملف الشخصي
+  let modal = document.getElementById('provider-profile-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'provider-profile-modal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal-panel" style="max-height:88vh;overflow-y:auto;border-radius:20px 20px 0 0">
+        <div id="provider-profile-content"></div>
+      </div>`;
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+    document.body.appendChild(modal);
+  }
+
+  const stars = '★'.repeat(Math.round(provider.rating || 5)) + '☆'.repeat(5 - Math.round(provider.rating || 5));
+  document.getElementById('provider-profile-content').innerHTML = `
+    <div style="background:var(--dark2);padding:20px;border-radius:20px 20px 0 0;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:18px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif">${sanitize(provider.name)}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:3px">${sanitize(provider.specialty || provider.service_type || '')}</div>
+          <div style="color:var(--accent);font-size:14px;margin-top:6px">${stars}</div>
+        </div>
+        <button onclick="document.getElementById('provider-profile-modal').classList.remove('open')"
+          style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">×</button>
+      </div>
+      ${provider.area ? `<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:10px"><i class="fas fa-map-marker-alt" style="margin-left:4px"></i>${sanitize(provider.area)}</div>` : ''}
+      ${provider.bio ? `<div style="font-size:13px;color:rgba(255,255,255,.55);margin-top:10px;line-height:1.7">${sanitize(provider.bio)}</div>` : ''}
+    </div>
+    <div style="padding:0 18px 18px">
+      <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>
+      ${servicesHtml}
+      <button onclick="openProviderBooking({id:'${provider.id}',service_type:'${sanitize(provider.service_type || '')}'})"
+        style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px">
+        <i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع ${sanitize(provider.name)}
+      </button>
+    </div>`;
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+
+function renderDocs(docs) {
+  const grid = document.getElementById('doctors-grid');
+  if (!grid) return;
+  grid.innerHTML = docs.length
+    ? docs.map((p,i) => renderDocCard(p,i)).join('')
+    : '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">لا يوجد مقدمو خدمة متاحون حالياً</div>';
+}
+
+function filterDocs(btn, type) {
+  document.querySelectorAll('#doctors-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = type === 'all' ? allDocs : allDocs.filter(d => d.service_type === type);
+  renderDocs(filtered);
+}
+
+// ============================================================
+// PRICING PAGE
+// ============================================================
+async function loadPricing() {
+  const { data } = await sb.from('services').select('*').eq('is_active',true).order('created_at');
+  const grid = document.getElementById('pricing-grid-content');
+  if (!grid || !data?.length) return;
+  const hdrs = ['var(--dark)','#1e2f3a','#2a1e3a'];
+  grid.innerHTML = data.map((s, i) => `
+    <div class="price-card" data-reveal>
+      <div class="price-card-header" style="background:${hdrs[i%3]}">
+        <div style="font-size:32px;margin-bottom:8px">${sanitize(s.icon||'🔧')}</div>
+        <h3 style="font-size:19px;font-weight:700;color:#fff">${sanitize(s.name)}</h3>
+        <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px">${sanitize(s.description||'')}</div>
+      </div>
+      <div class="price-card-body">
+        <div class="price-range-box">
+          <div class="price-range-label">نطاق الأسعار</div>
+          <div class="price-row">
+            <span class="price-min">${s.price_min} <span style="font-size:12px;font-weight:400;color:var(--muted)">ج.م</span></span>
+            <span style="color:var(--muted)">←</span>
+            <span class="price-max">${s.price_max} <span style="font-size:12px;font-weight:400;color:var(--muted)">ج.م</span></span>
+          </div>
+          <div class="price-note"><i class="fas fa-info-circle" style="margin-left:3px;font-size:9px"></i> الدفع بعد الخدمة · بدون رسوم خفية</div>
+        </div>
+        <button onclick="openBookingModal('${sanitize(s.name)}')" style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">
+          <i class="fas fa-calendar-check" style="margin-left:5px"></i> احجز ${sanitize(s.name)}
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// BOOKING MODAL
+// ============================================================
+// ============================================================
+// BOOKING MODAL STATE
+// ============================================================
+let bmSelectedService  = 'كشف منزلي';
+let bmSelectedSub      = '';
+let bmSelectedGrade    = '';        // أخصائي / استشاري
+let bmSelectedPayment  = 'cash';
+let bmSelectedFamilyMember = null;
+let bmClientLat        = null;
+let bmClientLon        = null;
+let allSubsCache       = {};        // cache الخدمات الفرعية
+
+// ============================================================
+// BOOKING MODAL OPEN
+// ============================================================
+async function openBookingModal(service, sub) {
+  bmSelectedService = service || 'كشف منزلي';
+  bmSelectedSub     = sub || '';
+  bmSelectedGrade   = '';
+  bmSelectedPayment = 'cash';
+  bmSelectedFamilyMember = null;
+  bmClientLat = null;
+  bmClientLon = null;
+
+  // Reset steps
+  document.getElementById('bm-step1').style.display = 'block';
+  document.getElementById('bm-step2').style.display = 'none';
+  document.getElementById('bm-success').style.display = 'none';
+  document.getElementById('bm-error').style.display = 'none';
+
+  // تحديد الخدمة في الـ UI
+  document.querySelectorAll('.bm-svc').forEach(el => {
+    const name = el.querySelector('.bm-svc-name')?.textContent?.trim();
+    el.classList.toggle('sel', name === bmSelectedService);
+  });
+
+  // تحميل الخدمات الفرعية
+  await loadSubsForService(bmSelectedService);
+
+  // لو جاي من خدمة فرعية محددة
+  if (sub) {
+    bmSelectedSub = sub;
+    const sel = document.getElementById('bm-sub-select');
+    if (sel) sel.value = sub;
+    onSubSelectChange(sub);
+  }
+
+  document.getElementById('booking-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // SEO تحديث ديناميكي
+  updateSEO(bmSelectedService, document.getElementById('bm-area')?.value);
+
+  // تحميل أفراد الأسرة
+  loadFamilyMembers();
+
+  // تحميل المناطق
+  if (document.getElementById('bm-area')?.options.length <= 1) await loadAreas();
+}
+
+function closeBookingModal() {
+  document.getElementById('booking-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ============================================================
+// SELECT SERVICE
+// ============================================================
+function selectService(el, svc) {
+  document.querySelectorAll('.bm-svc').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+  bmSelectedService = svc;
+  bmSelectedSub     = '';
+  bmSelectedGrade   = '';
+  loadSubsForService(svc);
+  updateSEO(svc, document.getElementById('bm-area')?.value);
+}
+
+// ============================================================
+// SELECT GRADE (أخصائي / استشاري) — للكشف المنزلي فقط
+// ============================================================
+function selectGrade(grade, el) {
+  bmSelectedGrade = grade;
+  document.querySelectorAll('#bm-grade-section .bm-svc').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+  // إعادة تحميل التخصصات بناءً على الدرجة
+  loadSpecialtiesForGrade(grade);
+}
+
+async function loadSpecialtiesForGrade(grade) {
+  const sel  = document.getElementById('bm-sub-select');
+  const hint = document.getElementById('bm-sub-price-hint');
+  sel.innerHTML = '<option value="">اختر التخصص...</option>';
+
+  // جيب التخصصات من الـ cache أو DB
+  let subs = allSubsCache['كشف منزلي_specialty'] || [];
+  if (!subs.length) {
+    const { data } = await sb.from('sub_services')
+      .select('*')
+      .eq('service_name', 'كشف منزلي')
+      .eq('group_name', 'specialty')
+      .eq('is_active', true)
+      .order('name');
+    subs = data || [];
+    allSubsCache['كشف منزلي_specialty'] = subs;
+  }
+
+  subs.forEach(sub => {
+    const priceMin = grade === 'استشاري'
+      ? (sub.price_min_consultant || sub.price_min || 0)
+      : (sub.price_min_specialist || sub.price_min || 0);
+    const priceMax = grade === 'استشاري'
+      ? (sub.price_max_consultant || sub.price_max || 0)
+      : (sub.price_max_specialist || sub.price_max || 0);
+
+    const opt = document.createElement('option');
+    opt.value = sub.name;
+    opt.textContent = `${sub.name}  —  ${priceMin}–${priceMax} ج.م`;
+    opt.dataset.min = priceMin;
+    opt.dataset.max = priceMax;
+    sel.appendChild(opt);
+  });
+
+  if (hint) hint.style.display = 'none';
+  document.getElementById('bm-sub-label').textContent = 'اختر التخصص الطبي';
+}
+
+// عند تغيير القيمة في الـ select
+function onSubSelectChange(val) {
+  bmSelectedSub = val;
+  const hint = document.getElementById('bm-sub-price-hint');
+  if (!hint) return;
+  if (!val) { hint.style.display = 'none'; return; }
+  const sel = document.getElementById('bm-sub-select');
+  const opt = sel?.querySelector(`option[value="${val}"]`);
+  if (opt && opt.dataset.min) {
+    hint.style.display = 'block';
+    hint.innerHTML = `💰 نطاق السعر: <strong>${opt.dataset.min} – ${opt.dataset.max} ج.م</strong>`;
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+// ============================================================
+// تحميل الخدمات الفرعية بشكل Dropdown مع الأسعار
+// ============================================================
+async function loadSubsForService(svcName) {
+  const gradeSection = document.getElementById('bm-grade-section');
+  const subLabel     = document.getElementById('bm-sub-label');
+  const sel          = document.getElementById('bm-sub-select');
+  const hint         = document.getElementById('bm-sub-price-hint');
+
+  if (!sel) return;
+  sel.innerHTML = '<option value="">جاري التحميل...</option>';
+  if (hint) hint.style.display = 'none';
+
+  // منطق خاص بالكشف المنزلي
+  if (svcName === 'كشف منزلي') {
+    if (gradeSection) gradeSection.style.display = 'block';
+    if (subLabel) subLabel.textContent = 'اختر التخصص الطبي';
+
+    // جيب نطاقات الأسعار من التخصصات الفعلية
+    const { data: specialties } = await sb.from('sub_services')
+      .select('price_min_specialist,price_max_specialist,price_min_consultant,price_max_consultant')
+      .eq('service_name', 'كشف منزلي')
+      .eq('group_name', 'specialty')
+      .eq('is_active', true);
+
+    if (specialties?.length) {
+      const specMins = specialties.map(s=>s.price_min_specialist).filter(Boolean);
+      const specMaxs = specialties.map(s=>s.price_max_specialist).filter(Boolean);
+      const consMins = specialties.map(s=>s.price_min_consultant).filter(Boolean);
+      const consMaxs = specialties.map(s=>s.price_max_consultant).filter(Boolean);
+
+      const specEl = document.getElementById('grade-spec-price');
+      const consEl = document.getElementById('grade-cons-price');
+      if (specEl && specMins.length) specEl.textContent = `${Math.min(...specMins)}–${Math.max(...specMaxs)} ج.م`;
+      if (consEl && consMins.length) consEl.textContent = `${Math.min(...consMins)}–${Math.max(...consMaxs)} ج.م`;
+    }
+
+    sel.innerHTML = '<option value="">اختر الدرجة أولاً ↑</option>';
+    return;
+  }
+
+  // التمريض والأشعة — dropdown مباشر
+  if (gradeSection) gradeSection.style.display = 'none';
+  if (subLabel) subLabel.textContent = svcName === 'تمريض منزلي' ? 'نوع الخدمة' : 'نوع الأشعة';
+
+  const cacheKey = svcName;
+  let subs = allSubsCache[cacheKey] || [];
+  if (!subs.length) {
+    const { data } = await sb.from('sub_services')
+      .select('*')
+      .eq('service_name', svcName)
+      .eq('is_active', true)
+      .order('name');
+    subs = data || [];
+    allSubsCache[cacheKey] = subs;
+  }
+
+  sel.innerHTML = `<option value="">اختر ${svcName === 'تمريض منزلي' ? 'نوع الخدمة' : 'نوع الأشعة'}...</option>`;
+  subs.forEach(sub => {
+    const opt = document.createElement('option');
+    opt.value = sub.name;
+    const priceRange = (sub.price_min && sub.price_max)
+      ? `  —  ${sub.price_min}–${sub.price_max} ج.م`
+      : '';
+    opt.textContent = sub.name + priceRange;
+    opt.dataset.min = sub.price_min || '';
+    opt.dataset.max = sub.price_max || '';
+    opt.dataset.duration = sub.duration || '';
+    sel.appendChild(opt);
+  });
+}
+
+// ============================================================
+// GPS — تحديد موقع العميل التلقائي
+// ============================================================
+function detectClientLocation() {
+  const btn      = document.getElementById('gps-detect-btn');
+  const input    = document.getElementById('bm-address');
+  const statusEl = document.getElementById('gps-status-client');
+
+  if (!navigator.geolocation) {
+    showToast('⚠️ جهازك لا يدعم تحديد الموقع');
+    return;
+  }
+
+  btn.textContent = '⏳ جاري التحديد...';
+  btn.disabled = true;
+  if (statusEl) statusEl.style.display = 'none';
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      bmClientLat = pos.coords.latitude;
+      bmClientLon = pos.coords.longitude;
+
+      // محاولة عكس الإحداثيات لعنوان نصي
+      let addressText = `✅ تم تحديد الموقع بالـ GPS`;
+      try {
+        const resp = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${bmClientLat}&lon=${bmClientLon}&format=json&accept-language=ar`
+        );
+        const geo = await resp.json();
+        if (geo?.display_name) {
+          const parts = geo.display_name.split(',').slice(0, 3).join('،');
+          addressText = `📍 ${parts}`;
+        }
+      } catch(e) {}
+
+      if (input) input.value = addressText;
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.innerHTML = `📍 تم تحديد موقعك بنجاح — <span style="font-size:10px;opacity:.7">${bmClientLat.toFixed(4)}, ${bmClientLon.toFixed(4)}</span>`;
+      }
+      btn.textContent = '✅ تم التحديد';
+      btn.style.background = 'rgba(46,184,114,.25)';
+      btn.disabled = false;
+    },
+    (err) => {
+      btn.textContent = '📍 موقعي';
+      btn.disabled = false;
+      const msgs = {1:'رفضت إذن الموقع', 2:'تعذر تحديد الموقع', 3:'انتهت المهلة'};
+      showToast('⚠️ ' + (msgs[err.code] || 'خطأ في GPS'));
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
+  );
+}
+
+// ============================================================
+// STEP 2 NAVIGATION
+// ============================================================
+async function bmGoStep2() {
+  // لو كشف منزلي — لازم تختار درجة وتخصص
+  if (bmSelectedService === 'كشف منزلي') {
+    if (!bmSelectedGrade) { showToast('⚠️ اختر الدرجة العلمية أولاً (أخصائي/استشاري)'); return; }
+    bmSelectedSub = document.getElementById('bm-sub-select')?.value || '';
+    if (!bmSelectedSub) { showToast('⚠️ اختر التخصص الطبي'); return; }
+  } else {
+    bmSelectedSub = document.getElementById('bm-sub-select')?.value || '';
+  }
+
+  document.getElementById('bm-step1').style.display = 'none';
+  document.getElementById('bm-step2').style.display = 'block';
+
+  // عرض ملخص الخدمة
+  const summary = document.getElementById('bm-service-summary');
+  if (summary) {
+    const gradeText = bmSelectedGrade ? ` — ${bmSelectedGrade}` : '';
+    const subText   = bmSelectedSub   ? ` | ${bmSelectedSub}` : '';
+    summary.style.display = 'block';
+    summary.innerHTML = `
+      <strong>${bmSelectedService}${gradeText}</strong>${subText}<br>
+      <span style="font-size:11px;opacity:.7">يمكنك الرجوع لتغيير الاختيار</span>`;
+  }
+
+  const title = document.getElementById('bm-step2-title');
+  if (title) title.textContent = bmSelectedSub || bmSelectedService;
+
+  if (document.getElementById('bm-area')?.options.length <= 1) await loadAreas();
+}
+
+function bmGoStep1Back() {
+  document.getElementById('bm-step2').style.display = 'none';
+  document.getElementById('bm-step1').style.display = 'block';
+}
+
+function selectPayment(el, method) {
+  document.querySelectorAll('.pay-opt').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+  bmSelectedPayment = method;
+  const hint = document.getElementById('instapay-hint');
+  if (hint) hint.style.display = (method === 'instapay' || method === 'wallet') ? 'block' : 'none';
+}
+
+// ============================================================
+// حجز من مقدم الخدمة مباشرة (لوجيك 1)
+// يحدد الخدمة والسعر المحدد من مقدم الخدمة
+// ============================================================
+async function openProviderBooking(provData) {
+  const provider = allDocs.find(p => p.id === provData.id) || provData;
+
+  // جلب الخدمات الفرعية التي يقدمها هذا المقدم وأسعاره الخاصة
+  let provSvcs = [];
+  try {
+    const { data } = await sb.rpc('get_provider_services_with_prices', { p_provider_id: provider.id });
+    provSvcs = data || [];
+  } catch(e) { provSvcs = []; }
+
+  // بناء محتوى الـ modal الخاص بمقدم الخدمة
+  let existingProvModal = document.getElementById('provider-booking-modal');
+  if(!existingProvModal) {
+    existingProvModal = document.createElement('div');
+    existingProvModal.id = 'provider-booking-modal';
+    existingProvModal.className = 'modal-overlay';
+    existingProvModal.innerHTML = `
+      <div class="modal-panel" style="border-radius:20px 20px 0 0;max-height:88vh;overflow-y:auto">
+        <div id="prov-booking-content"></div>
+      </div>`;
+    existingProvModal.addEventListener('click', e => {
+      if(e.target === existingProvModal) existingProvModal.classList.remove('open');
+    });
+    document.body.appendChild(existingProvModal);
+  }
+
+  // بناء grid الخدمات الفرعية مع السعر الخاص لمقدم الخدمة
+  const svcIcons = {'كشف منزلي':'🩺','تمريض منزلي':'👩‍⚕️','أشعة منزلية':'🔬'};
+  let svcHtml = '';
+  if(provSvcs.length) {
+    // تجميع حسب الخدمة الرئيسية
+    const grouped = {};
+    provSvcs.forEach(ps => {
+      if(!grouped[ps.service_name]) grouped[ps.service_name] = [];
+      grouped[ps.service_name].push(ps);
+    });
+    Object.entries(grouped).forEach(([svcName, subs]) => {
+      svcHtml += `<div style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:8px;letter-spacing:1px">${svcIcons[svcName]||'🔧'} ${sanitize(svcName)}</div>
+        ${subs.map(ps => {
+          const price = ps.custom_price || ps.price_min || 0;
+          const rangeText = ps.price_min ? `<span style="font-size:10px;color:rgba(255,255,255,.3)"> (نطاق: ${ps.price_min}–${ps.price_max})</span>` : '';
+          return `<div class="prov-sub-item" onclick="selectProviderSub('${sanitize(svcName)}','${sanitize(ps.sub_name)}',${price})"
+            style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.04);
+            border:1.5px solid rgba(255,255,255,.1);border-radius:12px;cursor:pointer;margin-bottom:8px;transition:all .2s"
+            onmouseover="this.style.borderColor='var(--accent)';this.style.background='rgba(201,168,76,.1)'"
+            onmouseout="this.style.borderColor='rgba(255,255,255,.1)';this.style.background='rgba(255,255,255,.04)'">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#fff">${sanitize(ps.sub_name)}</div>
+              ${ps.duration?`<div style="font-size:11px;color:rgba(255,255,255,.4)">⏱ ${sanitize(ps.duration)}</div>`:''}
+            </div>
+            <div style="text-align:left">
+              <div style="font-size:16px;font-weight:900;color:var(--accent)">${price}<span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.4)"> ج.م</span></div>
+              ${rangeText}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    });
+  } else {
+    svcHtml = `<div style="text-align:center;padding:20px;color:rgba(255,255,255,.4);font-size:13px">
+      لم يحدد هذا المقدم خدماته الفرعية بعد<br>
+      <button onclick="openBookingModal('${sanitize(provider.service_type||'')}');document.getElementById('provider-booking-modal').classList.remove('open')"
+        style="margin-top:12px;background:var(--accent);color:var(--dark);border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">
+        احجز بشكل عام
+      </button></div>`;
+  }
+
+  const stars = '★'.repeat(Math.round(provider.rating||5)) + '☆'.repeat(5-Math.round(provider.rating||5));
+  document.getElementById('prov-booking-content').innerHTML = `
+    <div style="background:var(--dark2);padding:20px;border-radius:20px 20px 0 0;margin-bottom:0">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+        <div>
+          <div style="font-size:18px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif">${sanitize(provider.name)}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:3px">${sanitize(provider.specialty||provider.service_type||'')} ${provider.grade?'· '+sanitize(provider.grade):''}</div>
+          <div style="color:var(--accent);font-size:13px;margin-top:5px">${stars} <span style="font-size:11px;color:rgba(255,255,255,.3)">${provider.rating||5}/5</span></div>
+        </div>
+        <button onclick="document.getElementById('provider-booking-modal').classList.remove('open')"
+          style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">×</button>
+      </div>
+      <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:10px 14px;font-size:12px;color:rgba(255,255,255,.6)">
+        📌 السعر المحدد هو سعر هذا المقدم الخاص — ضمن نطاق أسعار المنصة
+      </div>
+    </div>
+    <div style="padding:18px">
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:12px;letter-spacing:1px">اختر الخدمة للحجز</div>
+      ${svcHtml}
+    </div>`;
+
+  existingProvModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// عند اختيار خدمة فرعية من ملف مقدم الخدمة — ينتقل لـ modal الحجز الرئيسي
+function selectProviderSub(serviceName, subName, price) {
+  document.getElementById('provider-booking-modal')?.classList.remove('open');
+  // فتح الـ booking modal بهذه الخدمة
+  openBookingModal(serviceName, subName);
+  // نضيف السعر في الـ summary بعد ما الـ modal يفتح
+  setTimeout(() => {
+    const summary = document.getElementById('bm-service-summary');
+    if(summary && summary.style.display !== 'none') {
+      const priceEl = document.createElement('div');
+      priceEl.style.cssText = 'margin-top:6px;font-size:13px;color:var(--accent);font-weight:700';
+      priceEl.innerHTML = `💰 سعر ${sanitize(sanitize(window.bmSelectedSub||subName))}: <strong>${price} ج.م</strong>`;
+      summary.appendChild(priceEl);
+    }
+  }, 400);
+}
+
+
+// ============================================================
+// BOOKING SUBMIT — مع Sanitization كاملة + GPS + Specialty Level
+// ============================================================
+async function bmSubmit() {
+  // Sanitize جميع المدخلات
+  const name    = sanitize(document.getElementById('bm-name').value);
+  const phone   = sanitize(document.getElementById('bm-phone').value).replace(/\s/g,'');
+  const area    = sanitize(document.getElementById('bm-area').value);
+  const address = sanitize(document.getElementById('bm-address').value);
+  const time    = sanitize(document.getElementById('bm-time').value);
+  const notes   = sanitize(document.getElementById('bm-notes').value);
+  const errEl   = document.getElementById('bm-error');
+
+  errEl.style.display = 'none';
+
+  // Validations
+  if (!name)  { showBmError('⚠️ أدخل اسم المريض'); return; }
+  if (!phone) { showBmError('⚠️ أدخل رقم الموبايل'); return; }
+  if (!/^01[0125]\d{8}$/.test(phone)) {
+    showBmError('⚠️ رقم الموبايل غير صحيح — لازم يبدأ بـ 01'); return;
+  }
+  if (!area)    { showBmError('⚠️ اختر منطقتك'); return; }
+  if (!address) { showBmError('⚠️ أدخل العنوان أو اضغط "📍 موقعي"'); return; }
+  if (!time)    { showBmError('⚠️ اختر الفترة المناسبة'); return; }
+
+  const btn = document.getElementById('bm-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left:8px"></i> جاري الإرسال...';
+
+  try {
+    // بناء الـ payload — فقط الحقول الموجودة في الـ DB
+    const payload = {
+      patient_name:     name,
+      phone,
+      area,
+      address,
+      appointment_time: time,
+      service_type:     bmSelectedService,
+      service:          bmSelectedService,
+      payment_method:   bmSelectedPayment,
+      payment_status:   'unpaid',
+      status:           'pending',
+    };
+
+    // حقول اختيارية — فقط اللي مضمون موجوده في الـ DB
+    if (notes)         payload.notes      = notes;
+    if (bmSelectedSub) payload.sub_option = bmSelectedSub;
+
+    // ✅ FIX: الحقول دي اتحذفت لأنها مش موجودة في جدول bookings في Supabase
+    // لو أضفتها في الـ DB، شيل الـ // من قبل كل سطر:
+    // if (bmSelectedGrade)        payload.specialty_level   = bmSelectedGrade;
+    // if (bmSelectedFamilyMember) payload.family_member_id  = bmSelectedFamilyMember;
+    // if (bmClientLat) {
+    //   payload.client_latitude      = bmClientLat;
+    //   payload.client_longitude     = bmClientLon;
+    //   payload.client_location_text = `GPS: ${bmClientLat.toFixed(5)}, ${bmClientLon.toFixed(5)}`;
+    // }
+
+    // ✅ FIX: محاولة أولى مع select().single()
+    const { data, error } = await sb.from('bookings').insert([payload]).select().single();
+
+    if (error) {
+      console.error('Booking error:', error);
+      // ✅ FIX: لو فشلت بسبب column مش موجود، جرب بدون select()
+      if (error.code === '42703' || (error.message && error.message.includes('column'))) {
+        const { error: error2 } = await sb.from('bookings').insert([payload]);
+        if (error2) throw error2;
+        // نجحت المحاولة الثانية
+        localStorage.setItem('malaaz_client_phone', phone);
+        document.getElementById('bm-step2').style.display = 'none';
+        document.getElementById('bm-success').style.display = 'block';
+        const refEl2 = document.getElementById('bm-booking-ref');
+        if (refEl2) refEl2.textContent = '';
+        showToast('✅ تم الحجز بنجاح!');
+        if (typeof setupClientRealtime === 'function') setupClientRealtime(phone);
+        return;
+      }
+      throw error;
+    }
+
+    // حفظ موبايل العميل للإشعارات
+    localStorage.setItem('malaaz_client_phone', phone);
+
+    // عرض الـ success
+    document.getElementById('bm-step2').style.display = 'none';
+    document.getElementById('bm-success').style.display = 'block';
+    const refEl = document.getElementById('bm-booking-ref');
+    if (refEl && data?.id) refEl.textContent = `رقم الحجز: #${sanitize(data.id.slice(-6).toUpperCase())}`;
+
+    showToast('✅ تم الحجز بنجاح!');
+
+    // بدء الاستماع لإشعارات هذا العميل
+    if (typeof setupClientRealtime === 'function') setupClientRealtime(phone);
+
+  } catch (e) {
+    showBmError('❌ حصل خطأ — جرب تاني أو تواصل معنا');
+    console.error('Booking error:', e);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'تأكيد الحجز <i class="fas fa-check" style="margin-right:8px"></i>';
+  }
+}
+
+function showBmError(msg) {
+  const el = document.getElementById('bm-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+
+// ============================================================
+// TOAST & HELPERS
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+function toggleFaq(el) {
+  el.parentElement.classList.toggle('open');
+}
+
+// ============================================================
+// REALTIME — تحديث لحظي بمجرد تغيير الأدمن
+// ============================================================
+function setupRealtime() {
+  sb.channel('idx-services')
+    .on('postgres_changes', {event:'*',schema:'public',table:'services'}, () => {
+      loadHomeServices(); loadAreaSelector();
+      if (window._sl) loadServices();
+      if (window._pl) loadPricing();
+    }).subscribe();
+
+  sb.channel('idx-subs')
+    .on('postgres_changes', {event:'*',schema:'public',table:'sub_services'}, () => {
+      if (window._sl) loadServices();
+    }).subscribe();
+
+  sb.channel('idx-providers')
+    .on('postgres_changes', {event:'*',schema:'public',table:'providers'}, () => {
+      loadHomeDoctors();
+      if (window._dl) loadDoctors();
+    }).subscribe();
+
+  sb.channel('idx-areas')
+    .on('postgres_changes', {event:'*',schema:'public',table:'coverage_areas'}, () => {
+      loadAreas();
+    }).subscribe();
+
+  sb.channel('idx-reviews')
+    .on('postgres_changes', {event:'INSERT',schema:'public',table:'reviews'}, () => {
+      loadTestimonials();
+    }).subscribe();
+}
+
+// ============================================================
+// SCROLL & REVEAL
+// ============================================================
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if (nav) nav.classList.toggle('scrolled', scrollY > 50);
+  document.querySelectorAll('[data-reveal]').forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
+  });
+});
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', async () => {
+  // تحديد الصفحة من الـ hash
+  const hash = location.hash.replace('#','') || 'home';
+  if (hash !== 'home') showPage(hash);
+
+  // تحميل البيانات
+  await Promise.all([loadHomeServices(), loadAreas(), loadHomeDoctors(), loadTestimonials()]);
+  updateSchemaRating();
+
+  // اختيار أول خدمة في الـ booking modal
+  await loadSubsForService('كشف منزلي');
+
+  // Realtime
+  setupRealtime();
+});
+
+window.addEventListener('popstate', () => {
+  const p = location.hash.replace('#','') || 'home';
+  showPage(p);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeBookingModal();
+});
+
+// إغلاق الـ modal بالنقر خارجه
+document.getElementById('booking-modal')?.addEventListener('click', e => {
+  if (e.target === document.getElementById('booking-modal')) closeBookingModal();
+});
+
+
+// ===== v3 PATCH =====
+// ============================================================
+// PATCH v3 — index.html
+// Leaflet Map + Company Number + Responsive + Client Notifications
+// ============================================================
+
+const COMPANY_PHONE    = '01006484908';
+const COMPANY_WHATSAPP = 'https://wa.me/201006484908';
+const INSTAPAY_MSG     = `برجاء تحويل المبلغ إلى حساب/محفظة الشركة الرسمية:\n📱 ${COMPANY_PHONE}\nوإظهار لقطة الشاشة لمقدم الخدمة عند الوصول.`;
+
+// ============================================================
+// INJECT: زر واتساب عائم + زر اتصال
+// ============================================================
+// injectFloatingButtons removed v4
+
+function updatePaymentDisplay(method) {
+  const hint = document.getElementById('instapay-hint');
+  if (!hint) return;
+  if (method === 'instapay' || method === 'wallet') {
+    hint.style.display = 'block';
+    hint.innerHTML = `
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px">
+        ${method === 'instapay' ? '📱 انستا باي' : '💳 محفظة إلكترونية'}
+      </div>
+      <div style="font-size:12px;line-height:1.9;color:rgba(255,255,255,.8)">
+        برجاء تحويل المبلغ إلى حساب/محفظة الشركة الرسمية:<br>
+        <strong style="color:var(--accent);font-size:15px">📱 ${COMPANY_PHONE}</strong><br>
+        وإظهار لقطة الشاشة لمقدم الخدمة عند الوصول.
+      </div>
+      <a href="${COMPANY_WHATSAPP}" target="_blank"
+         style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:#25D366;color:#fff;
+                border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;
+                text-decoration:none;font-family:'Cairo',sans-serif">
+        💬 تواصل واتساب
+      </a>`;
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+// Override selectPayment
+const _origSelectPayment = window.selectPayment || function(){};
+window.selectPayment = function(el, method) {
+  _origSelectPayment(el, method);
+  updatePaymentDisplay(method);
+};
+
+// ============================================================
+// LEAFLET MAP — خريطة التتبع
+// ============================================================
+let trackingMap = null;
+let providerMarker = null;
+let clientMarker = null;
+let trackingInterval = null;
+let currentTrackingBookingId = null;
+
+function loadLeaflet(cb) {
+  if (window.L) { cb(); return; }
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  document.head.appendChild(link);
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  script.onload = cb;
+  document.head.appendChild(script);
+}
+
+function showTrackingMap(bookingId, clientLat, clientLon) {
+  currentTrackingBookingId = bookingId;
+
+  // إنشاء container
+  let mapContainer = document.getElementById('tracking-map-container');
+  if (!mapContainer) {
+    mapContainer = document.createElement('div');
+    mapContainer.id = 'tracking-map-container';
+    mapContainer.style.cssText = `
+      position:fixed;bottom:0;left:0;right:0;
+      height:55vh;background:var(--dark);z-index:300;
+      border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.4);
+      transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1);
+    `;
+    mapContainer.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08)">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#fff;font-family:'Tajawal',sans-serif">📍 تتبع مقدم الخدمة</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px" id="tracking-status">جاري تحديد الموقع...</div>
+        </div>
+        <button onclick="closeTrackingMap()" style="background:rgba(255,255,255,.08);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">×</button>
+      </div>
+      <div id="leaflet-map" style="height:calc(100% - 58px);width:100%;border-radius:0 0 24px 24px"></div>
+    `;
+    document.body.appendChild(mapContainer);
+  }
+
+  // Backdrop
+  let bd = document.getElementById('map-backdrop');
+  if (!bd) {
+    bd = document.createElement('div');
+    bd.id = 'map-backdrop';
+    bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299;';
+    bd.onclick = closeTrackingMap;
+    document.body.appendChild(bd);
+  }
+  bd.style.display = 'block';
+  setTimeout(() => { mapContainer.style.transform = 'translateY(0)'; }, 10);
+
+  // تحميل Leaflet وبناء الخريطة
+  loadLeaflet(() => {
+    if (!trackingMap) {
+      const defaultLat = clientLat || 30.0444;
+      const defaultLon = clientLon || 31.2357;
+      trackingMap = L.map('leaflet-map').setView([defaultLat, defaultLon], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 18
+      }).addTo(trackingMap);
+    }
+
+    // Marker العميل (ثابت)
+    if (clientLat && clientLon) {
+      if (clientMarker) clientMarker.setLatLng([clientLat, clientLon]);
+      else {
+        const clientIcon = L.divIcon({
+          html: '<div style="background:#c9a84c;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)">🏠</div>',
+          className: '', iconSize: [30, 30], iconAnchor: [15, 15]
+        });
+        clientMarker = L.marker([clientLat, clientLon], { icon: clientIcon })
+          .addTo(trackingMap)
+          .bindPopup('موقعك');
+      }
+    }
+
+    // بدء تحديث موقع المقدم
+    startProviderTracking(bookingId);
+  });
+}
+
+async function startProviderTracking(bookingId) {
+  await fetchAndUpdateProviderMarker(bookingId);
+  // تحديث كل 10 ثوانٍ
+  trackingInterval = setInterval(() => fetchAndUpdateProviderMarker(bookingId), 10000);
+
+  // Realtime أسرع
+  sb.channel('client-track-' + bookingId)
+    .on('postgres_changes', {
+      event: 'UPDATE', schema: 'public', table: 'providers'
+    }, (payload) => {
+      const p = payload.new;
+      if (p.latitude && p.longitude) updateProviderMarker(p.latitude, p.longitude, p.name);
+    }).subscribe();
+}
+
+async function fetchAndUpdateProviderMarker(bookingId) {
+  const { data } = await sb.rpc('get_booking_provider_location', { p_booking_id: bookingId });
+  if (!data?.found || !data.latitude) return;
+  updateProviderMarker(data.latitude, data.longitude, data.provider_name);
+  const statusEl = document.getElementById('tracking-status');
+  if (statusEl && data.updated_at) {
+    const ago = Math.round((Date.now() - new Date(data.updated_at)) / 1000);
+    statusEl.textContent = `آخر تحديث: منذ ${ago} ثانية`;
+  }
+}
+
+function updateProviderMarker(lat, lon, name) {
+  if (!window.L || !trackingMap) return;
+  if (providerMarker) {
+    providerMarker.setLatLng([lat, lon]);
+  } else {
+    const provIcon = L.divIcon({
+      html: `<div style="background:#2eb872;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid #fff;box-shadow:0 2px 10px rgba(46,184,114,.5);animation:pulse 1.5s ease-in-out infinite">🩺</div>`,
+      className: '', iconSize: [36, 36], iconAnchor: [18, 18]
+    });
+    providerMarker = L.marker([lat, lon], { icon: provIcon })
+      .addTo(trackingMap)
+      .bindPopup(`مقدم الخدمة: ${name || ''}`, { autoClose: false }).openPopup();
+  }
+  // اضبط الخريطة لتشمل كلا الـ markers
+  if (clientMarker) {
+    const bounds = L.latLngBounds([
+      providerMarker.getLatLng(),
+      clientMarker.getLatLng()
+    ]);
+    trackingMap.fitBounds(bounds, { padding: [40, 40] });
+  } else {
+    trackingMap.setView([lat, lon], 15);
+  }
+}
+
+function closeTrackingMap() {
+  const container = document.getElementById('tracking-map-container');
+  const bd = document.getElementById('map-backdrop');
+  if (container) container.style.transform = 'translateY(100%)';
+  if (bd) bd.style.display = 'none';
+  if (trackingInterval) { clearInterval(trackingInterval); trackingInterval = null; }
+}
+
+// ============================================================
+// CLIENT NOTIFICATIONS — استماع للحجوزات
+// ============================================================
+function setupClientRealtime(clientPhone) {
+  sb.channel('client-notif-' + clientPhone)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'notification_logs',
+      filter: `target_id=eq.${clientPhone}`
+    }, (payload) => {
+      const n = payload.new;
+      showClientToast(n.title, n.type);
+      // لو تأكيد — اعرض زر الخريطة
+      if (n.type === 'booking_confirmed' && n.booking_id) {
+        showTrackingButton(n.booking_id);
+      }
+    }).subscribe();
+}
+
+function showClientToast(msg, type) {
+  const colors = {
+    booking_confirmed: '#2eb872',
+    booking_cancelled: '#e05252',
+    booking_completed: '#c9a84c',
+  };
+  const t = document.getElementById('toast');
+  if (t) {
+    t.textContent = msg;
+    t.style.borderColor = colors[type] || 'rgba(201,168,76,.2)';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+}
+
+function showTrackingButton(bookingId) {
+  let btn = document.getElementById('tracking-btn');
+  if (!btn) {
+    btn = document.createElement('div');
+    btn.id = 'tracking-btn';
+    btn.style.cssText = `
+      position:fixed;top:80px;left:50%;transform:translateX(-50%);
+      background:linear-gradient(135deg,#2eb872,#1a7a43);color:#fff;
+      border-radius:12px;padding:12px 20px;font-size:13px;font-weight:700;
+      font-family:'Cairo',sans-serif;cursor:pointer;z-index:200;
+      box-shadow:0 8px 24px rgba(46,184,114,.4);
+      display:flex;align-items:center;gap:8px;
+    `;
+    document.body.appendChild(btn);
+  }
+  btn.innerHTML = `📍 تتبع مقدم الخدمة لحظياً <span style="font-size:18px">→</span>`;
+  btn.style.display = 'flex';
+  btn.onclick = () => {
+    const phone = localStorage.getItem('malaaz_client_phone');
+    showTrackingMap(bookingId, null, null);
+  };
+}
+
+// ============================================================
+// RESPONSIVE — Mobile adjustments for index.html
+// ============================================================
+function injectIndexResponsive() {
+  if (document.getElementById('idx-responsive-style')) return;
+  const style = document.createElement('style');
+  style.id = 'idx-responsive-style';
+  style.textContent = `
+    @media (max-width: 768px) {
+      nav { padding: 0 16px !important; height: 60px !important; }
+      .nav-links { display: none !important; }
+      .hero { padding: 80px 20px 40px !important; min-height: auto !important; }
+      .hero-visual { display: none !important; }
+      h1 { font-size: 36px !important; letter-spacing: -1px !important; }
+      .hero-sub { font-size: 14px !important; }
+      .hero-actions { flex-direction: column !important; gap: 10px !important; }
+      .hero-actions .btn-primary, .hero-actions .btn-secondary { width: 100% !important; text-align: center !important; }
+      .hero-stats { gap: 16px !important; flex-wrap: wrap !important; }
+      .trust-bar { flex-wrap: wrap !important; gap: 16px !important; padding: 16px 20px !important; }
+      .section { padding: 50px 20px !important; }
+      .services-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+      .doctors-grid { grid-template-columns: 1fr !important; }
+      .testi-grid { grid-template-columns: 1fr !important; }
+      .pricing-grid { grid-template-columns: 1fr !important; }
+      .coverage-grid { grid-template-columns: 1fr !important; }
+      .steps-grid { grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
+      .section-title { font-size: 28px !important; }
+      .modal-panel { border-radius: 20px 20px 0 0 !important; max-height: 95vh !important; }
+      .bm-svc-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+      .payment-options { grid-template-columns: 1fr 1fr 1fr !important; }
+      footer .footer-top { grid-template-columns: 1fr 1fr !important; gap: 24px !important; }
+      .page-hero { padding: 80px 20px 40px !important; }
+      .page-title { font-size: 30px !important; }
+      .container { padding: 30px 16px !important; }
+      .filters-bar { padding: 12px 16px !important; }
+      .sub-grid { grid-template-columns: 1fr 1fr !important; }
+    }
+    @media (max-width: 420px) {
+      .services-grid { grid-template-columns: 1fr !important; }
+      .steps-grid { grid-template-columns: 1fr !important; }
+      .hero-stats .stat-item { min-width: 80px; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// ============================================================
+// NOTIFICATION PERMISSION — طلب إذن المتصفح
+// ============================================================
+async function requestClientNotificationPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
+// ============================================================
+// INIT — تشغيل كل المضاف
+// ============================================================
+window.addEventListener('load', () => {
+  // floating buttons removed v4
+  injectIndexResponsive();
+  requestClientNotificationPermission();
+
+  // استماع لإشعارات العميل لو عنده رقم محفوظ
+  const savedPhone = localStorage.getItem('malaaz_client_phone');
+  if (savedPhone) {
+    setupClientRealtime(savedPhone);
+  }
+
+  // تحديث رقم الشركة في الـ instapay hint عند الفتح
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'bm-area') {
+      updateSEO(window.bmSelectedService || '', e.target.value);
+    }
+  });
+});
+
+// ✅ FIX: حذف الـ override ده لأنه بيسبب double call مع الـ bmSubmit الأصلي
+// setupClientRealtime بتتعمل جوه bmSubmit مباشرة
+
+console.log('✅ Malath Index v3 Patch loaded — Map + Responsive + Notifications');
+
+// ============================================================
+// QUICK BOOKING — لوجيك 2
+// الحجز السريع مع عرض رينج السعر من الأدمن
+// ============================================================
+let qbSelectedService = '';
+let qbSelectedSub     = '';
+let qbServicesCache   = [];
+
+async function openQuickBooking() {
+  qbSelectedService = '';
+  qbSelectedSub     = '';
+
+  // Reset UI
+  document.getElementById('qb-price-section').style.display = 'none';
+  document.getElementById('qb-subs-section').style.display  = 'none';
+  document.getElementById('qb-action').style.display        = 'none';
+
+  // تحميل الخدمات من الـ DB أو الـ cache
+  if(!qbServicesCache.length) {
+    const { data } = await sb.from('services').select('*').eq('is_active', true).order('created_at');
+    qbServicesCache = data || [];
+  }
+
+  renderQbServices();
+  document.getElementById('quick-booking-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if(document.getElementById('bm-area')?.options.length <= 1) await loadAreas();
+}
+
+function renderQbServices() {
+  const grid = document.getElementById('qb-services-grid');
+  const icons = { 'كشف منزلي': '🩺', 'تمريض منزلي': '👩‍⚕️', 'أشعة منزلية': '🔬' };
+
+  if(!qbServicesCache.length) {
+    // Fallback static services if DB not loaded
+    qbServicesCache = [
+      { name:'كشف منزلي',   icon:'🩺', price_min:200, price_max:800, description:'طبيب متخصص في بيتك' },
+      { name:'تمريض منزلي', icon:'👩‍⚕️', price_min:150, price_max:600, description:'ممرض متخصص 24/7' },
+      { name:'أشعة منزلية', icon:'🔬', price_min:250, price_max:900, description:'أشعة وسونار في بيتك' },
+    ];
+  }
+
+  grid.innerHTML = qbServicesCache.map(svc => `
+    <div class="bm-svc" id="qb-svc-${svc.name.replace(/\s/g,'_')}"
+      onclick="selectQbService('${sanitize(svc.name)}',${svc.price_min},${svc.price_max})"
+      style="position:relative;padding:16px 10px">
+      <div class="bm-svc-ico" style="font-size:26px">${svc.icon || icons[svc.name] || '🔧'}</div>
+      <div class="bm-svc-name" style="font-size:12px">${sanitize(svc.name)}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px">${svc.price_min}–${svc.price_max} ج.م</div>
+    </div>`).join('');
+}
+
+async function selectQbService(svcName, priceMin, priceMax) {
+  qbSelectedService = svcName;
+  qbSelectedSub     = '';
+
+  // تحديد الكارت المختار
+  document.querySelectorAll('#qb-services-grid .bm-svc').forEach(el => el.classList.remove('sel'));
+  document.getElementById('qb-svc-' + svcName.replace(/\s/g,'_'))?.classList.add('sel');
+
+  // عرض نطاق السعر للخدمة
+  const priceSection = document.getElementById('qb-price-section');
+  const priceDisplay = document.getElementById('qb-price-display');
+  priceDisplay.innerHTML = `${priceMin} <span style="font-size:16px;font-weight:400;color:rgba(255,255,255,.5)">ج.م</span>
+    <span style="font-size:18px;color:rgba(255,255,255,.3);margin:0 8px">←</span>
+    ${priceMax} <span style="font-size:16px;font-weight:400;color:rgba(255,255,255,.5)">ج.م</span>`;
+  priceSection.style.display = 'block';
+
+  // تحميل الخدمات الفرعية
+  await loadQbSubs(svcName);
+
+  // إظهار زر الإتمام
+  document.getElementById('qb-action').style.display = 'block';
+}
+
+async function loadQbSubs(svcName) {
+  const subsSection = document.getElementById('qb-subs-section');
+  const subsList    = document.getElementById('qb-subs-list');
+  const subsLabel   = document.getElementById('qb-subs-label');
+
+  subsSection.style.display = 'block';
+  subsList.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:12px;padding:8px 0">جاري تحميل الخدمات...</div>';
+
+  // تسمية الـ label حسب الخدمة
+  const labelMap = {
+    'كشف منزلي'  : 'اختر الدرجة والتخصص',
+    'تمريض منزلي': 'اختر نوع خدمة التمريض',
+    'أشعة منزلية': 'اختر نوع الأشعة'
+  };
+  subsLabel.textContent = labelMap[svcName] || 'اختر النوع';
+
+  // جلب الخدمات الفرعية
+  const { data: subs } = await sb.from('sub_services')
+    .select('*')
+    .eq('service_name', svcName)
+    .eq('is_active', true)
+    .neq('group_name', 'grade')   // نخفي صفوف الدرجة من الـ Quick Booking
+    .order('name');
+
+  if(!subs?.length) {
+    subsList.innerHTML = `<div style="color:rgba(255,255,255,.4);font-size:12px;text-align:center;padding:12px">
+      لم تُضَف خدمات فرعية بعد — يمكنك الحجز المباشر ↓</div>`;
+    return;
+  }
+
+  // للكشف المنزلي: نجمع حسب الدرجة (أخصائي/استشاري)
+  if(svcName === 'كشف منزلي') {
+    subsList.innerHTML = `
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:8px">🩺 أخصائي</div>
+        ${subs.map(sub => renderQbSubItem(sub, 'أخصائي')).join('')}
+      </div>
+      <div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:8px">👨‍⚕️ استشاري</div>
+        ${subs.map(sub => renderQbSubItem(sub, 'استشاري')).join('')}
+      </div>`;
+  } else {
+    subsList.innerHTML = subs.map(sub => renderQbSubItem(sub, null)).join('');
+  }
+}
+
+function renderQbSubItem(sub, grade) {
+  let pMin, pMax;
+  if(grade === 'استشاري') {
+    pMin = sub.price_min_consultant || sub.price_min || 0;
+    pMax = sub.price_max_consultant || sub.price_max || 0;
+  } else if(grade === 'أخصائي') {
+    pMin = sub.price_min_specialist || sub.price_min || 0;
+    pMax = sub.price_max_specialist || sub.price_max || 0;
+  } else {
+    pMin = sub.price_min || 0;
+    pMax = sub.price_max || 0;
+  }
+
+  const subKey = sanitize(sub.name) + (grade ? '_' + grade : '');
+  return `<div class="qb-sub-item" id="qbsub-${subKey.replace(/\s/g,'_')}"
+    onclick="selectQbSub('${sanitize(sub.name)}','${grade||''}',${pMin},${pMax},this)"
+    style="display:flex;justify-content:space-between;align-items:center;
+      padding:11px 14px;background:rgba(255,255,255,.04);
+      border:1.5px solid rgba(255,255,255,.08);border-radius:11px;
+      cursor:pointer;margin-bottom:7px;transition:all .2s"
+    onmouseover="this.style.borderColor='rgba(201,168,76,.4)';this.style.background='rgba(201,168,76,.08)'"
+    onmouseout="if(!this.classList.contains('sel')){this.style.borderColor='rgba(255,255,255,.08)';this.style.background='rgba(255,255,255,.04)'}">
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#fff">${sanitize(sub.name)}</div>
+      ${sub.duration ? `<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">⏱ ${sanitize(sub.duration)}</div>` : ''}
+    </div>
+    <div style="text-align:left;flex-shrink:0">
+      <div style="font-size:14px;font-weight:900;color:var(--accent)">${pMin}
+        <span style="font-size:11px;color:rgba(255,255,255,.35)">ج.م</span>
+      </div>
+      ${pMax && pMax!==pMin ? `<div style="font-size:10px;color:rgba(255,255,255,.3)">حتى ${pMax} ج.م</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function selectQbSub(subName, grade, pMin, pMax, el) {
+  // إزالة التحديد من الكل
+  document.querySelectorAll('.qb-sub-item').forEach(i => {
+    i.classList.remove('sel');
+    i.style.borderColor = 'rgba(255,255,255,.08)';
+    i.style.background  = 'rgba(255,255,255,.04)';
+  });
+  // تحديد المختار
+  el.classList.add('sel');
+  el.style.borderColor = 'var(--accent)';
+  el.style.background  = 'rgba(201,168,76,.1)';
+
+  qbSelectedSub = subName + (grade ? ' — ' + grade : '');
+
+  // تحديث عرض السعر بنطاق الخدمة الفرعية تحديداً
+  const priceDisplay = document.getElementById('qb-price-display');
+  priceDisplay.innerHTML = `${pMin} <span style="font-size:16px;font-weight:400;color:rgba(255,255,255,.5)">ج.م</span>
+    <span style="font-size:18px;color:rgba(255,255,255,.3);margin:0 8px">←</span>
+    ${pMax} <span style="font-size:16px;font-weight:400;color:rgba(255,255,255,.5)">ج.م</span>`;
+  document.getElementById('qb-price-note').textContent =
+    `${sanitize(subName)}${grade?' — '+sanitize(grade):''} · السعر النهائي بعد التأكيد`;
+}
+
+function proceedFromQuickBooking() {
+  if(!qbSelectedService) { showToast('⚠️ اختر الخدمة أولاً'); return; }
+
+  // غلق الـ quick modal
+  document.getElementById('quick-booking-modal').classList.remove('open');
+
+  // استخراج الخدمة الفرعية بدون الدرجة
+  const subParts = qbSelectedSub.split(' — ');
+  const subName  = subParts[0] || '';
+  const grade    = subParts[1] || '';
+
+  // فتح الـ booking modal الرئيسي بالخدمة المختارة
+  openBookingModal(qbSelectedService, subName);
+
+  // لو في درجة محددة — نختارها تلقائياً بعد ما الـ modal يفتح
+  if(grade && (grade === 'أخصائي' || grade === 'استشاري')) {
+    setTimeout(() => {
+      const gradeEl = document.getElementById(grade === 'استشاري' ? 'grade-consultant' : 'grade-specialist');
+      if(gradeEl) { selectGrade(grade, gradeEl); gradeEl.classList.add('sel'); }
+    }, 300);
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id)?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ============================================================
+// INIT: تحميل الـ Quick Booking بيانات في الخلفية
+// ============================================================
+window.addEventListener('load', async () => {
+  // نحمل بيانات الأسعار في الخلفية عشان الـ Quick Booking يكون سريع
+  try {
+    const { data } = await sb.from('services').select('*').eq('is_active', true).order('created_at');
+    if(data?.length) qbServicesCache = data;
+  } catch(e) {}
+});
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملاذ — داشبورد مقدم الخدمة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --dark:#1e2c2f;--dark2:#2d3b3e;--teal:#3a4a4e;--accent:#c9a84c;--accent2:#e8c56a;
+  --bg:#f5f2ec;--white:#fff;--text:#2d3b3e;--muted:#6b7c80;--border:rgba(58,74,78,0.12);
+  --green:#43A047;--success:#2e7d32;--danger:#c62828;--info:#1565c0;
+  --sidebar:260px;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overflow-x:hidden;display:flex;min-height:100vh;}
+
+/* ===== LOGIN ===== */
+.login-wrap{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:var(--dark);position:fixed;inset:0;z-index:1000;}
+.login-card{background:var(--dark2);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:40px;width:400px;text-align:center;}
+.login-logo{font-size:38px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;margin-bottom:4px;}
+.login-sub{font-size:11px;letter-spacing:3px;color:var(--accent);opacity:.8;margin-bottom:6px;}
+.login-desc{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:28px;}
+.login-input{width:100%;padding:13px 16px;border:1.5px solid rgba(255,255,255,.12);border-radius:12px;font-size:14px;font-family:'Cairo',sans-serif;background:rgba(255,255,255,.06);color:#fff;outline:none;margin-bottom:12px;}
+.login-input::placeholder{color:rgba(255,255,255,.3);}
+.login-input:focus{border-color:var(--accent);}
+.login-btn{width:100%;background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;margin-top:6px;}
+.login-btn:hover{transform:translateY(-1px);}
+.login-tabs{display:flex;gap:8px;margin-bottom:24px;}
+.login-tab{flex:1;padding:10px;border:1.5px solid rgba(255,255,255,.1);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;}
+.login-tab.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.3);color:var(--accent);}
+
+/* ===== SIDEBAR ===== */
+.sidebar{width:var(--sidebar);background:var(--dark);min-height:100vh;position:fixed;top:0;right:0;z-index:100;display:flex;flex-direction:column;border-left:1px solid rgba(255,255,255,.05);}
+.sidebar-logo{padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.06);}
+.sidebar-logo-ar{font-size:24px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;}
+.sidebar-logo-en{font-size:8px;letter-spacing:4px;color:var(--accent);opacity:.7;}
+.sidebar-badge{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:3px 9px;font-size:10px;font-weight:700;color:var(--accent);margin-top:5px;display:inline-block;}
+.sidebar-provider-info{padding:16px 20px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.05);}
+.prov-name{font-size:14px;font-weight:700;color:#fff;}
+.prov-type{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;}
+.prov-avail{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.avail-label{font-size:12px;color:rgba(255,255,255,.5);}
+.sidebar-nav{flex:1;padding:12px 0;overflow-y:auto;}
+.nav-section{padding:0 20px;margin-bottom:4px;font-size:10px;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:2px;text-transform:uppercase;margin-top:14px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.5);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border-right:3px solid transparent;}
+.nav-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.8);}
+.nav-item.active{background:rgba(201,168,76,.1);color:var(--accent);border-right-color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:14px;}
+.nav-item .badge{background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;margin-right:auto;}
+.sidebar-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.06);}
+
+/* ===== MAIN ===== */
+.main{margin-right:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-size:18px;font-weight:700;color:var(--dark);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.topbar-btn{background:var(--dark);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;}
+.topbar-btn:hover{transform:translateY(-1px);}
+.topbar-btn.accent{background:var(--accent);color:var(--dark);}
+
+.content{padding:28px;flex:1;}
+
+/* ===== PAGES ===== */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ===== CARDS ===== */
+.card{background:var(--white);border-radius:16px;border:.5px solid var(--border);margin-bottom:20px;overflow:hidden;}
+.card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:15px;font-weight:700;color:var(--dark);}
+.card-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.card-body{padding:22px;}
+
+/* ===== STATS ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--white);border-radius:14px;padding:18px;border:.5px solid var(--border);text-align:center;}
+.stat-val{font-size:28px;font-weight:900;font-family:'Tajawal',sans-serif;color:var(--dark);}
+.stat-lbl{font-size:12px;color:var(--muted);margin-top:3px;}
+
+/* ===== FORM ===== */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.3px;}
+.form-input{padding:11px 14px;border:1.5px solid rgba(58,74,78,.15);border-radius:10px;font-size:13px;font-family:'Cairo',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--accent);}
+.form-hint{font-size:11px;color:var(--muted);}
+.form-row{display:flex;align-items:center;gap:8px;}
+.range-sep{font-size:12px;color:var(--muted);flex-shrink:0;}
+
+/* ===== SECTION ===== */
+.section-divider{font-size:13px;font-weight:700;color:var(--dark);padding:12px 0 8px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.section-divider i{color:var(--accent);}
+
+/* ===== SERVICE SELECT CARDS ===== */
+.service-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.svc-type-card{border:2px solid var(--border);border-radius:14px;padding:18px 12px;text-align:center;cursor:pointer;transition:all .2s;background:#fff;}
+.svc-type-card:hover{border-color:rgba(201,168,76,.4);}
+.svc-type-card.sel{border-color:var(--accent);background:rgba(201,168,76,.06);}
+.svc-type-card .ico{font-size:28px;margin-bottom:8px;}
+.svc-type-card .lbl{font-size:13px;font-weight:700;}
+.svc-type-card .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ===== SUB-SERVICE CHECKBOXES ===== */
+.sub-svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sub-svc-item{border:1.5px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:all .2s;background:#fff;}
+.sub-svc-item.checked{border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.04);}
+.sub-svc-top{display:flex;align-items:center;justify-content:space-between;}
+.sub-svc-name{font-size:13px;font-weight:700;}
+.sub-svc-range{font-size:11px;color:var(--muted);}
+.sub-svc-price{display:flex;align-items:center;gap:8px;margin-top:4px;}
+.sub-svc-price label{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;}
+.price-input{width:80px;padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Cairo',sans-serif;text-align:center;background:#fff;}
+.price-input:focus{border-color:var(--accent);outline:none;}
+
+/* ===== GRADE CARDS ===== */
+.grade-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.grade-card{border:2px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;background:#fff;}
+.grade-card.sel{border-color:var(--accent);background:rgba(201,168,76,.06);}
+.grade-card .grade-ico{font-size:22px;margin-bottom:6px;}
+.grade-card .grade-name{font-size:14px;font-weight:700;}
+.grade-card .grade-desc{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ===== SPECIALTY SELECT ===== */
+.specialty-wrap{background:rgba(58,74,78,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;}
+
+/* ===== BOOKING CARD ===== */
+.booking-card{background:#fff;border:.5px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.bc-info .bc-name{font-size:14px;font-weight:700;}
+.bc-info .bc-svc{font-size:12px;color:var(--muted);margin-top:3px;}
+.bc-info .bc-time{font-size:11px;color:var(--muted);margin-top:2px;}
+.bc-right{text-align:left;flex-shrink:0;}
+.bc-area{font-size:12px;color:var(--muted);}
+.bc-actions{display:flex;gap:6px;margin-top:8px;}
+
+/* ===== TOGGLE ===== */
+.toggle{position:relative;display:inline-flex;width:46px;height:26px;cursor:pointer;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:#ddd;border-radius:26px;transition:.3s;}
+.toggle-slider::before{content:'';position:absolute;height:20px;width:20px;right:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 2px 4px rgba(0,0,0,.2);}
+.toggle input:checked + .toggle-slider{background:var(--green);}
+.toggle input:checked + .toggle-slider::before{transform:translateX(-20px);}
+
+/* ===== BADGE ===== */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge.green{background:rgba(67,160,71,.1);color:var(--success);}
+.badge.red{background:rgba(198,40,40,.1);color:var(--danger);}
+.badge.yellow{background:rgba(201,168,76,.12);color:#b8860b;}
+.badge.blue{background:rgba(21,101,192,.1);color:var(--info);}
+.badge.gray{background:rgba(107,124,128,.1);color:var(--muted);}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:20px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:16px;font-weight:700;}
+.modal-close{background:var(--bg);border:none;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:16px;color:var(--muted);}
+.modal-body{padding:22px;}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+
+/* ===== BTN ===== */
+.btn{border:none;border-radius:10px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;}
+.btn.primary{background:var(--dark);color:#fff;}
+.btn.accent{background:var(--accent);color:var(--dark);}
+.btn.ghost{background:var(--bg);color:var(--text);}
+
+/* ===== ACT BTNS ===== */
+.act-btn{border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .15s;}
+.act-btn.edit{background:rgba(21,101,192,.1);color:var(--info);}
+.act-btn.done{background:rgba(67,160,71,.1);color:var(--success);}
+.act-btn.cancel{background:rgba(198,40,40,.1);color:var(--danger);}
+
+/* ===== PRICE RANGE BADGE ===== */
+.range-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:3px 9px;font-size:11px;font-weight:700;color:#b8860b;}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:var(--dark);color:#fff;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid rgba(201,168,76,.2);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:rgba(67,160,71,.4);}
+.toast.error{border-color:rgba(198,40,40,.4);}
+
+/* ===== PENDING BADGE ===== */
+.pending-count{display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--danger);color:#fff;font-size:10px;align-items:center;justify-content:center;font-weight:700;margin-right:auto;}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .sidebar{transform:translateX(100%);transition:.3s;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-right:0;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .service-type-grid{grid-template-columns:1fr 1fr;}
+  .sub-svc-grid{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">ملاذ</div>
+    <div class="login-sub">مقدم الخدمة</div>
+    <div class="login-desc">سجّل دخولك أو أنشئ حساب جديد</div>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchLoginTab('login',this)">تسجيل الدخول</button>
+      <button class="login-tab" onclick="switchLoginTab('register',this)">حساب جديد</button>
+    </div>
+    <!-- Login -->
+    <div id="tab-login">
+      <input class="login-input" type="email" id="p-email" placeholder="البريد الإلكتروني">
+      <input class="login-input" type="password" id="p-pass" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter')doProviderLogin()">
+      <div id="login-err" style="color:#ff6b6b;font-size:12px;margin-bottom:8px;display:none"></div>
+      <button class="login-btn" onclick="doProviderLogin()"><i class="fas fa-sign-in-alt" style="margin-left:8px"></i> دخول</button>
+    </div>
+    <!-- Register -->
+    <div id="tab-register" style="display:none">
+      <input class="login-input" type="text" id="r-name" placeholder="الاسم الكامل *">
+      <input class="login-input" type="email" id="r-email" placeholder="البريد الإلكتروني *">
+      <input class="login-input" type="password" id="r-pass" placeholder="كلمة المرور *">
+      <input class="login-input" type="tel" id="r-phone" placeholder="رقم الموبايل *" dir="ltr">
+      <div id="register-err" style="color:#ff6b6b;font-size:12px;margin-bottom:8px;display:none"></div>
+      <button class="login-btn" onclick="doRegister()"><i class="fas fa-user-plus" style="margin-left:8px"></i> إنشاء حساب</button>
+      <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:12px">سيتم مراجعة طلبك من الأدمن قبل التفعيل</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PROVIDER APP ===== -->
+<div id="provider-app" style="display:none;width:100%;display:none;flex-direction:row;">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-ar">ملاذ</div>
+    <div class="sidebar-logo-en">MALAAZ</div>
+    <div class="sidebar-badge">مقدم الخدمة</div>
+  </div>
+  <div class="sidebar-provider-info">
+    <div class="prov-name" id="sb-prov-name">...</div>
+    <div class="prov-type" id="sb-prov-type">...</div>
+    <div class="prov-avail">
+      <span class="avail-label">متاح الآن</span>
+      <label class="toggle">
+        <input type="checkbox" id="avail-toggle" onchange="toggleAvailability(this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">الرئيسية</div>
+    <div class="nav-item active" onclick="showPage('overview')"><i class="fas fa-chart-bar"></i><span>نظرة عامة</span></div>
+    <div class="nav-item" onclick="showPage('bookings')"><i class="fas fa-calendar-check"></i><span>حجوزاتي</span><span class="badge" id="new-bookings-badge" style="display:none">0</span></div>
+
+    <div class="nav-section">إعداد الملف</div>
+    <div class="nav-item" onclick="showPage('profile')"><i class="fas fa-user-md"></i><span>ملفي الشخصي</span></div>
+    <div class="nav-item" onclick="showPage('services')"><i class="fas fa-layer-group"></i><span>خدماتي وأسعاري</span></div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="btn ghost" onclick="doLogout()" style="width:100%;font-size:13px"><i class="fas fa-sign-out-alt" style="margin-left:6px"></i> تسجيل الخروج</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+<div class="topbar">
+  <div class="topbar-title" id="page-title">نظرة عامة</div>
+  <div class="topbar-right">
+    <button class="topbar-btn accent" onclick="saveAll()"><i class="fas fa-save" style="margin-left:6px"></i> حفظ</button>
+  </div>
+</div>
+<div class="content">
+
+<!-- ============================
+     PAGE: OVERVIEW
+     ============================ -->
+<div class="page active" id="page-overview">
+  <div class="stats-grid">
+    <div class="stat-card"><div style="font-size:28px;margin-bottom:8px">📋</div><div class="stat-val" id="pov-all">—</div><div class="stat-lbl">إجمالي حجوزاتي</div></div>
+    <div class="stat-card"><div style="font-size:28px;margin-bottom:8px">⏳</div><div class="stat-val" style="color:var(--danger)" id="pov-pending">—</div><div class="stat-lbl">حجوزات جديدة</div></div>
+    <div class="stat-card"><div style="font-size:28px;margin-bottom:8px">✅</div><div class="stat-val" style="color:var(--green)" id="pov-completed">—</div><div class="stat-lbl">مكتملة</div></div>
+  </div>
+
+  <!-- Status card -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:15px;font-weight:700" id="pov-status-msg">جاري التحميل...</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px" id="pov-status-sub"></div>
+      </div>
+      <div id="pov-avail-badge"></div>
+    </div>
+  </div>
+
+  <!-- Recent bookings -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">آخر حجوزاتي</div>
+      <button class="btn primary" onclick="showPage('bookings')">عرض الكل</button>
+    </div>
+    <div class="card-body" id="overview-recent-bookings">
+      <div style="text-align:center;padding:24px;color:var(--muted)">جاري التحميل...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     PAGE: MY BOOKINGS
+     ============================ -->
+<div class="page" id="page-bookings">
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn primary active" id="bk-filter-all" onclick="filterMyBookings('all',this)" style="font-size:13px">الكل</button>
+    <button class="btn ghost" id="bk-filter-pending" onclick="filterMyBookings('pending',this)" style="font-size:13px">جديد</button>
+    <button class="btn ghost" id="bk-filter-confirmed" onclick="filterMyBookings('confirmed',this)" style="font-size:13px">مؤكد</button>
+    <button class="btn ghost" id="bk-filter-completed" onclick="filterMyBookings('completed',this)" style="font-size:13px">مكتمل</button>
+  </div>
+  <div id="my-bookings-list">
+    <div style="text-align:center;padding:40px;color:var(--muted)">جاري التحميل...</div>
+  </div>
+</div>
+
+<!-- ============================
+     PAGE: PROFILE
+     ============================ -->
+<div class="page" id="page-profile">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">ملفي الشخصي</div><div class="card-sub">المعلومات التي تظهر للعملاء</div></div>
+    </div>
+    <div class="card-body">
+      <div class="section-divider"><i class="fas fa-user"></i> المعلومات الأساسية</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="form-label">الاسم الكامل *</div>
+          <input class="form-input" id="p-name" placeholder="اسمك كاملاً">
+        </div>
+        <div class="form-group">
+          <div class="form-label">رقم الموبايل</div>
+          <input class="form-input" id="p-mobile" placeholder="01xxxxxxxxx" dir="ltr">
+        </div>
+        <div class="form-group">
+          <div class="form-label">سنوات الخبرة</div>
+          <input class="form-input" id="p-exp" type="number" placeholder="مثال: 10">
+        </div>
+        <div class="form-group">
+          <div class="form-label">منطقة التغطية الأساسية</div>
+          <select class="form-input" id="p-area"></select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px">
+        <div class="form-label">نبذة عنك (تظهر للعملاء)</div>
+        <textarea class="form-input" id="p-bio" rows="3" placeholder="اكتب نبذة مختصرة عن خبرتك وتخصصك..."></textarea>
+      </div>
+
+      <div class="section-divider" style="margin-top:20px"><i class="fas fa-stethoscope"></i> نوع الخدمة التي تقدمها</div>
+      <div class="service-type-grid">
+        <div class="svc-type-card sel" id="svc-type-exam" onclick="selectServiceType('كشف منزلي',this)">
+          <div class="ico">🩺</div>
+          <div class="lbl">كشف منزلي</div>
+          <div class="sub">طبيب متخصص</div>
+        </div>
+        <div class="svc-type-card" id="svc-type-nursing" onclick="selectServiceType('تمريض منزلي',this)">
+          <div class="ico">👩‍⚕️</div>
+          <div class="lbl">تمريض منزلي</div>
+          <div class="sub">ممرض / ممرضة</div>
+        </div>
+        <div class="svc-type-card" id="svc-type-radio" onclick="selectServiceType('أشعة منزلية',this)">
+          <div class="ico">🔬</div>
+          <div class="lbl">أشعة منزلية</div>
+          <div class="sub">مركز أشعة</div>
+        </div>
+      </div>
+      <input type="hidden" id="p-service-type" value="كشف منزلي">
+
+      <!-- Exam-specific: grade -->
+      <div id="exam-section">
+        <div class="section-divider"><i class="fas fa-graduation-cap"></i> الدرجة العلمية</div>
+        <div class="grade-grid">
+          <div class="grade-card sel" id="grade-specialist" onclick="selectGrade('أخصائي',this)">
+            <div class="grade-ico">🩺</div>
+            <div class="grade-name">أخصائي</div>
+            <div class="grade-desc">متخصص في مجال طبي محدد</div>
+          </div>
+          <div class="grade-card" id="grade-consultant" onclick="selectGrade('استشاري',this)">
+            <div class="grade-ico">👨‍⚕️</div>
+            <div class="grade-name">استشاري</div>
+            <div class="grade-desc">خبرة أعلى وسعر أعلى</div>
+          </div>
+        </div>
+        <input type="hidden" id="p-grade" value="أخصائي">
+
+        <div class="section-divider"><i class="fas fa-list-ul"></i> التخصص الطبي</div>
+        <div class="specialty-wrap">
+          <select class="form-input" id="p-specialty" style="width:100%">
+            <option value="">اختر تخصصك...</option>
+          </select>
+          <div class="form-hint" style="margin-top:8px">💡 نطاق السعر الخاص بتخصصك ودرجتك العلمية:</div>
+          <div id="grade-price-hint" style="margin-top:6px;font-size:13px;font-weight:700;color:#b8860b"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn accent" onclick="saveProfile()"><i class="fas fa-save" style="margin-left:6px"></i> حفظ الملف الشخصي</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     PAGE: MY SERVICES & PRICES
+     ============================ -->
+<div class="page" id="page-services">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">خدماتي وأسعاري</div><div class="card-sub">اختار الخدمات اللي بتقدمها وحدد سعرك (في حدود نطاق الأدمن)</div></div>
+      <button class="btn accent" onclick="saveMyServices()"><i class="fas fa-save" style="margin-left:6px"></i> حفظ</button>
+    </div>
+    <div class="card-body">
+      <!-- Price range info -->
+      <div id="price-range-info" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:14px;margin-bottom:20px;display:none">
+        <div style="font-size:13px;font-weight:700;color:#b8860b;margin-bottom:6px">⚠️ نطاقات الأسعار المحددة من الأدمن</div>
+        <div id="price-range-info-body" style="font-size:12px;color:var(--muted);line-height:1.8"></div>
+      </div>
+      <div id="my-services-grid">
+        <div style="text-align:center;padding:40px;color:var(--muted)">جاري تحميل الخدمات...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</main>
+</div><!-- /provider-app -->
+
+<!-- ===== BOOKING DETAIL MODAL ===== -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">تفاصيل الحجز</div>
+      <button class="modal-close" onclick="closeModal('booking-modal')">×</button>
+    </div>
+    <div class="modal-body" id="booking-modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// SUPABASE
+// ============================================================
+const SUPABASE_URL = "https://omsictbrqlsohrmxeuym.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ============================================================
+// STATE
+// ============================================================
+let currentProvider = null;
+let allSubServices   = [];
+let allAreas         = [];
+let myBookings       = [];
+let currentBookingFilter = 'all';
+let providerServices = {};
+
+function san(v){ return v==null?'':String(v).replace(/</g,'&lt;').replace(/>/g,'&gt;').trim(); }
+
+// ============================================================
+// LOGIN TABS
+// ============================================================
+function switchLoginTab(tab, btn) {
+  document.querySelectorAll('.login-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-login').style.display    = tab==='login'?'block':'none';
+  document.getElementById('tab-register').style.display = tab==='register'?'block':'none';
+}
+
+// ============================================================
+// PROVIDER LOGIN — Supabase Auth
+// ============================================================
+async function doProviderLogin() {
+  const email = document.getElementById('p-email').value.trim();
+  const pass  = document.getElementById('p-pass').value;
+  const err   = document.getElementById('login-err');
+  const btn   = document.querySelector('#tab-login .login-btn');
+  err.style.display  = 'none';
+  btn.textContent    = 'جاري الدخول...';
+  btn.disabled       = true;
+
+  const { data: authData, error: authErr } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'دخول';
+  btn.disabled    = false;
+
+  if(authErr) {
+    err.textContent   = 'بيانات الدخول غلط — تحقق من البريد وكلمة المرور';
+    err.style.display = 'block';
+    return;
+  }
+
+  // جلب بيانات المقدم من جدول providers
+  const { data: provData, error: provErr } = await sb
+    .from('providers')
+    .select('*')
+    .eq('user_id', authData.user.id)
+    .single();
+
+  if(provErr || !provData) {
+    err.textContent   = 'لم يتم العثور على ملف مقدم الخدمة — تواصل مع الإدارة';
+    err.style.display = 'block';
+    await sb.auth.signOut();
+    return;
+  }
+
+  if(provData.status === 'pending') {
+    err.textContent   = 'حسابك قيد المراجعة من الأدمن';
+    err.style.display = 'block';
+    await sb.auth.signOut();
+    return;
+  }
+
+  if(provData.status === 'suspended') {
+    err.textContent   = 'تم إيقاف حسابك — تواصل مع الإدارة';
+    err.style.display = 'block';
+    await sb.auth.signOut();
+    return;
+  }
+
+  loadProviderApp(provData);
+}
+
+// ============================================================
+// REGISTER — Supabase Auth + insert providers row
+// ============================================================
+async function doRegister() {
+  const name  = document.getElementById('r-name').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const pass  = document.getElementById('r-pass').value;
+  const phone = document.getElementById('r-phone').value.trim();
+  const err   = document.getElementById('register-err');
+  const btn   = document.querySelector('#tab-register .login-btn');
+
+  if(!name||!email||!pass||!phone) { err.textContent='يرجى ملء كل الحقول'; err.style.display='block'; return; }
+  if(pass.length < 6)              { err.textContent='كلمة المرور 6 أحرف على الأقل'; err.style.display='block'; return; }
+
+  err.style.display = 'none';
+  btn.textContent   = 'جاري الإنشاء...';
+  btn.disabled      = true;
+
+  // 1) إنشاء حساب Auth
+  const { data: authData, error: authErr } = await sb.auth.signUp({ email, password: pass });
+  btn.textContent = 'إنشاء حساب';
+  btn.disabled    = false;
+
+  if(authErr) { err.textContent = authErr.message; err.style.display='block'; return; }
+
+  // 2) إنشاء row في providers مرتبط بالـ user_id
+  const { error: provErr } = await sb.from('providers').insert([{
+    user_id:      authData.user.id,
+    name,
+    email,
+    phone,
+    status:       'pending',
+    is_available: false,
+    rating:       5
+  }]);
+
+  if(provErr) { err.textContent = 'خطأ في إنشاء الملف: ' + provErr.message; err.style.display='block'; return; }
+
+  showToast('✅ تم إنشاء الحساب — انتظر تأكيد البريد الإلكتروني وموافقة الأدمن');
+  // Clear fields
+  ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
+  switchLoginTab('login', document.querySelector('.login-tab'));
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+// ============================================================
+// LOAD PROVIDER APP
+// ============================================================
+async function loadProviderApp(provData) {
+  currentProvider = provData;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('provider-app').style.display = 'flex';
+
+  // Update sidebar info
+  document.getElementById('sb-prov-name').textContent = san(provData.name);
+  document.getElementById('sb-prov-type').textContent = san(provData.service_type || 'غير محدد');
+  document.getElementById('avail-toggle').checked = provData.is_available;
+
+  // Load data
+  await Promise.all([loadAreas(), loadSubServicesAll()]);
+  loadOverview();
+  loadMyBookings();
+  prefillProfile();
+  loadMyServicesGrid();
+  setupProviderRealtime();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const pageTitles = { overview:'نظرة عامة', bookings:'حجوزاتي', profile:'ملفي الشخصي', services:'خدماتي وأسعاري' };
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[id]||id;
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')?.includes("'"+id+"'")) n.classList.add('active');
+  });
+  if(id==='bookings') renderMyBookings(myBookings, currentBookingFilter);
+  if(id==='services') loadMyServicesGrid();
+}
+
+function saveAll() {
+  const active = document.querySelector('.page.active');
+  if(!active) return;
+  if(active.id==='page-profile') saveProfile();
+  else if(active.id==='page-services') saveMyServices();
+  else showToast('💾 لا يوجد تغييرات للحفظ');
+}
+
+// ============================================================
+// TOGGLE AVAILABILITY
+// ============================================================
+async function toggleAvailability(val) {
+  if(!currentProvider) return;
+  await sb.from('providers').update({is_available: val}).eq('id', currentProvider.id);
+  currentProvider.is_available = val;
+  showToast(val ? '🟢 أنت متاح الآن للحجز' : '⚫ تم إيقاف التوفر مؤقتاً');
+  updateOverviewStatus();
+}
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+async function loadOverview() {
+  const { data } = await sb.from('bookings').select('*').eq('provider_phone', currentProvider.phone||'__NONE__');
+  // Fallback: match by service type area
+  const allBkgs = data || [];
+  document.getElementById('pov-all').textContent = allBkgs.length;
+  document.getElementById('pov-pending').textContent = allBkgs.filter(b=>b.status==='pending').length;
+  document.getElementById('pov-completed').textContent = allBkgs.filter(b=>b.status==='completed').length;
+  updateOverviewStatus();
+  renderRecentBookings(allBkgs.slice(0,5));
+}
+
+function updateOverviewStatus() {
+  if(!currentProvider) return;
+  const avail = currentProvider.is_available;
+  const status = currentProvider.status;
+  const msg = status!=='active' ? 'حسابك غير مفعّل بعد' : avail ? '🟢 أنت متاح الآن — العملاء يمكنهم حجزك' : '⚫ أنت غير متاح حالياً';
+  const sub = avail ? 'قم بإيقاف التوفر عند عدم رغبتك في الاستقبال' : 'فعّل التوفر لاستقبال الحجوزات';
+  document.getElementById('pov-status-msg').textContent = msg;
+  document.getElementById('pov-status-sub').textContent = sub;
+  document.getElementById('pov-avail-badge').innerHTML = avail
+    ? '<span class="badge green">● متاح</span>'
+    : '<span class="badge gray">● غير متاح</span>';
+}
+
+function renderRecentBookings(data) {
+  const el = document.getElementById('overview-recent-bookings');
+  if(!data?.length) { el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted)">لا توجد حجوزات بعد</div>'; return; }
+  el.innerHTML = data.map(b => renderBookingCard(b)).join('');
+}
+
+// ============================================================
+// MY BOOKINGS
+// ============================================================
+async function loadMyBookings() {
+  // In real app: filter by assigned provider. Demo: load all.
+  const { data } = await sb.from('bookings').select('*').order('created_at',{ascending:false}).limit(50);
+  myBookings = data || [];
+  const pending = myBookings.filter(b=>b.status==='pending').length;
+  const badge = document.getElementById('new-bookings-badge');
+  badge.textContent = pending;
+  badge.style.display = pending > 0 ? 'flex' : 'none';
+  if(document.getElementById('page-bookings').classList.contains('active')) {
+    renderMyBookings(myBookings, currentBookingFilter);
+  }
+}
+
+function filterMyBookings(status, btn) {
+  currentBookingFilter = status;
+  document.querySelectorAll('#page-bookings .btn').forEach(b=>{ b.className='btn ghost'; b.style.fontSize='13px'; });
+  btn.className='btn primary'; btn.style.fontSize='13px';
+  renderMyBookings(myBookings, status);
+}
+
+function renderMyBookings(data, filter) {
+  const el = document.getElementById('my-bookings-list');
+  let filtered = filter==='all' ? data : data.filter(b=>b.status===filter);
+  if(!filtered?.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">لا توجد حجوزات في هذه الفئة</div>'; return; }
+  el.innerHTML = filtered.map(b => renderBookingCard(b)).join('');
+}
+
+function renderBookingCard(b) {
+  return `<div class="booking-card">
+    <div class="bc-info">
+      <div class="bc-name">${san(b.patient_name)} <span style="font-size:11px;color:var(--muted);margin-right:6px" dir="ltr">${san(b.phone)}</span></div>
+      <div class="bc-svc">${san(b.service_type)} ${b.sub_option?'— '+san(b.sub_option):''}</div>
+      <div class="bc-time"><i class="fas fa-clock" style="font-size:10px;margin-left:3px"></i>${san(b.appointment_time)} · ${san(b.area)}</div>
+      <div class="bc-actions">
+        ${b.status==='pending'?`<button class="act-btn done" onclick="updateBooking('${b.id}','confirmed')">قبول</button>`:''}
+        ${b.status==='confirmed'?`<button class="act-btn done" onclick="updateBooking('${b.id}','completed')">مكتمل</button>`:''}
+        ${b.status!=='cancelled'&&b.status!=='completed'?`<button class="act-btn cancel" onclick="updateBooking('${b.id}','cancelled')">رفض</button>`:''}
+        <button class="act-btn edit" onclick="showBookingDetail('${b.id}')">التفاصيل</button>
+      </div>
+    </div>
+    <div class="bc-right">
+      ${statusBadge(b.status)}
+      <div class="bc-area" style="margin-top:6px">${payBadge(b.payment_method)}</div>
+    </div>
+  </div>`;
+}
+
+function showBookingDetail(id) {
+  const b = myBookings.find(x=>x.id===id);
+  if(!b) return;
+  document.getElementById('booking-modal-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><div class="form-label">المريض</div><div style="font-weight:700;margin-top:4px">${san(b.patient_name)}</div></div>
+      <div><div class="form-label">الموبايل</div><div style="font-weight:700;margin-top:4px" dir="ltr">${san(b.phone)}</div></div>
+      <div><div class="form-label">الخدمة</div><div style="font-weight:700;margin-top:4px">${san(b.service_type)}</div></div>
+      <div><div class="form-label">التفصيل</div><div style="font-weight:700;margin-top:4px">${san(b.sub_option)||'—'}</div></div>
+      <div><div class="form-label">المنطقة</div><div style="font-weight:700;margin-top:4px">${san(b.area)}</div></div>
+      <div><div class="form-label">الوقت</div><div style="font-weight:700;margin-top:4px">${san(b.appointment_time)}</div></div>
+      <div style="grid-column:1/-1"><div class="form-label">العنوان</div><div style="font-weight:700;margin-top:4px">${san(b.address)}</div></div>
+      <div><div class="form-label">الدفع</div><div style="font-weight:700;margin-top:4px">${payBadge(b.payment_method)}</div></div>
+      <div><div class="form-label">الحالة</div><div style="font-weight:700;margin-top:4px">${statusBadge(b.status)}</div></div>
+      ${b.notes?`<div style="grid-column:1/-1"><div class="form-label">ملاحظات</div><div style="font-weight:700;margin-top:4px">${san(b.notes)}</div></div>`:''}
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      ${b.status==='pending'?`<button class="btn accent" onclick="updateBooking('${b.id}','confirmed');closeModal('booking-modal')">قبول الحجز</button>`:''}
+      ${b.status==='confirmed'?`<button class="btn accent" onclick="updateBooking('${b.id}','completed');closeModal('booking-modal')">تعيين مكتمل</button>`:''}
+    </div>`;
+  openModal('booking-modal');
+}
+
+async function updateBooking(id, status) {
+  await sb.from('bookings').update({status}).eq('id',id);
+  const b = myBookings.find(x=>x.id===id);
+  if(b) b.status = status;
+  showToast('✅ تم التحديث','success');
+  renderMyBookings(myBookings, currentBookingFilter);
+  loadMyBookings();
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+function prefillProfile() {
+  if(!currentProvider) return;
+  const p = currentProvider;
+  document.getElementById('p-name').value    = p.name    || '';
+  document.getElementById('p-mobile').value  = p.phone   || '';
+  document.getElementById('p-exp').value     = p.experience || '';
+  document.getElementById('p-bio').value     = p.bio     || '';
+  document.getElementById('p-grade').value   = p.grade   || 'أخصائي';
+  if(p.grade) selectGrade(p.grade, document.getElementById('grade-'+( p.grade==='استشاري'?'consultant':'specialist')));
+  if(p.service_type) {
+    selectServiceType(p.service_type, document.getElementById('svc-type-'+(
+      p.service_type==='تمريض منزلي'?'nursing': p.service_type==='أشعة منزلية'?'radio':'exam'
+    )));
+  }
+  // fill area select then set value
+  const areaEl = document.getElementById('p-area');
+  if(areaEl && allAreas.length) {
+    areaEl.innerHTML = '<option value="">اختر المنطقة</option>' + allAreas.map(a=>`<option value="${san(a.name)}" ${a.name===p.area?'selected':''}>${san(a.name)}</option>`).join('');
+  }
+  // specialty
+  if(p.specialty && document.getElementById('p-specialty')) {
+    loadSpecialtiesDropdown(p.grade||'أخصائي', p.specialty);
+  }
+}
+
+function selectServiceType(type, card) {
+  document.querySelectorAll('.svc-type-card').forEach(c=>c.classList.remove('sel'));
+  card?.classList.add('sel');
+  document.getElementById('p-service-type').value = type;
+  document.getElementById('exam-section').style.display = type==='كشف منزلي' ? 'block' : 'none';
+}
+
+function selectGrade(grade, card) {
+  document.querySelectorAll('.grade-card').forEach(c=>c.classList.remove('sel'));
+  card?.classList.add('sel');
+  document.getElementById('p-grade').value = grade;
+  loadSpecialtiesDropdown(grade, document.getElementById('p-specialty')?.value);
+}
+
+async function loadSpecialtiesDropdown(grade, selectedVal) {
+  const subs = allSubServices.filter(s=>s.service_name==='كشف منزلي'&&s.group_name==='specialty'&&s.is_active!==false);
+  const sel = document.getElementById('p-specialty');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">اختر تخصصك...</option>' + subs.map(s=>{
+    const min = grade==='استشاري'?(s.price_min_consultant||s.price_min||0):(s.price_min_specialist||s.price_min||0);
+    const max = grade==='استشاري'?(s.price_max_consultant||s.price_max||0):(s.price_max_specialist||s.price_max||0);
+    return `<option value="${san(s.name)}" data-min="${min}" data-max="${max}" ${s.name===selectedVal?'selected':''}>${san(s.name)} (${min}–${max} ج.م)</option>`;
+  }).join('');
+  // Show grade price hint
+  updateGradePriceHint();
+  sel.onchange = updateGradePriceHint;
+}
+
+function updateGradePriceHint() {
+  const sel  = document.getElementById('p-specialty');
+  const hint = document.getElementById('grade-price-hint');
+  if(!sel||!hint) return;
+  const opt = sel.options[sel.selectedIndex];
+  if(opt?.dataset.min) {
+    hint.innerHTML = `نطاق سعرك: <strong>${opt.dataset.min} – ${opt.dataset.max} ج.م</strong>`;
+  } else {
+    hint.textContent = '';
+  }
+}
+
+async function saveProfile() {
+  if(!currentProvider) return;
+  const name    = document.getElementById('p-name').value.trim();
+  const phone   = document.getElementById('p-mobile').value.trim();
+  const exp     = parseFloat(document.getElementById('p-exp').value)||null;
+  const bio     = document.getElementById('p-bio').value.trim();
+  const area    = document.getElementById('p-area').value;
+  const svcType = document.getElementById('p-service-type').value;
+  const grade   = document.getElementById('p-grade').value;
+  const spec    = document.getElementById('p-specialty')?.value||null;
+
+  if(!name) { showToast('⚠️ أدخل اسمك','error'); return; }
+
+  const payload = { name, phone, experience:exp, bio, area, service_type:svcType, grade, specialty:spec };
+  const { error } = await sb.from('providers').update(payload).eq('id', currentProvider.id);
+  if(error) { showToast('❌ '+error.message,'error'); return; }
+
+  Object.assign(currentProvider, payload);
+  document.getElementById('sb-prov-name').textContent = name;
+  document.getElementById('sb-prov-type').textContent = svcType;
+  showToast('✅ تم حفظ الملف الشخصي','success');
+}
+
+// ============================================================
+// MY SERVICES & PRICES
+// ============================================================
+async function loadMyServicesGrid() {
+  if(!currentProvider) return;
+  const svcType = currentProvider.service_type || 'كشف منزلي';
+  const subs = allSubServices.filter(s => s.service_name === svcType && s.is_active !== false &&
+    s.group_name !== 'grade'); // exclude the grade rows
+
+  // Load existing provider services
+  const { data: existing } = await sb.from('provider_services').select('*').eq('provider_id', currentProvider.id);
+  const existingMap = {};
+  (existing||[]).forEach(e=>{ existingMap[e.sub_service_id] = e; });
+
+  // Show price range info
+  const info = document.getElementById('price-range-info');
+  const infoBody = document.getElementById('price-range-info-body');
+  if(subs.length) {
+    info.style.display = 'block';
+    const mainSvc = await sb.from('services').select('price_min,price_max').eq('name',svcType).single();
+    infoBody.innerHTML = mainSvc.data
+      ? `الخدمة الرئيسية "${svcType}": <strong>${mainSvc.data.price_min} – ${mainSvc.data.price_max} ج.م</strong><br>يجب أن يكون سعرك ضمن هذا النطاق`
+      : 'يرجى تحديد سعرك ضمن النطاق المحدد لكل خدمة';
+  }
+
+  const grid = document.getElementById('my-services-grid');
+  if(!subs.length) {
+    grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">
+      <div style="font-size:36px;margin-bottom:12px">🔧</div>
+      <p>لم يتم إضافة خدمات فرعية لـ "${svcType}" بعد<br><small>يقوم الأدمن بإضافتها</small></p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = `<div class="sub-svc-grid">` + subs.map(sub => {
+    const ex = existingMap[sub.id];
+    const checked = !!ex;
+    const customPrice = ex?.custom_price || '';
+    const priceMin = currentProvider.grade==='استشاري' ? (sub.price_min_consultant||sub.price_min||0) : (sub.price_min_specialist||sub.price_min||0);
+    const priceMax = currentProvider.grade==='استشاري' ? (sub.price_max_consultant||sub.price_max||0) : (sub.price_max_specialist||sub.price_max||0);
+
+    return `<div class="sub-svc-item ${checked?'checked':''}" id="sub-item-${sub.id}">
+      <div class="sub-svc-top">
+        <div>
+          <div class="sub-svc-name">${san(sub.name)}</div>
+          ${sub.duration?`<div class="sub-svc-range">⏱ ${san(sub.duration)}</div>`:''}
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="sub-chk-${sub.id}" ${checked?'checked':''} onchange="onSubToggle('${sub.id}', this)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">نطاق الأدمن: <span class="range-badge">${priceMin} – ${priceMax} ج.م</span></div>
+      <div class="sub-svc-price" id="sub-price-row-${sub.id}" style="display:${checked?'flex':'none'}">
+        <label>سعرك (ج.م):</label>
+        <input class="price-input" type="number" id="sub-price-${sub.id}"
+          value="${customPrice}" placeholder="${priceMin}"
+          min="${priceMin}" max="${priceMax}"
+          oninput="validateSubPrice('${sub.id}','${priceMin}','${priceMax}')">
+        <span style="font-size:11px;color:var(--muted)">ج.م</span>
+      </div>
+      <div id="sub-price-err-${sub.id}" style="font-size:11px;color:var(--danger);display:none"></div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function onSubToggle(subId, checkbox) {
+  const row = document.getElementById('sub-price-row-'+subId);
+  const item = document.getElementById('sub-item-'+subId);
+  if(checkbox.checked) {
+    row.style.display = 'flex';
+    item.classList.add('checked');
+  } else {
+    row.style.display = 'none';
+    item.classList.remove('checked');
+  }
+}
+
+function validateSubPrice(subId, min, max) {
+  const inp = document.getElementById('sub-price-'+subId);
+  const err = document.getElementById('sub-price-err-'+subId);
+  const val = parseFloat(inp.value);
+  if(isNaN(val)) { err.style.display='none'; return true; }
+  if(val < parseFloat(min) || val > parseFloat(max)) {
+    err.textContent = `⚠️ السعر يجب بين ${min} و ${max} ج.م`;
+    err.style.display = 'block';
+    inp.style.borderColor = 'var(--danger)';
+    return false;
+  }
+  err.style.display = 'none';
+  inp.style.borderColor = 'var(--accent)';
+  return true;
+}
+
+async function saveMyServices() {
+  if(!currentProvider) return;
+  const svcType = currentProvider.service_type || 'كشف منزلي';
+  const subs = allSubServices.filter(s => s.service_name === svcType && s.is_active !== false && s.group_name !== 'grade');
+
+  let hasError = false;
+  const toSave = [];
+
+  for(const sub of subs) {
+    const chk = document.getElementById('sub-chk-'+sub.id);
+    if(!chk) continue;
+    if(chk.checked) {
+      const priceMin = currentProvider.grade==='استشاري'?(sub.price_min_consultant||sub.price_min||0):(sub.price_min_specialist||sub.price_min||0);
+      const priceMax = currentProvider.grade==='استشاري'?(sub.price_max_consultant||sub.price_max||0):(sub.price_max_specialist||sub.price_max||0);
+      if(!validateSubPrice(sub.id, priceMin, priceMax)) { hasError = true; continue; }
+      const priceVal = parseFloat(document.getElementById('sub-price-'+sub.id)?.value)||null;
+      toSave.push({ provider_id: currentProvider.id, sub_service_id: sub.id, custom_price: priceVal, is_active: true });
+    }
+  }
+
+  if(hasError) { showToast('⚠️ تحقق من الأسعار المحددة','error'); return; }
+
+  // Delete existing then insert
+  await sb.from('provider_services').delete().eq('provider_id', currentProvider.id).in('sub_service_id', subs.map(s=>s.id));
+  if(toSave.length) {
+    const { error } = await sb.from('provider_services').insert(toSave);
+    if(error) { showToast('❌ '+error.message,'error'); return; }
+  }
+
+  showToast('✅ تم حفظ خدماتك وأسعارك','success');
+}
+
+// ============================================================
+// LOAD GLOBAL DATA
+// ============================================================
+async function loadSubServicesAll() {
+  const { data } = await sb.from('sub_services').select('*').eq('is_active',true).order('service_name').order('name');
+  allSubServices = data || [];
+}
+async function loadAreas() {
+  const { data } = await sb.from('coverage_areas').select('*').eq('is_active',true).order('name');
+  allAreas = data || [];
+  const sel = document.getElementById('p-area');
+  if(sel) {
+    sel.innerHTML = '<option value="">اختر المنطقة</option>' + allAreas.map(a=>`<option value="${san(a.name)}">${san(a.name)}</option>`).join('');
+  }
+}
+
+// ============================================================
+// REALTIME
+// ============================================================
+function setupProviderRealtime() {
+  sb.channel('prov-bookings')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'bookings'},(payload) => {
+      showToast('🔔 حجز جديد: ' + san(payload.new?.patient_name||'عميل'));
+      myBookings.unshift(payload.new);
+      const badge = document.getElementById('new-bookings-badge');
+      badge.textContent = parseInt(badge.textContent||0)+1;
+      badge.style.display = 'flex';
+    }).subscribe();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function statusBadge(st) {
+  const m = {pending:'<span class="badge yellow">⏳ جديد</span>',confirmed:'<span class="badge blue">✅ مؤكد</span>',completed:'<span class="badge green">✔ مكتمل</span>',cancelled:'<span class="badge red">✖ ملغي</span>'};
+  return m[st]||`<span class="badge gray">${st||'—'}</span>`;
+}
+function payBadge(m) {
+  const map = {cash:'💵 كاش',wallet:'💳 محفظة',instapay:'📱 انستا باي'};
+  return `<span style="font-size:12px">${map[m]||m||'—'}</span>`;
+}
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function showToast(msg,type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast '+(type||'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ============================================================
+// INIT — Supabase Auth State
+// ============================================================
+window.addEventListener('load', async () => {
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if(event === 'SIGNED_OUT' || !session) {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('provider-app').style.display = 'none';
+      currentProvider = null;
+      return;
+    }
+    if(event === 'SIGNED_IN' && session && !currentProvider) {
+      const { data: provData } = await sb.from('providers').select('*').eq('user_id', session.user.id).single();
+      if(provData && provData.status === 'active') {
+        loadProviderApp(provData);
+      } else if(provData && provData.status === 'pending') {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('login-err').textContent = 'حسابك قيد المراجعة من الأدمن';
+        document.getElementById('login-err').style.display = 'block';
+        await sb.auth.signOut();
+      }
+    }
+  });
+
+  // جرب تجيب الـ session الحالي
+  const { data: { session } } = await sb.auth.getSession();
+  if(session) {
+    const { data: provData } = await sb.from('providers').select('*').eq('user_id', session.user.id).single();
+    if(provData && provData.status === 'active') {
+      loadProviderApp(provData);
+      return;
+    }
+  }
+  // عرض شاشة الـ login
+  document.getElementById('login-screen').style.display = 'flex';
+});
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+});
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
