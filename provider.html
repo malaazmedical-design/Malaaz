@@ -560,9 +560,18 @@ async function doRegister() {
 
   if(authErr) { err.textContent = authErr.message; err.style.display='block'; return; }
 
+  // لو Supabase محتاج تأكيد إيميل — authData.user ممكن يكون null
+  const userId = authData?.user?.id || authData?.session?.user?.id;
+  if(!userId) {
+    showToast('✅ تم إنشاء الحساب — تحقق من بريدك الإلكتروني لتأكيد الحساب');
+    ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
+    switchLoginTab('login', document.querySelector('.login-tab'));
+    return;
+  }
+
   // 2) إنشاء row في providers مرتبط بالـ user_id
   const { error: provErr } = await sb.from('providers').insert([{
-    user_id:      authData.user.id,
+    user_id:      userId,
     name,
     email,
     phone,
@@ -573,8 +582,7 @@ async function doRegister() {
 
   if(provErr) { err.textContent = 'خطأ في إنشاء الملف: ' + provErr.message; err.style.display='block'; return; }
 
-  showToast('✅ تم إنشاء الحساب — انتظر تأكيد البريد الإلكتروني وموافقة الأدمن');
-  // Clear fields
+  showToast('✅ تم إنشاء الحساب — انتظر موافقة الأدمن');
   ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
   switchLoginTab('login', document.querySelector('.login-tab'));
 }
