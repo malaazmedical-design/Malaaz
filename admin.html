@@ -1108,6 +1108,26 @@ async function updateBookingStatus(id, status) {
   const { error } = await sb.from('bookings').update({status}).eq('id', id);
   if(error) { showToast('❌ خطأ: '+error.message,'error'); return; }
   showToast('✅ تم تحديث الحالة','success');
+
+  // لو الحالة "مكتمل" — ابعت لينك التقييم للعميل على واتساب
+  if(status === 'completed') {
+    const b = allBookings.find(x => x.id === id);
+    if(b?.phone) {
+      const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}`;
+      const waMsg = encodeURIComponent(
+        `مرحباً ${b.patient_name||''}! 👋\n\n` +
+        `شكراً لاختيارك منصة *ملاذ* للرعاية الطبية المنزلية 🏥\n\n` +
+        `نتمنى تكون تجربتك معنا كانت مميزة 😊\n\n` +
+        `لو عندك دقيقة، يسعدنا تقيّم تجربتك:\n` +
+        `⭐ ${reviewLink}\n\n` +
+        `رأيك بيفرق معانا كتير! ❤️`
+      );
+      setTimeout(() => {
+        window.open(`https://wa.me/2${b.phone.replace(/^0/,'')}?text=${waMsg}`, '_blank');
+      }, 500);
+    }
+  }
+
   loadBookings();
 }
 
