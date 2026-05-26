@@ -114,7 +114,7 @@ nav.scrolled{height:62px;background:rgba(20,32,35,0.98);}
 .hero-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
 /* ===== SEO: h1 رئيسي بكلمات مفتاحية مُحسَّنة ===== */
 h1{font-family:'Tajawal',sans-serif;font-size:clamp(46px,5vw,72px);font-weight:900;line-height:1.1;color:#fff;letter-spacing:-2px;margin-bottom:14px;}
-h1 span{color:var(--accent);}
+h1 span.accent{color:var(--accent);}
 .hero-sub{font-size:18px;color:rgba(255,255,255,.55);line-height:1.8;margin-bottom:36px;font-weight:400;max-width:480px;}
 .hero-actions{display:flex;align-items:center;gap:14px;margin-bottom:48px;}
 .btn-primary{background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:16px 32px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;box-shadow:0 8px 32px rgba(201,168,76,.3);}
@@ -388,7 +388,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
     <div class="hero-content">
       <div class="hero-badge"><i class="fas fa-circle-check"></i> <span id="hero-badge-text">أطباء معتمدون · خدمة 24 ساعة</span></div>
       <!-- SEO: h1 يحتوي على الكلمة المفتاحية الرئيسية -->
-      <h1><span id="hero-title-l1">رعاية طبية منزلية</span><br><span id="hero-title-l2">كشف وتمريض وأشعة</span><br><span id="hero-title-l3">في بيتك</span></h1>
+      <h1><span id="hero-title-l1">رعاية طبية منزلية</span><br><span id="hero-title-l2" class="accent">كشف وتمريض وأشعة</span><br><span id="hero-title-l3">في بيتك</span></h1>
       <p class="hero-sub" id="hero-subtitle">أطباء وممرضون وأجهزة أشعة تصلك في أي مكان في القاهرة والجيزة — احجز خلال دقيقة واحدة</p>
       <div class="hero-actions">
         <button class="btn-primary" onclick="openBookingModal()"><i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز موعدك الآن</button>
@@ -1175,7 +1175,7 @@ function renderDocCard(p, i) {
           <div class="doc-price">${p.price || '—'} <span style="font-size:13px;font-weight:400;color:var(--muted)">ج.م</span></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-          <button class="doc-btn" onclick='openProviderBooking(${JSON.stringify({id:p.id,name:p.name,service_type:p.service_type,price:p.price,area:p.area})})'>
+          <button class="doc-btn" onclick='openProviderBooking(${JSON.stringify({id:p.id,name:p.name,email:p.email,service_type:p.service_type,price:p.price,area:p.area})})'>
             احجز <i class="fas fa-arrow-left" style="margin-right:3px;font-size:10px"></i>
           </button>
           <button class="doc-btn" style="background:rgba(201,168,76,.15);color:var(--accent);font-size:11px"
@@ -1420,7 +1420,9 @@ async function openBookingModal(service, sub, provider) {
     return;
   }
 
-  // الحجز العام — عرض step1 عادي
+  // الحجز العام — امسح الـ summary وعرض step1
+  const summaryEl = document.getElementById('bm-service-summary');
+  if(summaryEl) { summaryEl.style.display = 'none'; summaryEl.innerHTML = ''; }
   document.querySelectorAll('.bm-svc').forEach(el => {
     const name = el.querySelector('.bm-svc-name')?.textContent?.trim();
     el.classList.toggle('sel', name === bmSelectedService);
@@ -1757,7 +1759,7 @@ async function openProviderBooking(provData) {
         ${subs.map(ps => {
           const price = ps.custom_price || ps.price_min || 0;
           const rangeText = ps.price_min ? `<span style="font-size:10px;color:rgba(255,255,255,.3)"> (نطاق: ${ps.price_min}–${ps.price_max})</span>` : '';
-          return `<div class="prov-sub-item" onclick="selectProviderSub('${sanitize(svcName)}','${sanitize(ps.sub_name)}',${price},${JSON.stringify({id:provider.id,name:provider.name,service_type:provider.service_type,specialty:provider.specialty,grade:provider.grade}).replace(/"/g,'&quot;')})"
+          return `<div class="prov-sub-item" onclick="selectProviderSub('${sanitize(svcName)}','${sanitize(ps.sub_name)}',${price},${JSON.stringify({id:provider.id,name:provider.name,email:provider.email,service_type:provider.service_type,specialty:provider.specialty,grade:provider.grade}).replace(/"/g,'&quot;')})"
             style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.04);
             border:1.5px solid rgba(255,255,255,.1);border-radius:12px;cursor:pointer;margin-bottom:8px;transition:all .2s"
             onmouseover="this.style.borderColor='var(--accent)';this.style.background='rgba(201,168,76,.1)'"
