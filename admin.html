@@ -1935,13 +1935,27 @@ async function deleteTestimonial(id) {
 // SETUP REALTIME
 // ============================================================
 function setupRealtime() {
-  sb.channel('admin-bookings')
+  sb.channel('admin-bookings-insert')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'bookings'},(payload) => {
       showToast('🔔 حجز جديد من: '+(payload.new?.patient_name||'عميل'));
       loadOverviewStats();
       if(document.getElementById('page-bookings').classList.contains('active')) loadBookings();
       else loadOverviewBookings();
     }).subscribe();
+
+  sb.channel('admin-bookings-update')
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'bookings'},(payload) => {
+      const status = payload.new?.status;
+      const name   = payload.new?.patient_name || 'عميل';
+      const statusLabels = {confirmed:'✅ تأكيد', completed:'🎉 اكتمل', cancelled:'❌ إلغاء'};
+      if(statusLabels[status]) showToast(`${statusLabels[status]} حجز: ${name}`);
+      // تحديث الـ row في الـ allBookings
+      const idx = allBookings.findIndex(b => b.id === payload.new.id);
+      if(idx !== -1) allBookings[idx] = {...allBookings[idx], ...payload.new};
+      if(document.getElementById('page-bookings').classList.contains('active')) renderBookings(allBookings);
+      loadOverviewStats();
+    }).subscribe();
+
   sb.channel('admin-providers')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'providers'},(payload) => {
       showToast('👨‍⚕️ مقدم خدمة جديد: '+(payload.new?.name||''));
