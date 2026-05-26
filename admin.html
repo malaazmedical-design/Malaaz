@@ -184,6 +184,8 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
   .form-grid{grid-template-columns:1fr;}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('P2Xy0_OBIWdVXk1gE');</script>
 </head>
 <body>
 
@@ -1713,7 +1715,15 @@ const CONTENT_SECTIONS = {
 let siteContentData = {};
 
 async function loadSiteContent() {
-  const { data } = await sb.from('site_content').select('*');
+  const { data, error } = await sb.from('site_content').select('*');
+  if(error) {
+    document.getElementById('site-content-grid').innerHTML =
+      `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--danger)">
+        ⚠️ جدول site_content غير موجود — شغّل الـ SQL الأول
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">site_content_setup.sql</div>
+      </div>`;
+    return;
+  }
   siteContentData = {};
   (data||[]).forEach(row => {
     if(!siteContentData[row.section]) siteContentData[row.section] = {};
