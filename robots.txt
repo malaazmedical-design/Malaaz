@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /provider.html
+
+Sitemap: https://malaaz-plum.vercel.app/sitemap.xml
