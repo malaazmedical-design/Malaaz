@@ -663,12 +663,6 @@ async function loadOverview() {
   updateOverviewStatus();
   renderRecentBookings(allBkgs.slice(0,5));
 }
-  document.getElementById('pov-all').textContent = allBkgs.length;
-  document.getElementById('pov-pending').textContent = allBkgs.filter(b=>b.status==='pending').length;
-  document.getElementById('pov-completed').textContent = allBkgs.filter(b=>b.status==='completed').length;
-  updateOverviewStatus();
-  renderRecentBookings(allBkgs.slice(0,5));
-}
 
 function updateOverviewStatus() {
   if(!currentProvider) return;
