@@ -353,6 +353,8 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
 [data-reveal]{opacity:0;transform:translateY(24px);transition:all .6s ease;}
 [data-reveal].visible{opacity:1;transform:translateY(0);}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('P2Xy0_OBIWdVXk1gE');</script>
 </head>
 <body>
 
@@ -720,6 +722,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       <div class="bm-section-title">بيانات المريض</div>
       <input class="bm-input" id="bm-name" type="text" placeholder="اسم المريض *">
       <input class="bm-input" id="bm-phone" type="tel" placeholder="رقم الموبايل * (01xxxxxxxxx)" dir="ltr">
+      <input class="bm-input" id="bm-email" type="email" placeholder="البريد الإلكتروني (اختياري — للإشعارات)">
 
       <!-- المنطقة والموعد -->
       <div class="bm-section-title">الموعد والمكان</div>
@@ -1261,18 +1264,50 @@ let bmSelectedPayment  = 'cash';
 let bmSelectedFamilyMember = null;
 let bmClientLat        = null;
 let bmClientLon        = null;
+let bmSelectedProvider = null;      // مقدم الخدمة المختار مباشرة
+
+// ============================================================
+// EMAILJS — إشعار مقدم الخدمة بالحجز
+// ============================================================
+async function sendProviderNotification(bookingData, providerData) {
+  if(!providerData?.email) return; // مفيش إيميل = مفيش إشعار
+
+  const dashboardLink = `${window.location.origin}/provider.html`;
+  const paymentMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
+
+  try {
+    await emailjs.send('service_tv0w6ov', 'template_lxahygl', {
+      to_email:         providerData.email,
+      provider_name:    providerData.name || 'مقدم الخدمة',
+      patient_name:     bookingData.patient_name,
+      phone:            bookingData.phone,
+      service_type:     bookingData.service_type,
+      sub_option:       bookingData.sub_option || '—',
+      area:             bookingData.area,
+      appointment_time: bookingData.appointment_time,
+      payment_method:   paymentMap[bookingData.payment_method] || bookingData.payment_method,
+      dashboard_link:   dashboardLink,
+      name:             'منصة ملاذ',
+    });
+    console.log('✅ إشعار الإيميل أُرسل لـ', providerData.email);
+  } catch(e) {
+    console.warn('EmailJS error:', e);
+    // مش نوقف الحجز لو الإيميل فشل
+  }
+}
 let allSubsCache       = {};        // cache الخدمات الفرعية
 
 // ============================================================
 // BOOKING MODAL OPEN
 // ============================================================
 async function openBookingModal(service, sub) {
-  bmSelectedService = service || 'كشف منزلي';
-  bmSelectedSub     = sub || '';
-  bmSelectedGrade   = '';
-  bmSelectedPayment = 'cash';
+  bmSelectedService  = service || 'كشف منزلي';
+  bmSelectedSub      = sub || '';
+  bmSelectedGrade    = '';
+  bmSelectedPayment  = 'cash';
   bmSelectedFamilyMember = null;
-  bmClientLat = null;
+  bmClientLat        = null;
+  bmSelectedProvider = null; // مسح مقدم الخدمة عند الحجز العام
   bmClientLon = null;
 
   // Reset steps
@@ -1304,11 +1339,12 @@ async function openBookingModal(service, sub) {
   // SEO تحديث ديناميكي
   updateSEO(bmSelectedService, document.getElementById('bm-area')?.value);
 
-  // تحميل أفراد الأسرة
-  loadFamilyMembers();
-
   // تحميل المناطق
   if (document.getElementById('bm-area')?.options.length <= 1) await loadAreas();
+}
+
+function loadFamilyMembers() {
+  // placeholder — يمكن تفعيله لاحقاً
 }
 
 function closeBookingModal() {
@@ -1612,7 +1648,7 @@ async function openProviderBooking(provData) {
         ${subs.map(ps => {
           const price = ps.custom_price || ps.price_min || 0;
           const rangeText = ps.price_min ? `<span style="font-size:10px;color:rgba(255,255,255,.3)"> (نطاق: ${ps.price_min}–${ps.price_max})</span>` : '';
-          return `<div class="prov-sub-item" onclick="selectProviderSub('${sanitize(svcName)}','${sanitize(ps.sub_name)}',${price})"
+          return `<div class="prov-sub-item" onclick="selectProviderSub('${sanitize(svcName)}','${sanitize(ps.sub_name)}',${price},${JSON.stringify({id:provider.id,name:provider.name,service_type:provider.service_type,specialty:provider.specialty,grade:provider.grade}).replace(/"/g,'&quot;')})"
             style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.04);
             border:1.5px solid rgba(255,255,255,.1);border-radius:12px;cursor:pointer;margin-bottom:8px;transition:all .2s"
             onmouseover="this.style.borderColor='var(--accent)';this.style.background='rgba(201,168,76,.1)'"
@@ -1663,21 +1699,37 @@ async function openProviderBooking(provData) {
   document.body.style.overflow = 'hidden';
 }
 
-// عند اختيار خدمة فرعية من ملف مقدم الخدمة — ينتقل لـ modal الحجز الرئيسي
-function selectProviderSub(serviceName, subName, price) {
+function selectProviderSub(serviceName, subName, price, providerData) {
   document.getElementById('provider-booking-modal')?.classList.remove('open');
+  
+  // حفظ مقدم الخدمة المختار
+  bmSelectedProvider = providerData;
+
   // فتح الـ booking modal بهذه الخدمة
   openBookingModal(serviceName, subName);
-  // نضيف السعر في الـ summary بعد ما الـ modal يفتح
+
+  // إظهار اسم مقدم الخدمة في الـ modal بعد الفتح
   setTimeout(() => {
-    const summary = document.getElementById('bm-service-summary');
-    if(summary && summary.style.display !== 'none') {
-      const priceEl = document.createElement('div');
-      priceEl.style.cssText = 'margin-top:6px;font-size:13px;color:var(--accent);font-weight:700';
-      priceEl.innerHTML = `💰 سعر ${sanitize(sanitize(window.bmSelectedSub||subName))}: <strong>${price} ج.م</strong>`;
-      summary.appendChild(priceEl);
+    const modal = document.getElementById('booking-modal');
+    if(!modal) return;
+    // إضافة banner باسم المقدم لو مش موجود
+    let provBanner = document.getElementById('bm-provider-banner');
+    if(!provBanner) {
+      provBanner = document.createElement('div');
+      provBanner.id = 'bm-provider-banner';
+      provBanner.style.cssText = 'background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;';
+      const panel = modal.querySelector('.modal-panel');
+      if(panel) panel.insertBefore(provBanner, panel.firstChild.nextSibling);
     }
-  }, 400);
+    provBanner.innerHTML = providerData ? `
+      <div style="font-size:20px">👨‍⚕️</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff">حجز مباشر مع: ${sanitize(providerData.name)}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5)">سيصلك تأكيد من مقدم الخدمة · ${sanitize(serviceName)} — ${sanitize(subName)}</div>
+        <div style="font-size:13px;font-weight:900;color:var(--accent);margin-top:2px">${price} ج.م</div>
+      </div>` : '';
+    provBanner.style.display = providerData ? 'flex' : 'none';
+  }, 350);
 }
 
 
@@ -1688,6 +1740,7 @@ async function bmSubmit() {
   // Sanitize جميع المدخلات
   const name    = sanitize(document.getElementById('bm-name').value);
   const phone   = sanitize(document.getElementById('bm-phone').value).replace(/\s/g,'');
+  const email   = sanitize(document.getElementById('bm-email')?.value || '');
   const area    = sanitize(document.getElementById('bm-area').value);
   const address = sanitize(document.getElementById('bm-address').value);
   const time    = sanitize(document.getElementById('bm-time').value);
@@ -1726,8 +1779,10 @@ async function bmSubmit() {
     };
 
     // حقول اختيارية — فقط اللي مضمون موجوده في الـ DB
-    if (notes)         payload.notes      = notes;
-    if (bmSelectedSub) payload.sub_option = bmSelectedSub;
+    if (notes)         payload.notes          = notes;
+    if (bmSelectedSub) payload.sub_option     = bmSelectedSub;
+    if (bmSelectedProvider?.id) payload.provider_id = bmSelectedProvider.id;
+    if (email)         payload.patient_email  = email;
 
     // ✅ FIX: الحقول دي اتحذفت لأنها مش موجودة في جدول bookings في Supabase
     // لو أضفتها في الـ DB، شيل الـ // من قبل كل سطر:
@@ -1750,6 +1805,14 @@ async function bmSubmit() {
         if (error2) throw error2;
         // نجحت المحاولة الثانية
         localStorage.setItem('malaaz_client_phone', phone);
+        // إشعار مقدم الخدمة
+        if(bmSelectedProvider) {
+          await sendProviderNotification({
+            patient_name: name, phone, area,
+            service_type: bmSelectedService, sub_option: bmSelectedSub,
+            appointment_time: time, payment_method: bmSelectedPayment,
+          }, bmSelectedProvider);
+        }
         document.getElementById('bm-step2').style.display = 'none';
         document.getElementById('bm-success').style.display = 'block';
         const refEl2 = document.getElementById('bm-booking-ref');
@@ -1763,6 +1826,20 @@ async function bmSubmit() {
 
     // حفظ موبايل العميل للإشعارات
     localStorage.setItem('malaaz_client_phone', phone);
+
+    // إرسال إشعار لمقدم الخدمة لو كان حجز مباشر
+    if(bmSelectedProvider) {
+      await sendProviderNotification({
+        patient_name:     name,
+        phone,
+        area,
+        service_type:     bmSelectedService,
+        sub_option:       bmSelectedSub,
+        appointment_time: time,
+        payment_method:   bmSelectedPayment,
+        patient_email:    email,
+      }, bmSelectedProvider);
+    }
 
     // عرض الـ success
     document.getElementById('bm-step2').style.display = 'none';
