@@ -1929,7 +1929,7 @@ async function bmSubmit() {
             `⚕️ *الخدمة:* ${bmSelectedService}${bmSelectedSub?' — '+bmSelectedSub:''}\n` +
             `📍 *المنطقة:* ${area}\n🏠 *العنوان:* ${address}` + mapsLink + `\n` +
             `🕐 *الفترة:* ${time}\n💳 *الدفع:* ${payMap[bmSelectedPayment]||bmSelectedPayment}\n` +
-            `\n_يرجى التواصل مع العميل لتأكيد الحجز_`
+            `\n⏳ جاري توفير مقدم الخدمة المناسب — سنؤكد معك خلال 15 دقيقة 🏥`
           );
           document.getElementById('bm-step2').style.display = 'none';
           document.getElementById('bm-success').style.display = 'block';
@@ -1995,7 +1995,7 @@ async function bmSubmit() {
         `🕐 *الفترة:* ${time}\n` +
         `💳 *الدفع:* ${payMap[bmSelectedPayment] || bmSelectedPayment}\n` +
         (email ? `📧 *الإيميل:* ${email}\n` : '') +
-        `\n_يرجى التواصل مع العميل لتأكيد الحجز وتوفير مقدم خدمة مناسب_ 🏥`
+        `\n⏳ جاري توفير مقدم الخدمة المناسب — سنؤكد معك خلال 15 دقيقة 🏥`
       );
 
       // حفظ الحجز في DB أولاً
