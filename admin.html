@@ -310,7 +310,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     </div>
     <div class="card-body" style="padding:0">
       <table class="tbl">
-        <thead><tr><th>#</th><th>المريض</th><th>الموبايل</th><th>الخدمة</th><th>الخدمة الفرعية</th><th>المنطقة</th><th>الفترة</th><th>الدفع</th><th>الحالة</th><th>إجراء</th></tr></thead>
+        <thead><tr><th>#</th><th>المريض</th><th>الموبايل</th><th>الخدمة</th><th>الخدمة الفرعية</th><th>مقدم الخدمة</th><th>المنطقة</th><th>الفترة</th><th>الدفع</th><th>النوع</th><th>الحالة</th><th>إجراء</th></tr></thead>
         <tbody id="bookings-body"><tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
       </table>
     </div>
@@ -1045,9 +1045,13 @@ async function loadOverviewBookings() {
 let allBookings = [];
 async function loadBookings() {
   const tbody = document.getElementById('bookings-body');
-  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">جاري التحميل...</td></tr>';
-  const { data } = await sb.from('bookings').select('*').order('created_at', {ascending:false});
-  allBookings = data || [];
+  tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted)">جاري التحميل...</td></tr>';
+  const [bRes, pRes] = await Promise.all([
+    sb.from('bookings').select('*').order('created_at', {ascending:false}),
+    sb.from('providers').select('id,name,email,phone')
+  ]);
+  allBookings = bRes.data || [];
+  if(pRes.data) allProviders = pRes.data;
   updateBookingQuickStats(allBookings);
   renderBookings(allBookings);
   loadOverviewStats();
@@ -1082,17 +1086,25 @@ function filterBookings() {
 
 function renderBookings(data) {
   const tbody = document.getElementById('bookings-body');
-  if(!data?.length) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted)">لا توجد نتائج</td></tr>'; return; }
-  tbody.innerHTML = data.map((b,i) => `
-    <tr>
+  if(!data?.length) { tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--muted)">لا توجد نتائج</td></tr>'; return; }
+  tbody.innerHTML = data.map((b,i) => {
+    // إيجاد اسم مقدم الخدمة من الـ allProviders
+    const prov = allProviders.find(p => p.id === b.provider_id);
+    const provName = prov ? s(prov.name) : '—';
+    const bookingType = b.provider_id
+      ? `<span class="badge blue" style="font-size:10px">مباشر</span>`
+      : `<span class="badge yellow" style="font-size:10px">عام</span>`;
+    return `<tr>
       <td style="font-size:11px;color:var(--muted)">${s(b.id?.slice(-6)?.toUpperCase()||String(i+1))}</td>
       <td><strong>${s(b.patient_name)}</strong></td>
       <td dir="ltr">${s(b.phone)}</td>
       <td>${s(b.service_type)}</td>
       <td>${s(b.sub_option)||'—'}</td>
+      <td style="font-size:12px;font-weight:600;color:var(--info)">${provName}</td>
       <td>${s(b.area)}</td>
       <td>${s(b.appointment_time)}</td>
       <td>${payBadge(b.payment_method)}</td>
+      <td>${bookingType}</td>
       <td>${statusBadge(b.status)}</td>
       <td><div class="act-btns">
         <button class="act-btn edit" onclick="showBookingDetail('${b.id}')">عرض</button>
@@ -1101,7 +1113,8 @@ function renderBookings(data) {
         ${b.status==='cancelled'?`<button class="act-btn activate" onclick="reassignBooking('${b.id}')">↩ تحويل</button>`:''}
         ${b.status!=='cancelled'&&b.status!=='completed'?`<button class="act-btn delete" onclick="updateBookingStatus('${b.id}','cancelled')">إلغاء</button>`:''}
       </div></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 async function updateBookingStatus(id, status) {
@@ -1123,7 +1136,7 @@ async function updateBookingStatus(id, status) {
         `رأيك بيفرق معانا كتير! ❤️`
       );
       setTimeout(() => {
-        window.open(`https://wa.me/2${b.phone.replace(/^0/,'')}?text=${waMsg}`, '_blank');
+        window.open(`https://wa.me/20${b.phone.replace(/^0/,'')}?text=${waMsg}`, '_blank');
       }, 500);
     }
   }
