@@ -1347,6 +1347,7 @@ let bmSelectedFamilyMember = null;
 let bmClientLat        = null;
 let bmClientLon        = null;
 let bmSelectedProvider = null;      // مقدم الخدمة المختار مباشرة
+let bmSelectedPrice    = null;      // سعر الخدمة المختارة
 
 // ============================================================
 // EMAILJS — إشعار مقدم الخدمة بالحجز
@@ -1421,12 +1422,15 @@ async function openBookingModal(service, sub, provider) {
     if(summary) {
       summary.style.display = 'block';
       summary.innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="font-size:20px">👨‍⚕️</div>
-          <div>
-            <div style="font-weight:700;color:#fff">${sanitize(bmSelectedProvider.name)}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.5)">${sanitize(bmSelectedService)} ${bmSelectedSub?'— '+sanitize(bmSelectedSub):''}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:20px">👨‍⚕️</div>
+            <div>
+              <div style="font-weight:700;color:#fff">${sanitize(bmSelectedProvider.name)}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5)">${sanitize(bmSelectedService)} ${bmSelectedSub?'— '+sanitize(bmSelectedSub):''}</div>
+            </div>
           </div>
+          ${bmSelectedPrice ? `<div style="font-size:18px;font-weight:900;color:var(--accent)">${bmSelectedPrice} <span style="font-size:12px;font-weight:400;color:rgba(255,255,255,.4)">ج.م</span></div>` : ''}
         </div>`;
     }
     if(document.getElementById('bm-area')?.options.length <= 1) await loadAreas();
@@ -1834,8 +1838,9 @@ async function openProviderBooking(provData) {
 }
 
 function selectProviderSub(serviceName, subName, price, providerData) {
-  document.getElementById('provider-booking-modal')?.classList.remove('open');document.body.style.overflow='';
-  // فتح الـ booking modal مباشرة على step2 مع بيانات المقدم
+  document.getElementById('provider-booking-modal')?.classList.remove('open');
+  document.body.style.overflow='';
+  bmSelectedPrice = parseFloat(price) || null; // حفظ السعر
   openBookingModal(serviceName, subName, providerData);
 }
 
@@ -1890,6 +1895,7 @@ async function bmSubmit() {
     if (bmSelectedSub)          payload.sub_option    = bmSelectedSub;
     if (bmSelectedProvider?.id) payload.provider_id   = bmSelectedProvider.id;
     if (email)                  payload.patient_email = email;
+    if (bmSelectedPrice)        payload.price         = bmSelectedPrice;
 
     // ✅ FIX: الحقول دي اتحذفت لأنها مش موجودة في جدول bookings في Supabase
     // لو أضفتها في الـ DB، شيل الـ // من قبل كل سطر:
