@@ -1270,7 +1270,7 @@ async function viewProviderProfile(providerId) {
     <div style="padding:0 18px 18px">
       <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>
       ${servicesHtml}
-      <button onclick="openProviderBooking({id:'${provider.id}',service_type:'${sanitize(provider.service_type || '')}'})"
+      <button onclick="openProviderBooking({id:'${provider.id}',name:'${sanitize(provider.name)}',email:'${sanitize(provider.email||'')}',service_type:'${sanitize(provider.service_type || '')}'})"
         style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px">
         <i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع ${sanitize(provider.name)}
       </button>
@@ -1347,7 +1347,11 @@ let bmSelectedProvider = null;      // مقدم الخدمة المختار مب
 // EMAILJS — إشعار مقدم الخدمة بالحجز
 // ============================================================
 async function sendProviderNotification(bookingData, providerData) {
-  if(!providerData?.email) return; // مفيش إيميل = مفيش إشعار
+  console.log('📧 sendProviderNotification called:', providerData?.email, bookingData);
+  if(!providerData?.email) {
+    console.warn('❌ No provider email found!', providerData);
+    return;
+  }
 
   const dashboardLink = `${window.location.origin}/provider.html`;
   const paymentMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
@@ -1927,8 +1931,20 @@ async function bmSubmit() {
           );
           document.getElementById('bm-step2').style.display = 'none';
           document.getElementById('bm-success').style.display = 'block';
-          showToast('✅ تم الحجز — جاري فتح واتساب...');
-          setTimeout(() => window.open(`https://wa.me/201006484908?text=${waMsg}`, '_blank'), 1200);
+          showToast('✅ تم الحجز بنجاح!');
+          const successBtn2 = document.querySelector('#bm-success button');
+          if(successBtn2) {
+            const waUrl2 = `https://wa.me/201006484908?text=${encodeURIComponent(
+              `🔔 *حجز جديد على ملاذ*\n\n👤 *العميل:* ${name}\n📱 *الموبايل:* ${phone}\n` +
+              `⚕️ *الخدمة:* ${bmSelectedService}${bmSelectedSub?' — '+bmSelectedSub:''}\n` +
+              `📍 *المنطقة:* ${area}\n🏠 *العنوان:* ${address}\n` +
+              `🕐 *الفترة:* ${time}\n\n_يرجى التواصل مع العميل لتأكيد الحجز_`
+            )}`;
+            successBtn2.innerHTML = '💬 أرسل تفاصيل الحجز على واتساب';
+            successBtn2.style.background = '#25D366';
+            successBtn2.style.color = '#fff';
+            successBtn2.onclick = () => { window.open(waUrl2, '_blank'); closeBookingModal(); };
+          }
         }
         if(typeof setupClientRealtime === 'function') setupClientRealtime(phone);
         return;
@@ -1985,13 +2001,18 @@ async function bmSubmit() {
       document.getElementById('bm-success').style.display = 'block';
       const refEl = document.getElementById('bm-booking-ref');
       if(refEl && data?.id) refEl.textContent = `رقم الحجز: #${sanitize(data.id.slice(-6).toUpperCase())}`;
-      showToast('✅ تم الحجز — جاري فتح واتساب...');
 
-      // فتح واتساب بعد ثانية
-      setTimeout(() => {
-        window.open(`https://wa.me/201006484908?text=${waMsg}`, '_blank');
-      }, 1200);
+      // تغيير زرار "حسناً شكراً" لزرار واتساب
+      const successBtn = document.querySelector('#bm-success button');
+      if(successBtn) {
+        const waUrl = `https://wa.me/201006484908?text=${waMsg}`;
+        successBtn.innerHTML = '💬 أرسل تفاصيل الحجز على واتساب';
+        successBtn.style.background = '#25D366';
+        successBtn.style.color = '#fff';
+        successBtn.onclick = () => { window.open(waUrl, '_blank'); closeBookingModal(); };
+      }
 
+      showToast('✅ تم الحجز بنجاح!');
       if(typeof setupClientRealtime === 'function') setupClientRealtime(phone);
     }
 
