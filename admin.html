@@ -310,7 +310,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     </div>
     <div class="card-body" style="padding:0">
       <table class="tbl">
-        <thead><tr><th>#</th><th>المريض</th><th>الموبايل</th><th>الخدمة</th><th>الخدمة الفرعية</th><th>مقدم الخدمة</th><th>المنطقة</th><th>الفترة</th><th>الدفع</th><th>النوع</th><th>الحالة</th><th>إجراء</th></tr></thead>
+        <thead><tr><th>#</th><th>المريض</th><th>الموبايل</th><th>الخدمة</th><th>الخدمة الفرعية</th><th>مقدم الخدمة</th><th>السعر</th><th>المنطقة</th><th>الفترة</th><th>الدفع</th><th>النوع</th><th>الحالة</th><th>إجراء</th></tr></thead>
         <tbody id="bookings-body"><tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
       </table>
     </div>
@@ -1101,6 +1101,7 @@ function renderBookings(data) {
       <td>${s(b.service_type)}</td>
       <td>${s(b.sub_option)||'—'}</td>
       <td style="font-size:12px;font-weight:600;color:var(--info)">${provName}</td>
+      <td style="font-weight:700">${b.price ? b.price+' <span style="font-size:11px;color:var(--muted)">ج.م</span>' : '<span style="color:var(--muted)">—</span>'}</td>
       <td>${s(b.area)}</td>
       <td>${s(b.appointment_time)}</td>
       <td>${payBadge(b.payment_method)}</td>
@@ -1147,6 +1148,15 @@ async function updateBookingStatus(id, status) {
 function showBookingDetail(id) {
   const b = allBookings.find(x=>x.id===id);
   if(!b) return;
+  const prov = allProviders.find(p => p.id === b.provider_id);
+  const provName = prov ? s(prov.name) : '—';
+
+  // build provider options for assignment
+  const provOptions = allProviders
+    .filter(p => p.status === 'active')
+    .map(p => `<option value="${p.id}" ${p.id===b.provider_id?'selected':''}>${s(p.name)} — ${s(p.service_type||'')}</option>`)
+    .join('');
+
   document.getElementById('booking-detail-body').innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div><div class="form-label">المريض</div><div style="font-weight:700;margin-top:4px">${s(b.patient_name)}</div></div>
@@ -1155,17 +1165,49 @@ function showBookingDetail(id) {
       <div><div class="form-label">الخدمة الفرعية</div><div style="font-weight:700;margin-top:4px">${s(b.sub_option)||'—'}</div></div>
       <div><div class="form-label">المنطقة</div><div style="font-weight:700;margin-top:4px">${s(b.area)}</div></div>
       <div><div class="form-label">الفترة</div><div style="font-weight:700;margin-top:4px">${s(b.appointment_time)}</div></div>
-      <div style="grid-column:1/-1"><div class="form-label">العنوان التفصيلي</div><div style="font-weight:700;margin-top:4px">${s(b.address)}</div></div>
+      <div style="grid-column:1/-1"><div class="form-label">العنوان</div><div style="font-weight:700;margin-top:4px">${s(b.address)||'—'}</div></div>
       <div><div class="form-label">الدفع</div><div style="font-weight:700;margin-top:4px">${payBadge(b.payment_method)}</div></div>
       <div><div class="form-label">الحالة</div><div style="font-weight:700;margin-top:4px">${statusBadge(b.status)}</div></div>
       ${b.notes?`<div style="grid-column:1/-1"><div class="form-label">ملاحظات</div><div style="font-weight:700;margin-top:4px">${s(b.notes)}</div></div>`:''}
     </div>
-    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+
+    <!-- تعيين مقدم الخدمة والسعر -->
+    <div style="margin-top:16px;padding:14px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:12px">
+      <div style="font-size:12px;font-weight:700;color:#b8860b;margin-bottom:10px">⚙️ تعيين مقدم الخدمة والسعر</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <div class="form-label">مقدم الخدمة</div>
+          <select class="form-input" id="detail-provider-select" style="margin-top:4px">
+            <option value="">— اختر مقدم —</option>
+            ${provOptions}
+          </select>
+        </div>
+        <div>
+          <div class="form-label">سعر الخدمة (ج.م)</div>
+          <input class="form-input" type="number" id="detail-price-input" value="${b.price||''}" placeholder="0" style="margin-top:4px">
+        </div>
+      </div>
+      <button class="btn accent" onclick="assignProviderAndPrice('${b.id}')">
+        <i class="fas fa-save" style="margin-left:6px"></i> حفظ المقدم والسعر
+      </button>
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
       ${b.status==='pending'?`<button class="btn accent" onclick="updateBookingStatus('${b.id}','confirmed');closeModal('booking-detail-modal')">تأكيد الحجز</button>`:''}
       ${b.status==='confirmed'?`<button class="btn accent" onclick="updateBookingStatus('${b.id}','completed');closeModal('booking-detail-modal')">تعيين مكتمل</button>`:''}
       ${b.status!=='cancelled'&&b.status!=='completed'?`<button class="btn ghost" style="color:var(--danger)" onclick="updateBookingStatus('${b.id}','cancelled');closeModal('booking-detail-modal')">إلغاء الحجز</button>`:''}
     </div>`;
   openModal('booking-detail-modal');
+}
+
+async function assignProviderAndPrice(bookingId) {
+  const providerId = document.getElementById('detail-provider-select')?.value || null;
+  const price      = parseFloat(document.getElementById('detail-price-input')?.value) || null;
+  const { error }  = await sb.from('bookings').update({ provider_id: providerId||null, price }).eq('id', bookingId);
+  if(error) { showToast('❌ '+error.message,'error'); return; }
+  showToast('✅ تم تعيين المقدم والسعر','success');
+  closeModal('booking-detail-modal');
+  loadBookings();
 }
 
 // ============================================================
@@ -1354,12 +1396,20 @@ function renderProviders(data) {
   if(!data?.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">لا يوجد مقدمون</td></tr>'; return; }
   tbody.innerHTML = data.map(p => `
     <tr>
-      <td><strong>${s(p.name)}</strong></td>
+      <td><strong>${s(p.name)}</strong><div style="font-size:11px;color:var(--muted)">${s(p.email||'')}</div></td>
       <td>${s(p.service_type)||'—'}</td>
       <td style="font-size:12px">${s(p.specialty)||'—'} ${p.grade?'<span class="badge yellow">'+s(p.grade)+'</span>':''}</td>
       <td style="font-size:12px">${s(p.area)||'—'}</td>
       <td><span style="color:var(--accent)">★</span> ${p.rating||5}</td>
-      <td><strong>${p.price||'—'}</strong> <span style="font-size:11px;color:var(--muted)">ج.م</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" value="${p.price||''}" placeholder="0"
+            id="price-${p.id}"
+            style="width:70px;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Cairo',sans-serif;text-align:center">
+          <span style="font-size:11px;color:var(--muted)">ج.م</span>
+          <button class="act-btn edit" onclick="updateProviderPrice('${p.id}')">حفظ</button>
+        </div>
+      </td>
       <td>${providerStatusBadge(p.status, p.is_available)}</td>
       <td><div class="act-btns">
         ${p.status==='pending'?`<button class="act-btn activate" onclick="approveProvider('${p.id}')">قبول</button>`:''}
@@ -1368,6 +1418,14 @@ function renderProviders(data) {
         <button class="act-btn delete" onclick="deleteProvider('${p.id}')">حذف</button>
       </div></td>
     </tr>`).join('');
+}
+
+async function updateProviderPrice(id) {
+  const val = parseFloat(document.getElementById('price-'+id)?.value);
+  if(isNaN(val)) { showToast('⚠️ أدخل سعر صحيح','error'); return; }
+  const { error } = await sb.from('providers').update({price: val}).eq('id', id);
+  if(error) { showToast('❌ '+error.message,'error'); return; }
+  showToast('✅ تم تحديث السعر','success');
 }
 async function approveProvider(id){ await sb.from('providers').update({status:'active'}).eq('id',id); showToast('✅ تم القبول','success'); loadProviders(); }
 async function suspendProvider(id){ await sb.from('providers').update({status:'suspended'}).eq('id',id); showToast('⏸ تم الإيقاف'); loadProviders(); }
@@ -1571,6 +1629,7 @@ async function loadAccounting() {
   const { data: bookings } = await sb.from('bookings').select('provider_id,price,status').eq('status','completed');
   const bkgMap = {};
   (bookings||[]).forEach(b => {
+    if(!b.provider_id) return; // تجاهل الحجوزات بدون مقدم
     if(!bkgMap[b.provider_id]) bkgMap[b.provider_id] = { count:0, revenue:0 };
     bkgMap[b.provider_id].count++;
     bkgMap[b.provider_id].revenue += parseFloat(b.price||0);
