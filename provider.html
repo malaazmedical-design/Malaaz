@@ -784,11 +784,30 @@ async function updateBooking(id, status) {
   const b = myBookings.find(x => x.id === id);
   if(b) {
     b.status = status;
+
     if(status === 'cancelled') {
+      // رفض — إيميل للعميل
       await sendRejectionEmail(b);
     }
+
+    if(status === 'completed') {
+      // مكتمل — بعت رسالة تقييم للعميل على واتساب
+      if(b.phone) {
+        const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}`;
+        const waMsg = encodeURIComponent(
+          `مرحباً ${b.patient_name||''} 👋\n\n` +
+          `شكراً لاختيارك منصة *ملاذ* 🏥\n\n` +
+          `نتمنى تكون تجربتك كانت مميزة 😊\n\n` +
+          `قيّم تجربتك في دقيقة:\n⭐ ${reviewLink}\n\n` +
+          `رأيك بيفرق معانا كتير ❤️`
+        );
+        const clientPhone = `20${b.phone.replace(/^0/,'')}`;
+        window.open(`https://wa.me/${clientPhone}?text=${waMsg}`, '_blank');
+      }
+    }
   }
-  const msg = status === 'confirmed' ? '✅ تم قبول الحجز' : status === 'cancelled' ? '❌ تم رفض الحجز' : '✅ تم التحديث';
+
+  const msg = status === 'confirmed' ? '✅ تم قبول الحجز' : status === 'cancelled' ? '❌ تم رفض الحجز' : status === 'completed' ? '✅ تم إكمال الحجز' : '✅ تم التحديث';
   showToast(msg, 'success');
   renderMyBookings(myBookings, currentBookingFilter);
   loadMyBookings();
