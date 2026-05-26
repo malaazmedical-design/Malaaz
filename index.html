@@ -779,7 +779,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
         <div class="bm-success-ico">🎉</div>
         <div class="bm-success-title">تم الحجز بنجاح!</div>
         <div class="bm-success-sub">فريقنا سيتواصل معك خلال 15 دقيقة لتأكيد الموعد<br><span id="bm-booking-ref" style="color:var(--accent);font-weight:700"></span></div>
-        <button onclick="closeBookingModal()" style="margin-top:24px;background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">حسناً، شكراً!</button>
+        <button id="bm-success-btn" onclick="closeBookingModal()" style="margin-top:24px;background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">حسناً، شكراً!</button>
       </div>
     </div>
   </div>
@@ -1358,21 +1358,21 @@ async function sendProviderNotification(bookingData, providerData) {
 
   try {
     const mapsLink = window.bmGoogleMapsLink || 
-      (bmClientLat ? `https://www.google.com/maps?q=${bmClientLat},${bmClientLon}` : '');
+      (bmClientLat ? `https://www.google.com/maps?q=${bmClientLat},${bmClientLon}` : 'غير متاح');
     
     await emailjs.send('service_tv0w6ov', 'template_lxahygl', {
       to_email:         providerData.email,
       provider_name:    providerData.name || 'مقدم الخدمة',
-      patient_name:     bookingData.patient_name,
-      phone:            bookingData.phone,
-      service_type:     bookingData.service_type,
+      patient_name:     bookingData.patient_name || '—',
+      phone:            bookingData.phone || '—',
+      service_type:     bookingData.service_type || '—',
       sub_option:       bookingData.sub_option || '—',
-      area:             bookingData.area,
-      address:          bookingData.address || bookingData.area,
-      appointment_time: bookingData.appointment_time,
-      payment_method:   paymentMap[bookingData.payment_method] || bookingData.payment_method,
+      area:             bookingData.area || '—',
+      address:          bookingData.address || bookingData.area || '—',
+      appointment_time: bookingData.appointment_time || '—',
+      payment_method:   paymentMap[bookingData.payment_method] || bookingData.payment_method || '—',
       dashboard_link:   dashboardLink,
-      maps_link:        mapsLink || 'غير متاح',
+      maps_link:        mapsLink,
       name:             'منصة ملاذ',
     });
     console.log('✅ إشعار الإيميل أُرسل لـ', providerData.email);
@@ -1854,7 +1854,9 @@ async function bmSubmit() {
   // Validations
   if (!name)  { showBmError('⚠️ أدخل اسم المريض'); return; }
   if (!phone) { showBmError('⚠️ أدخل رقم الموبايل'); return; }
-  if (!/^01[0125]\d{8}$/.test(phone)) {
+  // تنظيف الرقم من أي مسافات أو +2
+  const cleanPhone = phone.replace(/\s+/g,'').replace(/^\+?2/,'').replace(/^0020/,'0');
+  if (!/^01[0125]\d{8}$/.test(cleanPhone)) {
     showBmError('⚠️ رقم الموبايل غير صحيح — لازم يبدأ بـ 01'); return;
   }
   if (!area)    { showBmError('⚠️ اختر منطقتك'); return; }
@@ -1932,7 +1934,7 @@ async function bmSubmit() {
           document.getElementById('bm-step2').style.display = 'none';
           document.getElementById('bm-success').style.display = 'block';
           showToast('✅ تم الحجز بنجاح!');
-          const successBtn2 = document.querySelector('#bm-success button');
+          const successBtn2 = document.getElementById('bm-success-btn');
           if(successBtn2) {
             const waUrl2 = `https://wa.me/201006484908?text=${encodeURIComponent(
               `🔔 *حجز جديد على ملاذ*\n\n👤 *العميل:* ${name}\n📱 *الموبايل:* ${phone}\n` +
@@ -1940,9 +1942,8 @@ async function bmSubmit() {
               `📍 *المنطقة:* ${area}\n🏠 *العنوان:* ${address}\n` +
               `🕐 *الفترة:* ${time}\n\n_يرجى التواصل مع العميل لتأكيد الحجز_`
             )}`;
-            successBtn2.innerHTML = '💬 أرسل تفاصيل الحجز على واتساب';
-            successBtn2.style.background = '#25D366';
-            successBtn2.style.color = '#fff';
+            successBtn2.innerHTML = '<i class="fab fa-whatsapp" style="margin-left:8px;font-size:18px"></i> أرسل تفاصيل الحجز على واتساب';
+            successBtn2.style.cssText = 'margin-top:16px;background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 24px;font-size:15px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;width:100%;display:block';
             successBtn2.onclick = () => { window.open(waUrl2, '_blank'); closeBookingModal(); };
           }
         }
@@ -1983,17 +1984,18 @@ async function bmSubmit() {
       // ====================================================
       const payMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
       const mapsLink = window.bmGoogleMapsLink ? `\n📍 الموقع: ${window.bmGoogleMapsLink}` : '';
+      const gradeText = bmSelectedGrade ? ` (${bmSelectedGrade})` : '';
       const waMsg = encodeURIComponent(
         `🔔 *حجز جديد على ملاذ*\n\n` +
         `👤 *العميل:* ${name}\n` +
         `📱 *الموبايل:* ${phone}\n` +
-        `⚕️ *الخدمة:* ${bmSelectedService}${bmSelectedSub ? ' — ' + bmSelectedSub : ''}\n` +
+        `⚕️ *الخدمة:* ${bmSelectedService}${bmSelectedSub ? ' — ' + bmSelectedSub : ''}${gradeText}\n` +
         `📍 *المنطقة:* ${area}\n` +
-        `🏠 *العنوان:* ${address}` + mapsLink + `\n` +
+        `🏠 *العنوان:* ${address}${mapsLink}\n` +
         `🕐 *الفترة:* ${time}\n` +
         `💳 *الدفع:* ${payMap[bmSelectedPayment] || bmSelectedPayment}\n` +
         (email ? `📧 *الإيميل:* ${email}\n` : '') +
-        `\n_يرجى التواصل مع العميل لتأكيد الحجز وتوفير مقدم خدمة مناسب_`
+        `\n_يرجى التواصل مع العميل لتأكيد الحجز وتوفير مقدم خدمة مناسب_ 🏥`
       );
 
       // حفظ الحجز في DB أولاً
@@ -2003,12 +2005,11 @@ async function bmSubmit() {
       if(refEl && data?.id) refEl.textContent = `رقم الحجز: #${sanitize(data.id.slice(-6).toUpperCase())}`;
 
       // تغيير زرار "حسناً شكراً" لزرار واتساب
-      const successBtn = document.querySelector('#bm-success button');
+      const successBtn = document.getElementById('bm-success-btn');
       if(successBtn) {
         const waUrl = `https://wa.me/201006484908?text=${waMsg}`;
-        successBtn.innerHTML = '💬 أرسل تفاصيل الحجز على واتساب';
-        successBtn.style.background = '#25D366';
-        successBtn.style.color = '#fff';
+        successBtn.innerHTML = '<i class="fab fa-whatsapp" style="margin-left:8px;font-size:18px"></i> أرسل تفاصيل الحجز على واتساب';
+        successBtn.style.cssText = 'margin-top:16px;background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 24px;font-size:15px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;width:100%;display:block';
         successBtn.onclick = () => { window.open(waUrl, '_blank'); closeBookingModal(); };
       }
 
@@ -2034,11 +2035,18 @@ function showBmError(msg) {
 // ============================================================
 // TOAST & HELPERS
 // ============================================================
-function showToast(msg) {
+function showToast(msg, type) {
   const t = document.getElementById('toast');
+  if(!t) return;
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  t.className = type === 'error' ? 'show' : 'show';
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(-20px)';
+  }, 3000);
 }
 function toggleFaq(el) {
   el.parentElement.classList.toggle('open');
@@ -2683,5 +2691,8 @@ window.addEventListener('load', async () => {
 
 
 </script>
+
+<div id="toast" style="position:fixed;top:90px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:var(--dark);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid rgba(201,168,76,.2);"></div>
+
 </body>
 </html>
