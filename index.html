@@ -1353,6 +1353,9 @@ async function sendProviderNotification(bookingData, providerData) {
   const paymentMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
 
   try {
+    const mapsLink = window.bmGoogleMapsLink || 
+      (bmClientLat ? `https://www.google.com/maps?q=${bmClientLat},${bmClientLon}` : '');
+    
     await emailjs.send('service_tv0w6ov', 'template_lxahygl', {
       to_email:         providerData.email,
       provider_name:    providerData.name || 'مقدم الخدمة',
@@ -1361,9 +1364,11 @@ async function sendProviderNotification(bookingData, providerData) {
       service_type:     bookingData.service_type,
       sub_option:       bookingData.sub_option || '—',
       area:             bookingData.area,
+      address:          bookingData.address || bookingData.area,
       appointment_time: bookingData.appointment_time,
       payment_method:   paymentMap[bookingData.payment_method] || bookingData.payment_method,
       dashboard_link:   dashboardLink,
+      maps_link:        mapsLink || 'غير متاح',
       name:             'منصة ملاذ',
     });
     console.log('✅ إشعار الإيميل أُرسل لـ', providerData.email);
@@ -1450,6 +1455,11 @@ function loadFamilyMembers() {
 function closeBookingModal() {
   document.getElementById('booking-modal').classList.remove('open');
   document.body.style.overflow = '';
+  // مسح بيانات المقدم والـ summary عند الإغلاق
+  bmSelectedProvider = null;
+  window.bmGoogleMapsLink = null;
+  const summaryEl = document.getElementById('bm-service-summary');
+  if(summaryEl) { summaryEl.style.display = 'none'; summaryEl.innerHTML = ''; }
 }
 
 // دالة إغلاق موحدة لكل الـ modals
@@ -1646,9 +1656,13 @@ function detectClientLocation() {
       } catch(e) {}
 
       if (input) input.value = addressText;
+      
+      // حفظ لينك Google Maps عشان نبعته في الإيميل
+      window.bmGoogleMapsLink = `https://www.google.com/maps?q=${bmClientLat},${bmClientLon}`;
+      
       if (statusEl) {
         statusEl.style.display = 'block';
-        statusEl.innerHTML = `📍 تم تحديد موقعك بنجاح — <span style="font-size:10px;opacity:.7">${bmClientLat.toFixed(4)}, ${bmClientLon.toFixed(4)}</span>`;
+        statusEl.innerHTML = `📍 تم تحديد موقعك — <a href="${window.bmGoogleMapsLink}" target="_blank" style="color:var(--accent);font-size:11px">افتح في الخريطة</a> <span style="font-size:10px;opacity:.7">(${bmClientLat.toFixed(4)}, ${bmClientLon.toFixed(4)})</span>`;
       }
       btn.textContent = '✅ تم التحديد';
       btn.style.background = 'rgba(46,184,114,.25)';
@@ -1891,8 +1905,10 @@ async function bmSubmit() {
         if(bmSelectedProvider) {
           await sendProviderNotification({
             patient_name: name, phone, area,
+            address:      address,
             service_type: bmSelectedService, sub_option: bmSelectedSub,
             appointment_time: time, payment_method: bmSelectedPayment,
+            patient_email: email,
           }, bmSelectedProvider);
         }
         document.getElementById('bm-step2').style.display = 'none';
