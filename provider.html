@@ -350,6 +350,10 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
           <input class="form-input" id="p-exp" type="number" placeholder="مثال: 10">
         </div>
         <div class="form-group">
+          <div class="form-label">السعر المبدئي (ج.م) — يظهر على كارتك</div>
+          <input class="form-input" id="p-price" type="number" placeholder="مثال: 200">
+        </div>
+        <div class="form-group">
           <div class="form-label">منطقة التغطية الأساسية</div>
           <select class="form-input" id="p-area"></select>
         </div>
@@ -697,6 +701,12 @@ async function loadMyBookings() {
   const badge = document.getElementById('new-bookings-badge');
   badge.textContent = pending;
   badge.style.display = pending > 0 ? 'flex' : 'none';
+  // تحديث الـ overview stats
+  document.getElementById('pov-all').textContent       = myBookings.length;
+  document.getElementById('pov-pending').textContent   = pending;
+  document.getElementById('pov-completed').textContent = myBookings.filter(b=>b.status==='completed').length;
+  // تحديث الـ recent bookings في الـ overview
+  renderRecentBookings(myBookings.slice(0,5));
   if(document.getElementById('page-bookings').classList.contains('active')) {
     renderMyBookings(myBookings, currentBookingFilter);
   }
@@ -822,6 +832,7 @@ function prefillProfile() {
   document.getElementById('p-name').value    = p.name    || '';
   document.getElementById('p-mobile').value  = p.phone   || '';
   document.getElementById('p-exp').value     = p.experience || '';
+  document.getElementById('p-price').value   = p.price   || '';
   document.getElementById('p-bio').value     = p.bio     || '';
   document.getElementById('p-grade').value   = p.grade   || 'أخصائي';
   if(p.grade) selectGrade(p.grade, document.getElementById('grade-'+( p.grade==='استشاري'?'consultant':'specialist')));
@@ -894,7 +905,7 @@ async function saveProfile() {
 
   if(!name) { showToast('⚠️ أدخل اسمك','error'); return; }
 
-  const payload = { name, phone, experience:exp, bio, area, service_type:svcType, grade, specialty:spec };
+  const payload = { name, phone, experience:exp, bio, area, service_type:svcType, grade, specialty:spec, price: parseFloat(document.getElementById('p-price')?.value)||null };
   const { error } = await sb.from('providers').update(payload).eq('id', currentProvider.id);
   if(error) { showToast('❌ '+error.message,'error'); return; }
 
