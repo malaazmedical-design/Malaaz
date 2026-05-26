@@ -1901,22 +1901,36 @@ async function bmSubmit() {
         if (error2) throw error2;
         // نجحت المحاولة الثانية
         localStorage.setItem('malaaz_client_phone', phone);
-        // إشعار مقدم الخدمة
+
         if(bmSelectedProvider) {
+          // حجز مباشر — إيميل لمقدم الخدمة
           await sendProviderNotification({
-            patient_name: name, phone, area,
-            address:      address,
+            patient_name: name, phone, area, address,
             service_type: bmSelectedService, sub_option: bmSelectedSub,
             appointment_time: time, payment_method: bmSelectedPayment,
             patient_email: email,
           }, bmSelectedProvider);
+          document.getElementById('bm-step2').style.display = 'none';
+          document.getElementById('bm-success').style.display = 'block';
+          showToast('✅ تم الحجز — سيصلك تأكيد من مقدم الخدمة!');
+        } else {
+          // حجز عام — واتساب للأدمن
+          const payMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
+          const mapsLink = window.bmGoogleMapsLink ? `\n📍 الموقع: ${window.bmGoogleMapsLink}` : '';
+          const waMsg = encodeURIComponent(
+            `🔔 *حجز جديد على ملاذ*\n\n` +
+            `👤 *العميل:* ${name}\n📱 *الموبايل:* ${phone}\n` +
+            `⚕️ *الخدمة:* ${bmSelectedService}${bmSelectedSub?' — '+bmSelectedSub:''}\n` +
+            `📍 *المنطقة:* ${area}\n🏠 *العنوان:* ${address}` + mapsLink + `\n` +
+            `🕐 *الفترة:* ${time}\n💳 *الدفع:* ${payMap[bmSelectedPayment]||bmSelectedPayment}\n` +
+            `\n_يرجى التواصل مع العميل لتأكيد الحجز_`
+          );
+          document.getElementById('bm-step2').style.display = 'none';
+          document.getElementById('bm-success').style.display = 'block';
+          showToast('✅ تم الحجز — جاري فتح واتساب...');
+          setTimeout(() => window.open(`https://wa.me/201006484908?text=${waMsg}`, '_blank'), 1200);
         }
-        document.getElementById('bm-step2').style.display = 'none';
-        document.getElementById('bm-success').style.display = 'block';
-        const refEl2 = document.getElementById('bm-booking-ref');
-        if (refEl2) refEl2.textContent = '';
-        showToast('✅ تم الحجز بنجاح!');
-        if (typeof setupClientRealtime === 'function') setupClientRealtime(phone);
+        if(typeof setupClientRealtime === 'function') setupClientRealtime(phone);
         return;
       }
       throw error;
@@ -1931,24 +1945,55 @@ async function bmSubmit() {
         patient_name:     name,
         phone,
         area,
+        address,
         service_type:     bmSelectedService,
         sub_option:       bmSelectedSub,
         appointment_time: time,
         payment_method:   bmSelectedPayment,
         patient_email:    email,
       }, bmSelectedProvider);
+
+      // حجز مباشر من مقدم خدمة — إيميل فقط ✅
+      document.getElementById('bm-step2').style.display = 'none';
+      document.getElementById('bm-success').style.display = 'block';
+      const refElP = document.getElementById('bm-booking-ref');
+      if(refElP && data?.id) refElP.textContent = `رقم الحجز: #${sanitize(data.id.slice(-6).toUpperCase())}`;
+      showToast('✅ تم الحجز — سيصلك تأكيد من مقدم الخدمة!');
+      if(typeof setupClientRealtime === 'function') setupClientRealtime(phone);
+
+    } else {
+      // ====================================================
+      // الحجز العام — يفتح واتساب الأدمن بتفاصيل الحجز
+      // ====================================================
+      const payMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
+      const mapsLink = window.bmGoogleMapsLink ? `\n📍 الموقع: ${window.bmGoogleMapsLink}` : '';
+      const waMsg = encodeURIComponent(
+        `🔔 *حجز جديد على ملاذ*\n\n` +
+        `👤 *العميل:* ${name}\n` +
+        `📱 *الموبايل:* ${phone}\n` +
+        `⚕️ *الخدمة:* ${bmSelectedService}${bmSelectedSub ? ' — ' + bmSelectedSub : ''}\n` +
+        `📍 *المنطقة:* ${area}\n` +
+        `🏠 *العنوان:* ${address}` + mapsLink + `\n` +
+        `🕐 *الفترة:* ${time}\n` +
+        `💳 *الدفع:* ${payMap[bmSelectedPayment] || bmSelectedPayment}\n` +
+        (email ? `📧 *الإيميل:* ${email}\n` : '') +
+        `\n_يرجى التواصل مع العميل لتأكيد الحجز وتوفير مقدم خدمة مناسب_`
+      );
+
+      // حفظ الحجز في DB أولاً
+      document.getElementById('bm-step2').style.display = 'none';
+      document.getElementById('bm-success').style.display = 'block';
+      const refEl = document.getElementById('bm-booking-ref');
+      if(refEl && data?.id) refEl.textContent = `رقم الحجز: #${sanitize(data.id.slice(-6).toUpperCase())}`;
+      showToast('✅ تم الحجز — جاري فتح واتساب...');
+
+      // فتح واتساب بعد ثانية
+      setTimeout(() => {
+        window.open(`https://wa.me/201006484908?text=${waMsg}`, '_blank');
+      }, 1200);
+
+      if(typeof setupClientRealtime === 'function') setupClientRealtime(phone);
     }
-
-    // عرض الـ success
-    document.getElementById('bm-step2').style.display = 'none';
-    document.getElementById('bm-success').style.display = 'block';
-    const refEl = document.getElementById('bm-booking-ref');
-    if (refEl && data?.id) refEl.textContent = `رقم الحجز: #${sanitize(data.id.slice(-6).toUpperCase())}`;
-
-    showToast('✅ تم الحجز بنجاح!');
-
-    // بدء الاستماع لإشعارات هذا العميل
-    if (typeof setupClientRealtime === 'function') setupClientRealtime(phone);
 
   } catch (e) {
     showBmError('❌ حصل خطأ — جرب تاني أو تواصل معنا');
