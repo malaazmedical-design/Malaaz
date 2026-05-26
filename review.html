@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملاذ — قيّم تجربتك</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--dark:#1e2c2f;--dark2:#2d3b3e;--accent:#c9a84c;--bg:#f5f2ec;--white:#fff;--text:#2d3b3e;--muted:#6b7c80;--border:rgba(58,74,78,.12);}
+body{font-family:'Cairo',sans-serif;background:var(--dark);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+
+.card{background:var(--dark2);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:36px 28px;width:420px;max-width:100%;text-align:center;}
+
+.logo{font-size:32px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;margin-bottom:4px;}
+.logo-sub{font-size:10px;letter-spacing:4px;color:var(--accent);opacity:.7;margin-bottom:24px;}
+
+.title{font-size:20px;font-weight:700;color:#fff;margin-bottom:6px;}
+.subtitle{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:28px;line-height:1.7;}
+
+/* Stars */
+.stars-wrap{display:flex;justify-content:center;gap:8px;margin-bottom:20px;flex-direction:row-reverse;}
+.star{font-size:38px;cursor:pointer;transition:transform .15s;color:rgba(255,255,255,.15);user-select:none;}
+.star:hover,.star.active{color:var(--accent);transform:scale(1.15);}
+
+.rating-label{font-size:13px;color:var(--accent);font-weight:700;height:20px;margin-bottom:16px;}
+
+/* Input */
+.review-input{width:100%;padding:14px 16px;border:1.5px solid rgba(255,255,255,.1);border-radius:14px;font-size:14px;font-family:'Cairo',sans-serif;background:rgba(255,255,255,.05);color:#fff;outline:none;resize:vertical;min-height:100px;transition:border-color .2s;}
+.review-input::placeholder{color:rgba(255,255,255,.25);}
+.review-input:focus{border-color:var(--accent);}
+
+.name-input{width:100%;padding:12px 16px;border:1.5px solid rgba(255,255,255,.1);border-radius:12px;font-size:14px;font-family:'Cairo',sans-serif;background:rgba(255,255,255,.05);color:#fff;outline:none;margin-bottom:12px;transition:border-color .2s;}
+.name-input::placeholder{color:rgba(255,255,255,.25);}
+.name-input:focus{border-color:var(--accent);}
+
+.submit-btn{width:100%;background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:16px;transition:all .2s;}
+.submit-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.3);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* Success */
+.success-state{display:none;text-align:center;padding:20px 0;}
+.success-ico{font-size:56px;margin-bottom:16px;}
+.success-title{font-size:22px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;margin-bottom:8px;}
+.success-sub{font-size:13px;color:rgba(255,255,255,.45);line-height:1.8;}
+
+/* Error */
+.err-msg{color:#ff6b6b;font-size:12px;margin-top:8px;display:none;}
+
+/* Service badge */
+.service-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:20px;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">ملاذ</div>
+  <div class="logo-sub">MALAAZ</div>
+
+  <!-- Form State -->
+  <div id="form-state">
+    <div class="title">قيّم تجربتك معنا ⭐</div>
+    <div class="subtitle">رأيك يساعدنا نتحسن ويساعد عملاء تانيين يختاروا بثقة</div>
+
+    <div id="service-badge-wrap"></div>
+
+    <!-- Stars -->
+    <div class="stars-wrap" id="stars-wrap">
+      <span class="star" data-val="1">★</span>
+      <span class="star" data-val="2">★</span>
+      <span class="star" data-val="3">★</span>
+      <span class="star" data-val="4">★</span>
+      <span class="star" data-val="5">★</span>
+    </div>
+    <div class="rating-label" id="rating-label">اختر تقييمك</div>
+
+    <input class="name-input" id="reviewer-name" placeholder="اسمك (اختياري)">
+    <textarea class="review-input" id="review-text" placeholder="اكتب رأيك في الخدمة..."></textarea>
+
+    <div class="err-msg" id="err-msg">⚠️ اختر تقييم بالنجوم الأول</div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitReview()">
+      إرسال التقييم ✅
+    </button>
+  </div>
+
+  <!-- Success State -->
+  <div class="success-state" id="success-state">
+    <div class="success-ico">🎉</div>
+    <div class="success-title">شكراً على تقييمك!</div>
+    <div class="success-sub">رأيك وصلنا وسيظهر على الموقع بعد المراجعة<br>نتمنى نكون عند حسن ظنك دايماً ❤️</div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://omsictbrqlsohrmxeuym.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let selectedRating = 0;
+let bookingId = null;
+let serviceType = null;
+
+const ratingLabels = ['', 'سيء 😞', 'مقبول 😐', 'كويس 🙂', 'جيد جداً 😊', 'ممتاز! 🤩'];
+
+// Get params from URL
+const params = new URLSearchParams(location.search);
+bookingId   = params.get('bid');
+serviceType = params.get('svc') || '';
+
+// Show service badge
+if(serviceType) {
+  document.getElementById('service-badge-wrap').innerHTML =
+    `<div class="service-badge">⚕️ ${serviceType}</div>`;
+}
+
+// Stars interaction
+document.querySelectorAll('.star').forEach(star => {
+  star.addEventListener('mouseover', () => highlightStars(+star.dataset.val));
+  star.addEventListener('mouseout',  () => highlightStars(selectedRating));
+  star.addEventListener('click',     () => {
+    selectedRating = +star.dataset.val;
+    highlightStars(selectedRating);
+    document.getElementById('rating-label').textContent = ratingLabels[selectedRating];
+    document.getElementById('err-msg').style.display = 'none';
+  });
+});
+
+function highlightStars(val) {
+  document.querySelectorAll('.star').forEach(s => {
+    s.classList.toggle('active', +s.dataset.val <= val);
+  });
+}
+
+async function submitReview() {
+  if(!selectedRating) {
+    document.getElementById('err-msg').style.display = 'block';
+    return;
+  }
+  const text = document.getElementById('review-text').value.trim();
+  const name = document.getElementById('reviewer-name').value.trim() || 'عميل ملاذ';
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'جاري الإرسال...';
+
+  const { error } = await sb.from('testimonials').insert([{
+    client_name:  name,
+    service_type: serviceType || null,
+    rating:       selectedRating,
+    text:         text || null,
+    is_active:    false, // مش يظهر إلا بعد موافقة الأدمن
+  }]);
+
+  if(error) {
+    btn.disabled = false;
+    btn.textContent = 'إرسال التقييم ✅';
+    document.getElementById('err-msg').textContent = '❌ حصل خطأ، جرب تاني';
+    document.getElementById('err-msg').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('form-state').style.display    = 'none';
+  document.getElementById('success-state').style.display = 'block';
+}
+</script>
+</body>
+</html>
