@@ -18,6 +18,7 @@
   "redirects": [
     { "source": "/provider", "destination": "/provider.html", "permanent": false },
     { "source": "/admin",    "destination": "/admin.html",    "permanent": false },
-    { "source": "/review",   "destination": "/review.html",   "permanent": false }
+    { "source": "/review",   "destination": "/review.html",   "permanent": false },
+    { "source": "/client",   "destination": "/client.html",   "permanent": false }
   ]
 }
