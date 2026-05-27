@@ -189,25 +189,14 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
-  .sidebar{width:260px;transform:translateX(100%);transition:.3s;z-index:200;}
-  .sidebar.open{transform:translateX(0);box-shadow:-4px 0 20px rgba(0,0,0,.3);}
+  .sidebar{transform:translateX(100%);transition:.3s;}
+  .sidebar.open{transform:translateX(0);}
   .main{margin-right:0;}
   .stats-grid{grid-template-columns:1fr 1fr;}
   .service-type-grid{grid-template-columns:1fr 1fr;}
   .sub-svc-grid{grid-template-columns:1fr;}
   .form-grid{grid-template-columns:1fr;}
-  .topbar{padding:0 16px;}
-  .content{padding:16px;}
-  .sidebar-overlay{display:block;}
 }
-@media(max-width:600px){
-  .stats-grid{grid-template-columns:1fr;}
-  .grade-grid{grid-template-columns:1fr;}
-  .modal-box{width:95vw !important;border-radius:16px;}
-}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199;}
-.hamburger-btn{display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);}
-@media(max-width:900px){.hamburger-btn{display:flex;}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('P2Xy0_OBIWdVXk1gE');</script>
@@ -245,7 +234,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 </div>
 
 <!-- ===== PROVIDER APP ===== -->
-<div id="provider-app" style="display:none;width:100%;flex-direction:row;">
+<div id="provider-app" style="display:none;width:100%;display:none;flex-direction:row;">
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -282,15 +271,11 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 <!-- MAIN -->
 <main class="main">
 <div class="topbar">
-  <div style="display:flex;align-items:center;gap:10px">
-    <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
-    <div class="topbar-title" id="page-title">نظرة عامة</div>
-  </div>
+  <div class="topbar-title" id="page-title">نظرة عامة</div>
   <div class="topbar-right">
     <button class="topbar-btn accent" onclick="saveAll()"><i class="fas fa-save" style="margin-left:6px"></i> حفظ</button>
   </div>
 </div>
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div class="content">
 
 <!-- ============================
@@ -318,4 +303,822 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
   <div class="card">
     <div class="card-header">
       <div class="card-title">آخر حجوزاتي</div>
-      <button class="btn primary" onclick="sh
+      <button class="btn primary" onclick="showPage('bookings')">عرض الكل</button>
+    </div>
+    <div class="card-body" id="overview-recent-bookings">
+      <div style="text-align:center;padding:24px;color:var(--muted)">جاري التحميل...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     PAGE: MY BOOKINGS
+     ============================ -->
+<div class="page" id="page-bookings">
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn primary active" id="bk-filter-all" onclick="filterMyBookings('all',this)" style="font-size:13px">الكل</button>
+    <button class="btn ghost" id="bk-filter-pending" onclick="filterMyBookings('pending',this)" style="font-size:13px">جديد</button>
+    <button class="btn ghost" id="bk-filter-confirmed" onclick="filterMyBookings('confirmed',this)" style="font-size:13px">مؤكد</button>
+    <button class="btn ghost" id="bk-filter-completed" onclick="filterMyBookings('completed',this)" style="font-size:13px">مكتمل</button>
+  </div>
+  <div id="my-bookings-list">
+    <div style="text-align:center;padding:40px;color:var(--muted)">جاري التحميل...</div>
+  </div>
+</div>
+
+<!-- ============================
+     PAGE: PROFILE
+     ============================ -->
+<div class="page" id="page-profile">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">ملفي الشخصي</div><div class="card-sub">المعلومات التي تظهر للعملاء</div></div>
+    </div>
+    <div class="card-body">
+      <div class="section-divider"><i class="fas fa-user"></i> المعلومات الأساسية</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="form-label">الاسم الكامل *</div>
+          <input class="form-input" id="p-name" placeholder="اسمك كاملاً">
+        </div>
+        <div class="form-group">
+          <div class="form-label">رقم الموبايل</div>
+          <input class="form-input" id="p-mobile" placeholder="01xxxxxxxxx" dir="ltr">
+        </div>
+        <div class="form-group">
+          <div class="form-label">سنوات الخبرة</div>
+          <input class="form-input" id="p-exp" type="number" placeholder="مثال: 10">
+        </div>
+        <div class="form-group">
+          <div class="form-label">السعر المبدئي (ج.م) — يظهر على كارتك</div>
+          <input class="form-input" id="p-price" type="number" placeholder="مثال: 200">
+        </div>
+        <div class="form-group">
+          <div class="form-label">منطقة التغطية الأساسية</div>
+          <select class="form-input" id="p-area"></select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px">
+        <div class="form-label">نبذة عنك (تظهر للعملاء)</div>
+        <textarea class="form-input" id="p-bio" rows="3" placeholder="اكتب نبذة مختصرة عن خبرتك وتخصصك..."></textarea>
+      </div>
+
+      <div class="section-divider" style="margin-top:20px"><i class="fas fa-stethoscope"></i> نوع الخدمة التي تقدمها</div>
+      <div class="service-type-grid">
+        <div class="svc-type-card sel" id="svc-type-exam" onclick="selectServiceType('كشف منزلي',this)">
+          <div class="ico">🩺</div>
+          <div class="lbl">كشف منزلي</div>
+          <div class="sub">طبيب متخصص</div>
+        </div>
+        <div class="svc-type-card" id="svc-type-nursing" onclick="selectServiceType('تمريض منزلي',this)">
+          <div class="ico">👩‍⚕️</div>
+          <div class="lbl">تمريض منزلي</div>
+          <div class="sub">ممرض / ممرضة</div>
+        </div>
+        <div class="svc-type-card" id="svc-type-radio" onclick="selectServiceType('أشعة منزلية',this)">
+          <div class="ico">🔬</div>
+          <div class="lbl">أشعة منزلية</div>
+          <div class="sub">مركز أشعة</div>
+        </div>
+      </div>
+      <input type="hidden" id="p-service-type" value="كشف منزلي">
+
+      <!-- Exam-specific: grade -->
+      <div id="exam-section">
+        <div class="section-divider"><i class="fas fa-graduation-cap"></i> الدرجة العلمية</div>
+        <div class="grade-grid">
+          <div class="grade-card sel" id="grade-specialist" onclick="selectGrade('أخصائي',this)">
+            <div class="grade-ico">🩺</div>
+            <div class="grade-name">أخصائي</div>
+            <div class="grade-desc">متخصص في مجال طبي محدد</div>
+          </div>
+          <div class="grade-card" id="grade-consultant" onclick="selectGrade('استشاري',this)">
+            <div class="grade-ico">👨‍⚕️</div>
+            <div class="grade-name">استشاري</div>
+            <div class="grade-desc">خبرة أعلى وسعر أعلى</div>
+          </div>
+        </div>
+        <input type="hidden" id="p-grade" value="أخصائي">
+
+        <div class="section-divider"><i class="fas fa-list-ul"></i> التخصص الطبي</div>
+        <div class="specialty-wrap">
+          <select class="form-input" id="p-specialty" style="width:100%">
+            <option value="">اختر تخصصك...</option>
+          </select>
+          <div class="form-hint" style="margin-top:8px">💡 نطاق السعر الخاص بتخصصك ودرجتك العلمية:</div>
+          <div id="grade-price-hint" style="margin-top:6px;font-size:13px;font-weight:700;color:#b8860b"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn accent" onclick="saveProfile()"><i class="fas fa-save" style="margin-left:6px"></i> حفظ الملف الشخصي</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     PAGE: MY SERVICES & PRICES
+     ============================ -->
+<div class="page" id="page-services">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">خدماتي وأسعاري</div><div class="card-sub">اختار الخدمات اللي بتقدمها وحدد سعرك (في حدود نطاق الأدمن)</div></div>
+      <button class="btn accent" onclick="saveMyServices()"><i class="fas fa-save" style="margin-left:6px"></i> حفظ</button>
+    </div>
+    <div class="card-body">
+      <!-- Price range info -->
+      <div id="price-range-info" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:14px;margin-bottom:20px;display:none">
+        <div style="font-size:13px;font-weight:700;color:#b8860b;margin-bottom:6px">⚠️ نطاقات الأسعار المحددة من الأدمن</div>
+        <div id="price-range-info-body" style="font-size:12px;color:var(--muted);line-height:1.8"></div>
+      </div>
+      <div id="my-services-grid">
+        <div style="text-align:center;padding:40px;color:var(--muted)">جاري تحميل الخدمات...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</main>
+</div><!-- /provider-app -->
+
+<!-- ===== BOOKING DETAIL MODAL ===== -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">تفاصيل الحجز</div>
+      <button class="modal-close" onclick="closeModal('booking-modal')">×</button>
+    </div>
+    <div class="modal-body" id="booking-modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// SUPABASE
+// ============================================================
+const SUPABASE_URL = "https://omsictbrqlsohrmxeuym.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ============================================================
+// STATE
+// ============================================================
+let currentProvider = null;
+let allSubServices   = [];
+let allAreas         = [];
+let myBookings       = [];
+let currentBookingFilter = 'all';
+let providerServices = {};
+
+function san(v){ return v==null?'':String(v).replace(/</g,'&lt;').replace(/>/g,'&gt;').trim(); }
+
+// ============================================================
+// LOGIN TABS
+// ============================================================
+function switchLoginTab(tab, btn) {
+  document.querySelectorAll('.login-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-login').style.display    = tab==='login'?'block':'none';
+  document.getElementById('tab-register').style.display = tab==='register'?'block':'none';
+}
+
+// ============================================================
+// PROVIDER LOGIN — Supabase Auth
+// ============================================================
+async function doProviderLogin() {
+  const email = document.getElementById('p-email').value.trim();
+  const pass  = document.getElementById('p-pass').value;
+  const err   = document.getElementById('login-err');
+  const btn   = document.querySelector('#tab-login .login-btn');
+  err.style.display  = 'none';
+  btn.textContent    = 'جاري الدخول...';
+  btn.disabled       = true;
+
+  const { data: authData, error: authErr } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'دخول';
+  btn.disabled    = false;
+
+  if(authErr) {
+    err.textContent   = 'بيانات الدخول غلط — تحقق من البريد وكلمة المرور';
+    err.style.display = 'block';
+    return;
+  }
+
+  // جلب بيانات المقدم من جدول providers
+  const { data: provData, error: provErr } = await sb
+    .from('providers')
+    .select('*')
+    .eq('user_id', authData.user.id)
+    .single();
+
+  if(provErr || !provData) {
+    err.textContent   = 'لم يتم العثور على ملف مقدم الخدمة — تواصل مع الإدارة';
+    err.style.display = 'block';
+    await sb.auth.signOut();
+    return;
+  }
+
+  if(provData.status === 'pending') {
+    err.textContent   = 'حسابك قيد المراجعة من الأدمن';
+    err.style.display = 'block';
+    await sb.auth.signOut();
+    return;
+  }
+
+  if(provData.status === 'suspended') {
+    err.textContent   = 'تم إيقاف حسابك — تواصل مع الإدارة';
+    err.style.display = 'block';
+    await sb.auth.signOut();
+    return;
+  }
+
+  loadProviderApp(provData);
+}
+
+// ============================================================
+// REGISTER — Supabase Auth + insert providers row
+// ============================================================
+async function doRegister() {
+  const name  = document.getElementById('r-name').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const pass  = document.getElementById('r-pass').value;
+  const phone = document.getElementById('r-phone').value.trim();
+  const err   = document.getElementById('register-err');
+  const btn   = document.querySelector('#tab-register .login-btn');
+
+  if(!name||!email||!pass||!phone) { err.textContent='يرجى ملء كل الحقول'; err.style.display='block'; return; }
+  if(pass.length < 6)              { err.textContent='كلمة المرور 6 أحرف على الأقل'; err.style.display='block'; return; }
+
+  err.style.display = 'none';
+  btn.textContent   = 'جاري الإنشاء...';
+  btn.disabled      = true;
+
+  // 1) إنشاء حساب Auth
+  const { data: authData, error: authErr } = await sb.auth.signUp({ email, password: pass });
+  btn.textContent = 'إنشاء حساب';
+  btn.disabled    = false;
+
+  if(authErr) { err.textContent = authErr.message; err.style.display='block'; return; }
+
+  // لو Supabase محتاج تأكيد إيميل — authData.user ممكن يكون null
+  const userId = authData?.user?.id || authData?.session?.user?.id;
+  if(!userId) {
+    showToast('✅ تم إنشاء الحساب — تحقق من بريدك الإلكتروني لتأكيد الحساب');
+    ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
+    switchLoginTab('login', document.querySelector('.login-tab'));
+    return;
+  }
+
+  // 2) إنشاء row في providers مرتبط بالـ user_id
+  const { error: provErr } = await sb.from('providers').insert([{
+    user_id:      userId,
+    name,
+    email,
+    phone,
+    status:       'pending',
+    is_available: false,
+    rating:       5
+  }]);
+
+  if(provErr) { err.textContent = 'خطأ في إنشاء الملف: ' + provErr.message; err.style.display='block'; return; }
+
+  showToast('✅ تم إنشاء الحساب — انتظر موافقة الأدمن');
+  ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
+  switchLoginTab('login', document.querySelector('.login-tab'));
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+// ============================================================
+// LOAD PROVIDER APP
+// ============================================================
+async function loadProviderApp(provData) {
+  currentProvider = provData;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('provider-app').style.display = 'flex';
+
+  // Update sidebar info
+  document.getElementById('sb-prov-name').textContent = san(provData.name);
+  document.getElementById('sb-prov-type').textContent = san(provData.service_type || 'غير محدد');
+  document.getElementById('avail-toggle').checked = provData.is_available;
+
+  // Load data
+  await Promise.all([loadAreas(), loadSubServicesAll()]);
+  loadOverview();
+  loadMyBookings();
+  prefillProfile();
+  loadMyServicesGrid();
+  setupProviderRealtime();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const pageTitles = { overview:'نظرة عامة', bookings:'حجوزاتي', profile:'ملفي الشخصي', services:'خدماتي وأسعاري' };
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[id]||id;
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')?.includes("'"+id+"'")) n.classList.add('active');
+  });
+  if(id==='bookings') renderMyBookings(myBookings, currentBookingFilter);
+  if(id==='services') loadMyServicesGrid();
+}
+
+function saveAll() {
+  const active = document.querySelector('.page.active');
+  if(!active) return;
+  if(active.id==='page-profile') saveProfile();
+  else if(active.id==='page-services') saveMyServices();
+  else showToast('💾 لا يوجد تغييرات للحفظ');
+}
+
+// ============================================================
+// TOGGLE AVAILABILITY
+// ============================================================
+async function toggleAvailability(val) {
+  if(!currentProvider) return;
+  await sb.from('providers').update({is_available: val}).eq('id', currentProvider.id);
+  currentProvider.is_available = val;
+  showToast(val ? '🟢 أنت متاح الآن للحجز' : '⚫ تم إيقاف التوفر مؤقتاً');
+  updateOverviewStatus();
+}
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+async function loadOverview() {
+  const { data } = await sb.from('bookings').select('*').eq('provider_id', currentProvider.id);
+  const allBkgs = data || [];
+  document.getElementById('pov-all').textContent       = allBkgs.length;
+  document.getElementById('pov-pending').textContent   = allBkgs.filter(b=>b.status==='pending').length;
+  document.getElementById('pov-completed').textContent = allBkgs.filter(b=>b.status==='completed').length;
+  updateOverviewStatus();
+  renderRecentBookings(allBkgs.slice(0,5));
+}
+
+function updateOverviewStatus() {
+  if(!currentProvider) return;
+  const avail = currentProvider.is_available;
+  const status = currentProvider.status;
+  const msg = status!=='active' ? 'حسابك غير مفعّل بعد' : avail ? '🟢 أنت متاح الآن — العملاء يمكنهم حجزك' : '⚫ أنت غير متاح حالياً';
+  const sub = avail ? 'قم بإيقاف التوفر عند عدم رغبتك في الاستقبال' : 'فعّل التوفر لاستقبال الحجوزات';
+  document.getElementById('pov-status-msg').textContent = msg;
+  document.getElementById('pov-status-sub').textContent = sub;
+  document.getElementById('pov-avail-badge').innerHTML = avail
+    ? '<span class="badge green">● متاح</span>'
+    : '<span class="badge gray">● غير متاح</span>';
+}
+
+function renderRecentBookings(data) {
+  const el = document.getElementById('overview-recent-bookings');
+  if(!data?.length) { el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted)">لا توجد حجوزات بعد</div>'; return; }
+  el.innerHTML = data.map(b => renderBookingCard(b)).join('');
+}
+
+// ============================================================
+// MY BOOKINGS
+// ============================================================
+async function loadMyBookings() {
+  const { data } = await sb.from('bookings')
+    .select('*')
+    .eq('provider_id', currentProvider.id)
+    .order('created_at', {ascending: false})
+    .limit(50);
+  myBookings = data || [];
+  const pending = myBookings.filter(b => b.status === 'pending').length;
+  const badge = document.getElementById('new-bookings-badge');
+  badge.textContent = pending;
+  badge.style.display = pending > 0 ? 'flex' : 'none';
+  // تحديث الـ overview stats
+  document.getElementById('pov-all').textContent       = myBookings.length;
+  document.getElementById('pov-pending').textContent   = pending;
+  document.getElementById('pov-completed').textContent = myBookings.filter(b=>b.status==='completed').length;
+  // تحديث الـ recent bookings في الـ overview
+  renderRecentBookings(myBookings.slice(0,5));
+  if(document.getElementById('page-bookings').classList.contains('active')) {
+    renderMyBookings(myBookings, currentBookingFilter);
+  }
+}
+
+function filterMyBookings(status, btn) {
+  currentBookingFilter = status;
+  document.querySelectorAll('#page-bookings .btn').forEach(b=>{ b.className='btn ghost'; b.style.fontSize='13px'; });
+  btn.className='btn primary'; btn.style.fontSize='13px';
+  renderMyBookings(myBookings, status);
+}
+
+function renderMyBookings(data, filter) {
+  const el = document.getElementById('my-bookings-list');
+  let filtered = filter==='all' ? data : data.filter(b=>b.status===filter);
+  if(!filtered?.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">لا توجد حجوزات في هذه الفئة</div>'; return; }
+  el.innerHTML = filtered.map(b => renderBookingCard(b)).join('');
+}
+
+function renderBookingCard(b) {
+  return `<div class="booking-card">
+    <div class="bc-info">
+      <div class="bc-name">${san(b.patient_name)} <span style="font-size:11px;color:var(--muted);margin-right:6px" dir="ltr">${san(b.phone)}</span></div>
+      <div class="bc-svc">${san(b.service_type)} ${b.sub_option?'— '+san(b.sub_option):''}</div>
+      <div class="bc-time"><i class="fas fa-clock" style="font-size:10px;margin-left:3px"></i>${san(b.appointment_time)} · ${san(b.area)}</div>
+      <div class="bc-actions">
+        ${b.status==='pending'?`<button class="act-btn done" onclick="updateBooking('${b.id}','confirmed')">قبول</button>`:''}
+        ${b.status==='confirmed'?`<button class="act-btn done" onclick="updateBooking('${b.id}','completed')">مكتمل</button>`:''}
+        ${b.status!=='cancelled'&&b.status!=='completed'?`<button class="act-btn cancel" onclick="updateBooking('${b.id}','cancelled')">رفض</button>`:''}
+        <button class="act-btn edit" onclick="showBookingDetail('${b.id}')">التفاصيل</button>
+      </div>
+    </div>
+    <div class="bc-right">
+      ${statusBadge(b.status)}
+      <div class="bc-area" style="margin-top:6px">${payBadge(b.payment_method)}</div>
+    </div>
+  </div>`;
+}
+
+function showBookingDetail(id) {
+  const b = myBookings.find(x=>x.id===id);
+  if(!b) return;
+  document.getElementById('booking-modal-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><div class="form-label">المريض</div><div style="font-weight:700;margin-top:4px">${san(b.patient_name)}</div></div>
+      <div><div class="form-label">الموبايل</div><div style="font-weight:700;margin-top:4px" dir="ltr">${san(b.phone)}</div></div>
+      <div><div class="form-label">الخدمة</div><div style="font-weight:700;margin-top:4px">${san(b.service_type)}</div></div>
+      <div><div class="form-label">التفصيل</div><div style="font-weight:700;margin-top:4px">${san(b.sub_option)||'—'}</div></div>
+      <div><div class="form-label">المنطقة</div><div style="font-weight:700;margin-top:4px">${san(b.area)}</div></div>
+      <div><div class="form-label">الوقت</div><div style="font-weight:700;margin-top:4px">${san(b.appointment_time)}</div></div>
+      <div style="grid-column:1/-1"><div class="form-label">العنوان</div><div style="font-weight:700;margin-top:4px">${san(b.address)}</div></div>
+      <div><div class="form-label">الدفع</div><div style="font-weight:700;margin-top:4px">${payBadge(b.payment_method)}</div></div>
+      <div><div class="form-label">الحالة</div><div style="font-weight:700;margin-top:4px">${statusBadge(b.status)}</div></div>
+      ${b.notes?`<div style="grid-column:1/-1"><div class="form-label">ملاحظات</div><div style="font-weight:700;margin-top:4px">${san(b.notes)}</div></div>`:''}
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      ${b.status==='pending'?`<button class="btn accent" onclick="updateBooking('${b.id}','confirmed');closeModal('booking-modal')">قبول الحجز</button>`:''}
+      ${b.status==='confirmed'?`<button class="btn accent" onclick="updateBooking('${b.id}','completed');closeModal('booking-modal')">تعيين مكتمل</button>`:''}
+    </div>`;
+  openModal('booking-modal');
+}
+
+// ============================================================
+// EMAILJS — إشعار العميل بالرفض
+// ============================================================
+async function sendRejectionEmail(booking) {
+  if(!booking.patient_email) return;
+  try {
+    await emailjs.send('service_tv0w6ov', 'template_3arzsvv', {
+      to_email:         booking.patient_email,
+      patient_name:     booking.patient_name,
+      service_type:     booking.service_type,
+      area:             booking.area,
+      appointment_time: booking.appointment_time,
+      site_link:        'https://malaaz-plum.vercel.app',
+    });
+    console.log('✅ إيميل الرفض أُرسل');
+  } catch(e) {
+    console.warn('EmailJS rejection error:', e);
+  }
+}
+
+async function updateBooking(id, status) {
+  await sb.from('bookings').update({status}).eq('id', id);
+  const b = myBookings.find(x => x.id === id);
+  if(b) {
+    b.status = status;
+
+    if(status === 'cancelled') {
+      // رفض — إيميل للعميل
+      await sendRejectionEmail(b);
+    }
+
+    if(status === 'completed') {
+      // مكتمل — بعت رسالة تقييم للعميل على واتساب
+      if(b.phone) {
+        const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}`;
+        const waMsg = encodeURIComponent(
+          `مرحباً ${b.patient_name||''} 👋\n\n` +
+          `شكراً لاختيارك منصة *ملاذ* 🏥\n\n` +
+          `نتمنى تكون تجربتك كانت مميزة 😊\n\n` +
+          `قيّم تجربتك في دقيقة:\n⭐ ${reviewLink}\n\n` +
+          `رأيك بيفرق معانا كتير ❤️`
+        );
+        const clientPhone = `20${b.phone.replace(/^0/,'')}`;
+        window.open(`https://wa.me/${clientPhone}?text=${waMsg}`, '_blank');
+      }
+    }
+  }
+
+  const msg = status === 'confirmed' ? '✅ تم قبول الحجز' : status === 'cancelled' ? '❌ تم رفض الحجز' : status === 'completed' ? '✅ تم إكمال الحجز' : '✅ تم التحديث';
+  showToast(msg, 'success');
+  renderMyBookings(myBookings, currentBookingFilter);
+  loadMyBookings();
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+function prefillProfile() {
+  if(!currentProvider) return;
+  const p = currentProvider;
+  document.getElementById('p-name').value    = p.name    || '';
+  document.getElementById('p-mobile').value  = p.phone   || '';
+  document.getElementById('p-exp').value     = p.experience || '';
+  document.getElementById('p-price').value   = p.price   || '';
+  document.getElementById('p-bio').value     = p.bio     || '';
+  document.getElementById('p-grade').value   = p.grade   || 'أخصائي';
+  if(p.grade) selectGrade(p.grade, document.getElementById('grade-'+( p.grade==='استشاري'?'consultant':'specialist')));
+  if(p.service_type) {
+    selectServiceType(p.service_type, document.getElementById('svc-type-'+(
+      p.service_type==='تمريض منزلي'?'nursing': p.service_type==='أشعة منزلية'?'radio':'exam'
+    )));
+  }
+  // fill area select then set value
+  const areaEl = document.getElementById('p-area');
+  if(areaEl && allAreas.length) {
+    areaEl.innerHTML = '<option value="">اختر المنطقة</option>' + allAreas.map(a=>`<option value="${san(a.name)}" ${a.name===p.area?'selected':''}>${san(a.name)}</option>`).join('');
+  }
+  // specialty
+  if(p.specialty && document.getElementById('p-specialty')) {
+    loadSpecialtiesDropdown(p.grade||'أخصائي', p.specialty);
+  }
+}
+
+function selectServiceType(type, card) {
+  document.querySelectorAll('.svc-type-card').forEach(c=>c.classList.remove('sel'));
+  card?.classList.add('sel');
+  document.getElementById('p-service-type').value = type;
+  document.getElementById('exam-section').style.display = type==='كشف منزلي' ? 'block' : 'none';
+}
+
+function selectGrade(grade, card) {
+  document.querySelectorAll('.grade-card').forEach(c=>c.classList.remove('sel'));
+  card?.classList.add('sel');
+  document.getElementById('p-grade').value = grade;
+  loadSpecialtiesDropdown(grade, document.getElementById('p-specialty')?.value);
+}
+
+async function loadSpecialtiesDropdown(grade, selectedVal) {
+  const subs = allSubServices.filter(s=>s.service_name==='كشف منزلي'&&s.group_name==='specialty'&&s.is_active!==false);
+  const sel = document.getElementById('p-specialty');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">اختر تخصصك...</option>' + subs.map(s=>{
+    const min = grade==='استشاري'?(s.price_min_consultant||s.price_min||0):(s.price_min_specialist||s.price_min||0);
+    const max = grade==='استشاري'?(s.price_max_consultant||s.price_max||0):(s.price_max_specialist||s.price_max||0);
+    return `<option value="${san(s.name)}" data-min="${min}" data-max="${max}" ${s.name===selectedVal?'selected':''}>${san(s.name)} (${min}–${max} ج.م)</option>`;
+  }).join('');
+  // Show grade price hint
+  updateGradePriceHint();
+  sel.onchange = updateGradePriceHint;
+}
+
+function updateGradePriceHint() {
+  const sel  = document.getElementById('p-specialty');
+  const hint = document.getElementById('grade-price-hint');
+  if(!sel||!hint) return;
+  const opt = sel.options[sel.selectedIndex];
+  if(opt?.dataset.min) {
+    hint.innerHTML = `نطاق سعرك: <strong>${opt.dataset.min} – ${opt.dataset.max} ج.م</strong>`;
+  } else {
+    hint.textContent = '';
+  }
+}
+
+async function saveProfile() {
+  if(!currentProvider) return;
+  const name    = document.getElementById('p-name').value.trim();
+  const phone   = document.getElementById('p-mobile').value.trim();
+  const exp     = parseFloat(document.getElementById('p-exp').value)||null;
+  const bio     = document.getElementById('p-bio').value.trim();
+  const area    = document.getElementById('p-area').value;
+  const svcType = document.getElementById('p-service-type').value;
+  const grade   = document.getElementById('p-grade').value;
+  const spec    = document.getElementById('p-specialty')?.value||null;
+
+  if(!name) { showToast('⚠️ أدخل اسمك','error'); return; }
+
+  const payload = { name, phone, experience:exp, bio, area, service_type:svcType, grade, specialty:spec, price: parseFloat(document.getElementById('p-price')?.value)||null };
+  const { error } = await sb.from('providers').update(payload).eq('id', currentProvider.id);
+  if(error) { showToast('❌ '+error.message,'error'); return; }
+
+  Object.assign(currentProvider, payload);
+  document.getElementById('sb-prov-name').textContent = name;
+  document.getElementById('sb-prov-type').textContent = svcType;
+  showToast('✅ تم حفظ الملف الشخصي','success');
+}
+
+// ============================================================
+// MY SERVICES & PRICES
+// ============================================================
+async function loadMyServicesGrid() {
+  if(!currentProvider) return;
+  const svcType = currentProvider.service_type || 'كشف منزلي';
+  const subs = allSubServices.filter(s => s.service_name === svcType && s.is_active !== false &&
+    s.group_name !== 'grade'); // exclude the grade rows
+
+  // Load existing provider services
+  const { data: existing } = await sb.from('provider_services').select('*').eq('provider_id', currentProvider.id);
+  const existingMap = {};
+  (existing||[]).forEach(e=>{ existingMap[e.sub_service_id] = e; });
+
+  // Show price range info
+  const info = document.getElementById('price-range-info');
+  const infoBody = document.getElementById('price-range-info-body');
+  if(subs.length) {
+    info.style.display = 'block';
+    const mainSvc = await sb.from('services').select('price_min,price_max').eq('name',svcType).single();
+    infoBody.innerHTML = mainSvc.data
+      ? `الخدمة الرئيسية "${svcType}": <strong>${mainSvc.data.price_min} – ${mainSvc.data.price_max} ج.م</strong><br>يجب أن يكون سعرك ضمن هذا النطاق`
+      : 'يرجى تحديد سعرك ضمن النطاق المحدد لكل خدمة';
+  }
+
+  const grid = document.getElementById('my-services-grid');
+  if(!subs.length) {
+    grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">
+      <div style="font-size:36px;margin-bottom:12px">🔧</div>
+      <p>لم يتم إضافة خدمات فرعية لـ "${svcType}" بعد<br><small>يقوم الأدمن بإضافتها</small></p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = `<div class="sub-svc-grid">` + subs.map(sub => {
+    const ex = existingMap[sub.id];
+    const checked = !!ex;
+    const customPrice = ex?.custom_price || '';
+    const priceMin = currentProvider.grade==='استشاري' ? (sub.price_min_consultant||sub.price_min||0) : (sub.price_min_specialist||sub.price_min||0);
+    const priceMax = currentProvider.grade==='استشاري' ? (sub.price_max_consultant||sub.price_max||0) : (sub.price_max_specialist||sub.price_max||0);
+
+    return `<div class="sub-svc-item ${checked?'checked':''}" id="sub-item-${sub.id}">
+      <div class="sub-svc-top">
+        <div>
+          <div class="sub-svc-name">${san(sub.name)}</div>
+          ${sub.duration?`<div class="sub-svc-range">⏱ ${san(sub.duration)}</div>`:''}
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="sub-chk-${sub.id}" ${checked?'checked':''} onchange="onSubToggle('${sub.id}', this)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">نطاق الأدمن: <span class="range-badge">${priceMin} – ${priceMax} ج.م</span></div>
+      <div class="sub-svc-price" id="sub-price-row-${sub.id}" style="display:${checked?'flex':'none'}">
+        <label>سعرك (ج.م):</label>
+        <input class="price-input" type="number" id="sub-price-${sub.id}"
+          value="${customPrice}" placeholder="${priceMin}"
+          min="${priceMin}" max="${priceMax}"
+          oninput="validateSubPrice('${sub.id}','${priceMin}','${priceMax}')">
+        <span style="font-size:11px;color:var(--muted)">ج.م</span>
+      </div>
+      <div id="sub-price-err-${sub.id}" style="font-size:11px;color:var(--danger);display:none"></div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function onSubToggle(subId, checkbox) {
+  const row = document.getElementById('sub-price-row-'+subId);
+  const item = document.getElementById('sub-item-'+subId);
+  if(checkbox.checked) {
+    row.style.display = 'flex';
+    item.classList.add('checked');
+  } else {
+    row.style.display = 'none';
+    item.classList.remove('checked');
+  }
+}
+
+function validateSubPrice(subId, min, max) {
+  const inp = document.getElementById('sub-price-'+subId);
+  const err = document.getElementById('sub-price-err-'+subId);
+  const val = parseFloat(inp.value);
+  if(isNaN(val)) { err.style.display='none'; return true; }
+  if(val < parseFloat(min) || val > parseFloat(max)) {
+    err.textContent = `⚠️ السعر يجب بين ${min} و ${max} ج.م`;
+    err.style.display = 'block';
+    inp.style.borderColor = 'var(--danger)';
+    return false;
+  }
+  err.style.display = 'none';
+  inp.style.borderColor = 'var(--accent)';
+  return true;
+}
+
+async function saveMyServices() {
+  if(!currentProvider) return;
+  const svcType = currentProvider.service_type || 'كشف منزلي';
+  const subs = allSubServices.filter(s => s.service_name === svcType && s.is_active !== false && s.group_name !== 'grade');
+
+  let hasError = false;
+  const toSave = [];
+
+  for(const sub of subs) {
+    const chk = document.getElementById('sub-chk-'+sub.id);
+    if(!chk) continue;
+    if(chk.checked) {
+      const priceMin = currentProvider.grade==='استشاري'?(sub.price_min_consultant||sub.price_min||0):(sub.price_min_specialist||sub.price_min||0);
+      const priceMax = currentProvider.grade==='استشاري'?(sub.price_max_consultant||sub.price_max||0):(sub.price_max_specialist||sub.price_max||0);
+      if(!validateSubPrice(sub.id, priceMin, priceMax)) { hasError = true; continue; }
+      const priceVal = parseFloat(document.getElementById('sub-price-'+sub.id)?.value)||null;
+      toSave.push({ provider_id: currentProvider.id, sub_service_id: sub.id, custom_price: priceVal, is_active: true });
+    }
+  }
+
+  if(hasError) { showToast('⚠️ تحقق من الأسعار المحددة','error'); return; }
+
+  // Delete existing then insert
+  await sb.from('provider_services').delete().eq('provider_id', currentProvider.id).in('sub_service_id', subs.map(s=>s.id));
+  if(toSave.length) {
+    const { error } = await sb.from('provider_services').insert(toSave);
+    if(error) { showToast('❌ '+error.message,'error'); return; }
+  }
+
+  showToast('✅ تم حفظ خدماتك وأسعارك','success');
+}
+
+// ============================================================
+// LOAD GLOBAL DATA
+// ============================================================
+async function loadSubServicesAll() {
+  const { data } = await sb.from('sub_services').select('*').eq('is_active',true).order('service_name').order('name');
+  allSubServices = data || [];
+}
+async function loadAreas() {
+  const { data } = await sb.from('coverage_areas').select('*').eq('is_active',true).order('name');
+  allAreas = data || [];
+  const sel = document.getElementById('p-area');
+  if(sel) {
+    sel.innerHTML = '<option value="">اختر المنطقة</option>' + allAreas.map(a=>`<option value="${san(a.name)}">${san(a.name)}</option>`).join('');
+  }
+}
+
+// ============================================================
+// REALTIME
+// ============================================================
+function setupProviderRealtime() {
+  sb.channel('prov-bookings-' + currentProvider.id)
+    .on('postgres_changes', {
+      event:  'INSERT',
+      schema: 'public',
+      table:  'bookings',
+      filter: `provider_id=eq.${currentProvider.id}`
+    }, (payload) => {
+      showToast('🔔 حجز جديد من: ' + san(payload.new?.patient_name || 'عميل'));
+      myBookings.unshift(payload.new);
+      const badge = document.getElementById('new-bookings-badge');
+      badge.textContent = parseInt(badge.textContent || 0) + 1;
+      badge.style.display = 'flex';
+      // تحديث الـ overview
+      document.getElementById('pov-all').textContent     = myBookings.length;
+      document.getElementById('pov-pending').textContent = myBookings.filter(b=>b.status==='pending').length;
+    }).subscribe();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function statusBadge(st) {
+  const m = {pending:'<span class="badge yellow">⏳ جديد</span>',confirmed:'<span class="badge blue">✅ مؤكد</span>',completed:'<span class="badge green">✔ مكتمل</span>',cancelled:'<span class="badge red">✖ ملغي</span>'};
+  return m[st]||`<span class="badge gray">${st||'—'}</span>`;
+}
+function payBadge(m) {
+  const map = {cash:'💵 كاش',wallet:'💳 محفظة',instapay:'📱 انستا باي'};
+  return `<span style="font-size:12px">${map[m]||m||'—'}</span>`;
+}
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function showToast(msg,type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast '+(type||'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if(session) {
+    const { data: provData } = await sb.from('providers').select('*').eq('user_id', session.user.id).single();
+    if(provData && provData.status === 'active') {
+      loadProviderApp(provData);
+      return;
+    }
+  }
+  document.getElementById('login-screen').style.display = 'flex';
+});
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+});
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
