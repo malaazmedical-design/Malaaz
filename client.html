@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملاذ — حسابي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --dark:#1e2c2f;--dark2:#2d3b3e;--accent:#c9a84c;
+  --bg:#f5f2ec;--white:#fff;--text:#2d3b3e;
+  --muted:#6b7c80;--border:rgba(58,74,78,.12);
+  --success:#22c55e;--danger:#ef4444;--info:#3b82f6;
+}
+body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);}
+
+/* ===== LOGIN ===== */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--dark);}
+.login-card{background:var(--dark2);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:36px 28px;width:420px;max-width:100%;text-align:center;}
+.login-logo{font-size:32px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;}
+.login-sub{font-size:10px;letter-spacing:4px;color:var(--accent);opacity:.7;margin-bottom:8px;}
+.login-title{font-size:16px;color:rgba(255,255,255,.55);margin-bottom:24px;}
+.login-input{width:100%;padding:14px 16px;border:1.5px solid rgba(255,255,255,.1);border-radius:12px;font-size:16px;font-family:'Cairo',sans-serif;background:rgba(255,255,255,.05);color:#fff;outline:none;margin-bottom:12px;text-align:center;letter-spacing:2px;transition:border-color .2s;}
+.login-input:focus{border-color:var(--accent);}
+.login-input::placeholder{letter-spacing:0;color:rgba(255,255,255,.25);}
+.login-btn{width:100%;background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.3);}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.login-err{color:#ff6b6b;font-size:12px;margin-bottom:10px;display:none;}
+.back-link{color:rgba(255,255,255,.4);font-size:12px;margin-top:16px;cursor:pointer;display:block;}
+.back-link:hover{color:var(--accent);}
+
+/* ===== APP ===== */
+.app-wrap{display:none;min-height:100vh;}
+
+/* Header */
+.app-header{background:var(--dark);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.app-header-logo{font-size:22px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;}
+.app-header-logo span{color:var(--accent);}
+.app-header-user{display:flex;align-items:center;gap:10px;}
+.app-header-name{font-size:13px;color:rgba(255,255,255,.7);font-weight:600;}
+.logout-btn{background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'Cairo',sans-serif;}
+
+/* Nav Tabs */
+.app-nav{background:#fff;border-bottom:2px solid var(--border);display:flex;overflow-x:auto;}
+.app-nav::-webkit-scrollbar{display:none;}
+.nav-tab{padding:14px 20px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.nav-tab i{margin-left:6px;}
+
+/* Content */
+.app-content{max-width:700px;margin:0 auto;padding:20px;}
+
+/* Cards */
+.card{background:#fff;border-radius:16px;border:1px solid var(--border);margin-bottom:16px;overflow:hidden;}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:14px;font-weight:700;}
+.card-body{padding:20px;}
+
+/* Form */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;letter-spacing:.5px;}
+.form-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Cairo',sans-serif;color:var(--text);outline:none;transition:border-color .2s;background:#fff;}
+.form-input:focus{border-color:var(--accent);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* Buttons */
+.btn{padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;border:none;transition:all .2s;}
+.btn-accent{background:var(--accent);color:var(--dark);}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--muted);}
+.btn-danger{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.2);}
+.btn:hover{transform:translateY(-1px);}
+
+/* Address card */
+.address-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.address-card.default{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.05);}
+.address-info .address-text{font-size:13px;font-weight:700;}
+.address-info .address-area{font-size:11px;color:var(--muted);margin-top:2px;}
+.default-badge{font-size:10px;font-weight:700;color:var(--accent);background:rgba(201,168,76,.1);padding:2px 8px;border-radius:20px;margin-top:4px;display:inline-block;}
+
+/* Booking card */
+.booking-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+.booking-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.booking-service{font-size:14px;font-weight:700;}
+.booking-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.booking-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.booking-meta span{font-size:11px;color:var(--muted);background:#fff;padding:3px 8px;border-radius:20px;border:1px solid var(--border);}
+.status-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;}
+.status-pending{background:rgba(245,158,11,.1);color:#f59e0b;}
+.status-confirmed{background:rgba(59,130,246,.1);color:var(--info);}
+.status-completed{background:rgba(34,197,94,.1);color:var(--success);}
+.status-cancelled{background:rgba(239,68,68,.1);color:var(--danger);}
+
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-state i{font-size:40px;margin-bottom:12px;opacity:.3;}
+.empty-state p{font-size:13px;}
+
+/* Toast */
+.toast-msg{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:var(--dark);color:#fff;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid rgba(201,168,76,.2);}
+.toast-msg.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr;}
+  .app-content{padding:16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">ملاذ</div>
+    <div class="login-sub">MALAAZ</div>
+    <div class="login-title">سجّل دخولك برقم موبايلك</div>
+    <div id="login-err" class="login-err"></div>
+    <input class="login-input" type="tel" id="login-phone" placeholder="01xxxxxxxxx" dir="ltr"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" id="login-btn" onclick="doLogin()">
+      <i class="fas fa-arrow-left" style="margin-right:6px"></i> دخول
+    </button>
+    <a class="back-link" href="/">← العودة للصفحة الرئيسية</a>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="app-wrap" id="app-wrap">
+
+  <!-- Header -->
+  <div class="app-header">
+    <div class="app-header-logo">ملا<span>ذ</span></div>
+    <div class="app-header-user">
+      <div class="app-header-name" id="header-name">مرحباً!</div>
+      <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt" style="margin-left:4px"></i> خروج</button>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="app-nav">
+    <div class="nav-tab active" onclick="showTab('profile',this)"><i class="fas fa-user"></i> ملفي</div>
+    <div class="nav-tab" onclick="showTab('addresses',this)"><i class="fas fa-map-marker-alt"></i> عناويني</div>
+    <div class="nav-tab" onclick="showTab('bookings',this)"><i class="fas fa-calendar-check"></i> حجوزاتي</div>
+  </div>
+
+  <div class="app-content">
+
+    <!-- TAB: PROFILE -->
+    <div class="tab-content active" id="tab-profile">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">البيانات الشخصية</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <div class="form-label">الاسم الكامل *</div>
+              <input class="form-input" id="p-name" placeholder="مثال: أحمد محمد">
+            </div>
+            <div class="form-group">
+              <div class="form-label">رقم الموبايل</div>
+              <input class="form-input" id="p-phone" placeholder="01xxxxxxxxx" dir="ltr" readonly
+                style="background:var(--bg);color:var(--muted)">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <div class="form-label">البريد الإلكتروني (اختياري)</div>
+              <input class="form-input" id="p-email" type="email" placeholder="example@gmail.com">
+            </div>
+          </div>
+          <button class="btn btn-accent" onclick="saveProfile()" style="width:100%;margin-top:4px">
+            <i class="fas fa-save" style="margin-left:6px"></i> حفظ البيانات
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ADDRESSES -->
+    <div class="tab-content" id="tab-addresses" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">عناويني المحفوظة</div>
+          <button class="btn btn-accent" onclick="showAddAddressForm()" style="padding:8px 14px;font-size:12px">
+            <i class="fas fa-plus" style="margin-left:4px"></i> إضافة
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="addresses-list">
+            <div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>لا توجد عناوين محفوظة</p></div>
+          </div>
+
+          <!-- Add form -->
+          <div id="add-address-form" style="display:none;margin-top:16px;padding:16px;background:var(--bg);border-radius:12px;border:1px solid var(--border)">
+            <div class="form-group">
+              <div class="form-label">العنوان التفصيلي *</div>
+              <input class="form-input" id="a-address" placeholder="مثال: شارع التحرير، عمارة 12، شقة 3">
+            </div>
+            <div class="form-group">
+              <div class="form-label">المنطقة *</div>
+              <select class="form-input" id="a-area">
+                <option value="">اختر المنطقة</option>
+              </select>
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;gap:8px">
+              <input type="checkbox" id="a-default" style="width:16px;height:16px">
+              <label for="a-default" style="font-size:13px;cursor:pointer">تعيين كعنوان افتراضي</label>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-accent" onclick="saveAddress()" style="flex:1">حفظ العنوان</button>
+              <button class="btn btn-ghost" onclick="document.getElementById('add-address-form').style.display='none'">إلغاء</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: BOOKINGS -->
+    <div class="tab-content" id="tab-bookings" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">حجوزاتي</div>
+          <a href="/" class="btn btn-accent" style="font-size:12px;padding:8px 14px;text-decoration:none">
+            <i class="fas fa-plus" style="margin-left:4px"></i> حجز جديد
+          </a>
+        </div>
+        <div class="card-body" id="bookings-list">
+          <div class="empty-state"><i class="fas fa-calendar"></i><p>جاري تحميل الحجوزات...</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast-msg" id="toast"></div>
+
+<script>
+const SUPABASE_URL = "https://omsictbrqlsohrmxeuym.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentClient = null;
+let coverageAreas  = [];
+
+// ============================================================
+// LOGIN
+// ============================================================
+async function doLogin() {
+  const phone = document.getElementById('login-phone').value.trim().replace(/\s/g,'');
+  const err   = document.getElementById('login-err');
+  const btn   = document.getElementById('login-btn');
+
+  err.style.display = 'none';
+  if(!/^01[0125]\d{8}$/.test(phone)) {
+    err.textContent = '⚠️ رقم الموبايل غير صحيح';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'جاري...';
+
+  // ابحث عن العميل، لو مش موجود أنشئه
+  let { data: client } = await sb.from('clients').select('*').eq('phone', phone).single();
+
+  if(!client) {
+    const { data: newClient, error } = await sb.from('clients').insert([{ phone }]).select().single();
+    if(error) {
+      err.textContent = '❌ حصل خطأ: ' + error.message;
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-arrow-left" style="margin-right:6px"></i> دخول';
+      return;
+    }
+    client = newClient;
+  }
+
+  currentClient = client;
+  localStorage.setItem('malaaz_client_id', client.id);
+  localStorage.setItem('malaaz_client_phone', phone);
+  showApp(client);
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-arrow-left" style="margin-right:6px"></i> دخول';
+}
+
+function doLogout() {
+  currentClient = null;
+  localStorage.removeItem('malaaz_client_id');
+  localStorage.removeItem('malaaz_client_phone');
+  document.getElementById('app-wrap').style.display    = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-phone').value = '';
+}
+
+// ============================================================
+// SHOW APP
+// ============================================================
+function showApp(client) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-wrap').style.display     = 'block';
+
+  // ملء البيانات
+  document.getElementById('p-name').value  = client.name  || '';
+  document.getElementById('p-phone').value = client.phone || '';
+  document.getElementById('p-email').value = client.email || '';
+  document.getElementById('header-name').textContent = client.name ? 'مرحباً، ' + client.name : 'مرحباً!';
+
+  // تحميل البيانات
+  loadAreas();
+  loadAddresses();
+  loadBookings();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = 'block';
+  btn.classList.add('active');
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+async function saveProfile() {
+  const name  = document.getElementById('p-name').value.trim();
+  const email = document.getElementById('p-email').value.trim();
+  if(!name) { showToast('⚠️ أدخل اسمك'); return; }
+
+  const { error } = await sb.from('clients').update({ name, email: email||null }).eq('id', currentClient.id);
+  if(error) { showToast('❌ ' + error.message); return; }
+
+  currentClient.name  = name;
+  currentClient.email = email;
+  document.getElementById('header-name').textContent = 'مرحباً، ' + name;
+  showToast('✅ تم حفظ بياناتك');
+}
+
+// ============================================================
+// AREAS
+// ============================================================
+async function loadAreas() {
+  const { data } = await sb.from('coverage_areas').select('name').eq('is_active', true).order('name');
+  coverageAreas = data || [];
+  const select = document.getElementById('a-area');
+  if(select) {
+    select.innerHTML = '<option value="">اختر المنطقة</option>';
+    coverageAreas.forEach(a => {
+      const o = document.createElement('option');
+      o.value = a.name; o.textContent = a.name;
+      select.appendChild(o);
+    });
+  }
+}
+
+// ============================================================
+// ADDRESSES
+// ============================================================
+async function loadAddresses() {
+  const { data } = await sb.from('client_addresses')
+    .select('*').eq('client_id', currentClient.id).order('is_default', {ascending:false});
+  renderAddresses(data || []);
+}
+
+function renderAddresses(list) {
+  const el = document.getElementById('addresses-list');
+  if(!list.length) {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>لا توجد عناوين محفوظة — أضف عنوانك الأول!</p></div>';
+    return;
+  }
+  el.innerHTML = list.map(a => `
+    <div class="address-card ${a.is_default?'default':''}">
+      <div class="address-info">
+        <div class="address-text">${s(a.address)}</div>
+        <div class="address-area"><i class="fas fa-map-marker-alt" style="margin-left:3px;font-size:10px"></i>${s(a.area)}</div>
+        ${a.is_default ? '<span class="default-badge">افتراضي</span>' : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        ${!a.is_default ? `<button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="setDefaultAddress('${a.id}')">تعيين افتراضي</button>` : ''}
+        <button class="btn btn-danger" style="font-size:11px;padding:5px 10px" onclick="deleteAddress('${a.id}')">حذف</button>
+      </div>
+    </div>`).join('');
+}
+
+function showAddAddressForm() {
+  document.getElementById('add-address-form').style.display = 'block';
+}
+
+async function saveAddress() {
+  const address    = document.getElementById('a-address').value.trim();
+  const area       = document.getElementById('a-area').value;
+  const isDefault  = document.getElementById('a-default').checked;
+  if(!address || !area) { showToast('⚠️ أدخل العنوان واختر المنطقة'); return; }
+
+  // لو افتراضي — امسح الافتراضي القديم
+  if(isDefault) {
+    await sb.from('client_addresses').update({is_default:false}).eq('client_id', currentClient.id);
+  }
+
+  const { error } = await sb.from('client_addresses').insert([{
+    client_id: currentClient.id, address, area, is_default: isDefault
+  }]);
+  if(error) { showToast('❌ ' + error.message); return; }
+
+  document.getElementById('a-address').value = '';
+  document.getElementById('a-area').value    = '';
+  document.getElementById('a-default').checked = false;
+  document.getElementById('add-address-form').style.display = 'none';
+  showToast('✅ تم إضافة العنوان');
+  loadAddresses();
+}
+
+async function setDefaultAddress(id) {
+  await sb.from('client_addresses').update({is_default:false}).eq('client_id', currentClient.id);
+  await sb.from('client_addresses').update({is_default:true}).eq('id', id);
+  showToast('✅ تم تعيين العنوان الافتراضي');
+  loadAddresses();
+}
+
+async function deleteAddress(id) {
+  if(!confirm('حذف هذا العنوان؟')) return;
+  await sb.from('client_addresses').delete().eq('id', id);
+  showToast('🗑 تم الحذف');
+  loadAddresses();
+}
+
+// ============================================================
+// BOOKINGS
+// ============================================================
+async function loadBookings() {
+  const { data } = await sb.from('bookings')
+    .select('id,service_type,sub_option,area,appointment_time,status,created_at,price,provider_id')
+    .eq('phone', currentClient.phone)
+    .order('created_at', {ascending:false})
+    .limit(20);
+
+  const el = document.getElementById('bookings-list');
+  if(!data?.length) {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-calendar"></i><p>لا توجد حجوزات بعد — <a href="/" style="color:var(--accent)">احجز الآن</a></p></div>';
+    return;
+  }
+
+  const statusMap = {
+    pending:   { label:'معلق',   cls:'status-pending'   },
+    confirmed: { label:'مؤكد',   cls:'status-confirmed' },
+    completed: { label:'مكتمل',  cls:'status-completed' },
+    cancelled: { label:'ملغي',   cls:'status-cancelled' },
+  };
+
+  el.innerHTML = data.map(b => {
+    const st = statusMap[b.status] || { label:b.status, cls:'' };
+    return `
+      <div class="booking-card">
+        <div class="booking-header">
+          <div>
+            <div class="booking-service">${s(b.service_type||'—')}</div>
+            ${b.sub_option ? `<div class="booking-sub">${s(b.sub_option)}</div>` : ''}
+          </div>
+          <span class="status-badge ${st.cls}">${st.label}</span>
+        </div>
+        <div class="booking-meta">
+          ${b.area ? `<span><i class="fas fa-map-marker-alt" style="margin-left:3px"></i>${s(b.area)}</span>` : ''}
+          ${b.appointment_time ? `<span><i class="fas fa-clock" style="margin-left:3px"></i>${s(b.appointment_time)}</span>` : ''}
+          ${b.price ? `<span><i class="fas fa-tag" style="margin-left:3px"></i>${b.price} ج.م</span>` : ''}
+        </div>
+        ${b.status==='completed' ? `
+          <div style="margin-top:10px">
+            <a href="/review.html?bid=${b.id}&svc=${encodeURIComponent(b.service_type||'')}"
+              style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:700">
+              ⭐ قيّم تجربتك
+            </a>
+          </div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function s(str) {
+  if(!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(-20px)';
+  }, 3000);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', async () => {
+  // تحقق لو في client محفوظ
+  const savedId    = localStorage.getItem('malaaz_client_id');
+  const savedPhone = localStorage.getItem('malaaz_client_phone');
+
+  if(savedId && savedPhone) {
+    const { data: client } = await sb.from('clients').select('*').eq('id', savedId).single();
+    if(client) {
+      currentClient = client;
+      showApp(client);
+      return;
+    }
+  }
+  document.getElementById('login-screen').style.display = 'flex';
+});
+</script>
+</body>
+</html>
