@@ -226,6 +226,14 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
       <input class="login-input" type="email" id="r-email" placeholder="البريد الإلكتروني *">
       <input class="login-input" type="password" id="r-pass" placeholder="كلمة المرور *">
       <input class="login-input" type="tel" id="r-phone" placeholder="رقم الموبايل *" dir="ltr">
+      <select class="login-input" id="r-service-type" style="color:#fff;background:rgba(255,255,255,.05)">
+        <option value="">نوع الخدمة *</option>
+        <option value="كشف منزلي">كشف منزلي</option>
+        <option value="تمريض منزلي">تمريض منزلي</option>
+        <option value="أشعة منزلية">أشعة منزلية</option>
+      </select>
+      <input class="login-input" type="text" id="r-specialty" placeholder="التخصص (مثال: باطنة، أطفال، تمريض) *">
+      <input class="login-input" type="text" id="r-area" placeholder="منطقة تقديم الخدمة (مثال: مدينة نصر) *">
       <div id="register-err" style="color:#ff6b6b;font-size:12px;margin-bottom:8px;display:none"></div>
       <button class="login-btn" onclick="doRegister()"><i class="fas fa-user-plus" style="margin-left:8px"></i> إنشاء حساب</button>
       <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:12px">سيتم مراجعة طلبك من الأدمن قبل التفعيل</div>
@@ -545,10 +553,13 @@ async function doProviderLogin() {
 // REGISTER — Supabase Auth + insert providers row
 // ============================================================
 async function doRegister() {
-  const name  = document.getElementById('r-name').value.trim();
-  const email = document.getElementById('r-email').value.trim();
-  const pass  = document.getElementById('r-pass').value;
-  const phone = document.getElementById('r-phone').value.trim();
+  const name        = document.getElementById('r-name').value.trim();
+  const email       = document.getElementById('r-email').value.trim();
+  const pass        = document.getElementById('r-pass').value;
+  const phone       = document.getElementById('r-phone').value.trim();
+  const serviceType = document.getElementById('r-service-type').value;
+  const specialty   = document.getElementById('r-specialty').value.trim();
+  const area        = document.getElementById('r-area').value.trim();
   const err   = document.getElementById('register-err');
   const btn   = document.querySelector('#tab-register .login-btn');
 
@@ -570,7 +581,8 @@ async function doRegister() {
   const userId = authData?.user?.id || authData?.session?.user?.id;
   if(!userId) {
     showToast('✅ تم إنشاء الحساب — تحقق من بريدك الإلكتروني لتأكيد الحساب');
-    ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
+    ['r-name','r-email','r-pass','r-phone','r-specialty','r-area'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('r-service-type').value = '';
     switchLoginTab('login', document.querySelector('.login-tab'));
     return;
   }
@@ -581,6 +593,9 @@ async function doRegister() {
     name,
     email,
     phone,
+    service_type: serviceType,
+    specialty,
+    area,
     status:       'pending',
     is_available: false,
     rating:       5
@@ -589,7 +604,8 @@ async function doRegister() {
   if(provErr) { err.textContent = 'خطأ في إنشاء الملف: ' + provErr.message; err.style.display='block'; return; }
 
   showToast('✅ تم إنشاء الحساب — انتظر موافقة الأدمن');
-  ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
+  ['r-name','r-email','r-pass','r-phone','r-specialty','r-area'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('r-service-type').value = '';
   switchLoginTab('login', document.querySelector('.login-tab'));
 }
 
