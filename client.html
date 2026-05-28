@@ -593,9 +593,10 @@ async function showBookingDetails(bookingId) {
             </div>
             <div style="text-align:left">
               <div style="color:var(--accent);font-size:13px">${'★'.repeat(Math.round(provider.rating||5))}</div>
-              ${provider.phone ? `<a href="tel:+20${provider.phone.replace(/^0/,'')}" style="display:block;margin-top:6px;background:var(--accent);color:var(--dark);padding:6px 12px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;text-align:center">
-                <i class="fas fa-phone" style="margin-left:4px"></i> اتصال
-              </a>` : ''}
+              <a href="https://wa.me/201006484908?text=${encodeURIComponent('مرحباً، أريد الاستفسار عن حجزي #'+b.id?.slice(-6)?.toUpperCase())}"
+                target="_blank" style="display:block;margin-top:6px;background:#25D366;color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;text-align:center">
+                <i class="fab fa-whatsapp" style="margin-left:4px"></i> تواصل مع ملاذ
+              </a>
             </div>
           </div>
         </div>` : ''}
