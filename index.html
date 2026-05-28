@@ -1261,11 +1261,12 @@ async function viewProviderProfile(providerId) {
     document.body.appendChild(modal);
   }
 
-  // جلب التقييمات
+  // جلب التقييمات الخاصة بهذا المقدم فقط
   const { data: provReviews } = await sb.from('testimonials')
     .select('client_name,rating,text,service_type')
     .eq('is_active', true)
-    .limit(3);
+    .eq('provider_id', providerId)
+    .limit(5);
 
   const stars = '★'.repeat(Math.round(provider.rating || 5)) + '☆'.repeat(5 - Math.round(provider.rating || 5));
   const gradeLabel = provider.grade ? `<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px">${sanitize(provider.grade)}</span>` : '';
