@@ -377,7 +377,10 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
   </div>
   <div class="nav-right">
     <button class="nav-provider-btn" onclick="window.open('provider.html','_blank')">مقدم خدمة؟ سجّل هنا</button>
-    <button class="nav-provider-btn" onclick="window.open('client.html','_blank')" style="margin-left:4px" id="client-profile-btn" title="ملفي الشخصي"><i class="fas fa-user"></i></button>
+    <button onclick="window.open('client.html','_blank')" title="حسابي"
+      style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;margin-left:4px">
+      <i class="fas fa-user"></i>
+    </button>
     <button class="nav-cta" onclick="openBookingModal()">احجز الآن <i class="fas fa-arrow-left" style="margin-right:5px;font-size:12px"></i></button>
   </div>
 </nav>
@@ -1149,7 +1152,7 @@ async function loadServices() {
 // ============================================================
 let allDocs = [];
 async function loadDoctors() {
-  const { data } = await sb.from('providers').select('*').eq('status','active').order('rating',{ascending:false});
+  const { data } = await sb.from('providers').select('*').eq('status','active').eq('is_available',true).order('rating',{ascending:false});
   allDocs = data || [];
   renderDocs(allDocs);
 }
@@ -1165,10 +1168,7 @@ function renderDocCard(p, i) {
     <div class="doc-header">
       <div class="doc-ava">${icons[p.service_type] || '<i class="fas fa-user-md" style="font-size:40px;color:rgba(255,255,255,.7)"></i>'}</div>
       <div class="doc-name">${sanitize(p.name)}</div>
-      <div class="doc-spec">
-        ${p.grade ? `<span style="font-size:11px;background:rgba(201,168,76,.15);color:var(--accent);padding:2px 8px;border-radius:10px;margin-left:4px">${sanitize(p.grade)}</span>` : ''}
-        ${sanitize(p.specialty || (p.service_type === 'تمريض منزلي' ? 'تمريض' : p.service_type === 'أشعة منزلية' ? 'أشعة' : '—'))}
-      </div>
+      <div class="doc-spec">${sanitize(p.specialty || '—')}</div>
     </div>
     <div class="doc-body">
       <div class="doc-stars">${stars}</div>
@@ -1261,57 +1261,44 @@ async function viewProviderProfile(providerId) {
     document.body.appendChild(modal);
   }
 
-  // جلب تقييمات هذا المقدم
+  // جلب التقييمات
   const { data: provReviews } = await sb.from('testimonials')
     .select('client_name,rating,text,service_type')
     .eq('is_active', true)
-    .eq('service_type', provider.service_type||'')
     .limit(3);
 
   const stars = '★'.repeat(Math.round(provider.rating || 5)) + '☆'.repeat(5 - Math.round(provider.rating || 5));
-  const gradeLabel = provider.grade ? `<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-right:6px">${sanitize(provider.grade)}</span>` : '';
+  const gradeLabel = provider.grade ? `<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px">${sanitize(provider.grade)}</span>` : '';
 
-  // بناء قسم التقييمات
-  let reviewsHtml = '';
-  if(provReviews?.length) {
-    reviewsHtml = `
-      <div style="margin-top:16px;padding:0 18px">
-        <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px">⭐ آراء العملاء</div>
-        ${provReviews.map(r => `
-          <div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:8px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <div style="font-size:13px;font-weight:700">${sanitize(r.client_name||'عميل')}</div>
-              <div style="color:var(--accent);font-size:12px">${'★'.repeat(r.rating||5)}</div>
-            </div>
-            <div style="font-size:12px;color:var(--muted);line-height:1.6">${sanitize(r.text||'')}</div>
-          </div>`).join('')}
-      </div>`;
-  }
+  const reviewsHtml = provReviews?.length ? `
+    <div style="padding:16px 18px;border-top:1px solid var(--border)">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px">⭐ آراء العملاء</div>
+      ${provReviews.map(r => `
+        <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:12px;font-weight:700">${sanitize(r.client_name||'عميل')}</span>
+            <span style="color:var(--accent);font-size:11px">${'★'.repeat(r.rating||5)}</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.6">${sanitize(r.text||'')}</div>
+        </div>`).join('')}
+    </div>` : '';
 
   document.getElementById('provider-profile-content').innerHTML = `
     <div style="background:var(--dark2);padding:20px;border-radius:20px 20px 0 0;margin-bottom:0">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div style="font-size:18px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif">${sanitize(provider.name)}</div>
-          <div style="margin-top:6px;display:flex;align-items:center;flex-wrap:wrap;gap:4px">
-            ${gradeLabel}
-            <span style="font-size:12px;color:rgba(255,255,255,.5)">${sanitize(provider.specialty || provider.service_type || '')}</span>
-          </div>
-          <div style="color:var(--accent);font-size:13px;margin-top:6px">${stars} <span style="font-size:11px;color:rgba(255,255,255,.3)">${provider.rating||5}/5</span></div>
+          <div style="margin-top:5px">${gradeLabel}<span style="font-size:12px;color:rgba(255,255,255,.5)">${sanitize(provider.specialty||provider.service_type||'')}</span></div>
+          <div style="color:var(--accent);font-size:13px;margin-top:5px">${stars} <span style="font-size:10px;color:rgba(255,255,255,.3)">(${provider.rating||5}/5)</span></div>
         </div>
         <button onclick="document.getElementById('provider-profile-modal').classList.remove('open');document.body.style.overflow=''"
           style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0">×</button>
       </div>
-      <!-- بيانات المقدم -->
-      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
-        ${provider.area ? `<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:4px 10px;border-radius:20px"><i class="fas fa-map-marker-alt" style="margin-left:4px"></i>${sanitize(provider.area)}</span>` : ''}
-        ${provider.experience ? `<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:4px 10px;border-radius:20px"><i class="fas fa-briefcase" style="margin-left:4px"></i>${sanitize(String(provider.experience))} سنة خبرة</span>` : ''}
-        ${provider.service_type ? `<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:4px 10px;border-radius:20px">${sanitize(provider.service_type)}</span>` : ''}
-      </div>
-      ${provider.bio ? `<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:12px;line-height:1.7;padding:10px;background:rgba(255,255,255,.04);border-radius:10px">${sanitize(provider.bio)}</div>` : ''}
+      ${provider.area ? `<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:10px"><i class="fas fa-map-marker-alt" style="margin-left:4px"></i>${sanitize(provider.area)}</div>` : ''}
+      ${provider.bio ? `<div style="font-size:13px;color:rgba(255,255,255,.55);margin-top:10px;line-height:1.7">${sanitize(provider.bio)}</div>` : ''}
     </div>
-    <div style="padding:16px 18px">
-      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>
+    <div style="padding:0 18px 18px">
+      <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>
       ${servicesHtml}
       <button onclick="openProviderBooking({id:'${provider.id}',name:'${sanitize(provider.name)}',email:'${sanitize(provider.email||'')}',service_type:'${sanitize(provider.service_type || '')}'})"
         style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px">
@@ -1474,7 +1461,6 @@ async function openBookingModal(service, sub, provider) {
     }
     if(document.getElementById('bm-area')?.options.length <= 1) await loadAreas();
     updateSEO(bmSelectedService, document.getElementById('bm-area')?.value);
-    prefillFromSavedProfile();
     return;
   }
 
@@ -1508,29 +1494,10 @@ function loadFamilyMembers() {
 function closeBookingModal() {
   document.getElementById('booking-modal').classList.remove('open');
   document.body.style.overflow = '';
-  // مسح كل بيانات الفورم
-  ['bm-name','bm-phone','bm-email','bm-address','bm-notes'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if(el) el.value = '';
-  });
-  var timeEl = document.getElementById('bm-time');
-  if(timeEl) timeEl.value = '';
-  var areaEl = document.getElementById('bm-area');
-  if(areaEl) areaEl.selectedIndex = 0;
-  var gpsEl = document.getElementById('bm-location-status');
-  if(gpsEl) { gpsEl.style.display = 'none'; gpsEl.textContent = ''; }
-  // إعادة زرار الـ success
-  var btn = document.getElementById('bm-success-btn');
-  if(btn) {
-    btn.innerHTML = 'حسناً، شكراً!';
-    btn.style.cssText = 'margin-top:24px;background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif';
-    btn.onclick = closeBookingModal;
-  }
-  // مسح بيانات المقدم والـ summary
+  // مسح بيانات المقدم والـ summary عند الإغلاق
   bmSelectedProvider = null;
-  bmSelectedPrice    = null;
   window.bmGoogleMapsLink = null;
-  var summaryEl = document.getElementById('bm-service-summary');
+  const summaryEl = document.getElementById('bm-service-summary');
   if(summaryEl) { summaryEl.style.display = 'none'; summaryEl.innerHTML = ''; }
 }
 
@@ -2105,137 +2072,6 @@ function showBmError(msg) {
 // ============================================================
 // TOAST & HELPERS
 // ============================================================
-// ============================================================
-// CLIENT PROFILE — ملف العميل الشخصي
-// ============================================================
-function openClientProfile() {
-  // تحميل البيانات المحفوظة
-  const saved = JSON.parse(localStorage.getItem('malaaz_client') || '{}');
-  document.getElementById('cp-name').value  = saved.name  || '';
-  document.getElementById('cp-phone').value = saved.phone || '';
-  document.getElementById('cp-email').value = saved.email || '';
-
-  // تحميل العناوين
-  renderClientAddresses(saved.addresses || []);
-
-  // تحميل المناطق في الـ select
-  const areaSelect = document.getElementById('cp-new-area');
-  if(areaSelect && areaSelect.options.length <= 1) {
-    const areaEl = document.getElementById('bm-area');
-    if(areaEl) {
-      Array.from(areaEl.options).forEach(opt => {
-        if(opt.value) {
-          const o = document.createElement('option');
-          o.value = opt.value; o.textContent = opt.textContent;
-          areaSelect.appendChild(o);
-        }
-      });
-    }
-  }
-
-  // عرض الحجوزات لو عنده رقم
-  if(saved.phone) loadClientBookings(saved.phone);
-
-  document.getElementById('client-profile-modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function renderClientAddresses(addresses) {
-  const list = document.getElementById('cp-addresses-list');
-  if(!list) return;
-  if(!addresses.length) {
-    list.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px">لا توجد عناوين محفوظة</div>';
-    return;
-  }
-  list.innerHTML = addresses.map((a, i) => `
-    <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px">
-      <div>
-        <div style="font-size:13px;font-weight:700">${sanitize(a.address)}</div>
-        <div style="font-size:11px;color:var(--muted)">${sanitize(a.area)}</div>
-      </div>
-      <button onclick="removeClientAddress(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px">×</button>
-    </div>`).join('');
-}
-
-function addClientAddress() {
-  const address = document.getElementById('cp-new-address')?.value.trim();
-  const area    = document.getElementById('cp-new-area')?.value;
-  if(!address || !area) { showToast('⚠️ أدخل العنوان واختر المنطقة'); return; }
-  const saved = JSON.parse(localStorage.getItem('malaaz_client') || '{}');
-  const addresses = saved.addresses || [];
-  addresses.push({ address, area });
-  saved.addresses = addresses;
-  localStorage.setItem('malaaz_client', JSON.stringify(saved));
-  document.getElementById('cp-new-address').value = '';
-  document.getElementById('cp-new-area').value    = '';
-  renderClientAddresses(addresses);
-  showToast('✅ تم إضافة العنوان');
-}
-
-function removeClientAddress(idx) {
-  const saved = JSON.parse(localStorage.getItem('malaaz_client') || '{}');
-  const addresses = saved.addresses || [];
-  addresses.splice(idx, 1);
-  saved.addresses = addresses;
-  localStorage.setItem('malaaz_client', JSON.stringify(saved));
-  renderClientAddresses(addresses);
-}
-
-function saveClientProfile() {
-  const name  = document.getElementById('cp-name')?.value.trim();
-  const phone = document.getElementById('cp-phone')?.value.trim();
-  const email = document.getElementById('cp-email')?.value.trim();
-  if(!name || !phone) { showToast('⚠️ أدخل الاسم والموبايل'); return; }
-  const saved = JSON.parse(localStorage.getItem('malaaz_client') || '{}');
-  saved.name  = name;
-  saved.phone = phone;
-  saved.email = email;
-  localStorage.setItem('malaaz_client', JSON.stringify(saved));
-  // ملء بيانات فورم الحجز تلقائياً
-  const nameEl  = document.getElementById('bm-name');
-  const phoneEl = document.getElementById('bm-phone');
-  const emailEl = document.getElementById('bm-email');
-  if(nameEl)  nameEl.value  = name;
-  if(phoneEl) phoneEl.value = phone;
-  if(emailEl) emailEl.value = email || '';
-  showToast('✅ تم حفظ بياناتك — ستُملأ تلقائياً في الحجز');
-  closeModal('client-profile-modal');
-}
-
-async function loadClientBookings(phone) {
-  const list = document.getElementById('cp-bookings-list');
-  if(!list) return;
-  list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:10px">جاري التحميل...</div>';
-  const { data } = await sb.from('bookings')
-    .select('id,service_type,sub_option,area,appointment_time,status,created_at')
-    .eq('phone', phone)
-    .order('created_at', {ascending: false})
-    .limit(5);
-  if(!data?.length) {
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:10px">لا توجد حجوزات بهذا الرقم</div>';
-    return;
-  }
-  const statusColors = { pending:'#f59e0b', confirmed:'#3b82f6', completed:'#22c55e', cancelled:'#ef4444' };
-  const statusLabels = { pending:'معلق', confirmed:'مؤكد', completed:'مكتمل', cancelled:'ملغي' };
-  list.innerHTML = data.map(b => `
-    <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:13px;font-weight:700">${sanitize(b.service_type||'')}</div>
-        <span style="font-size:11px;font-weight:700;color:${statusColors[b.status]||'#888'}">${statusLabels[b.status]||b.status}</span>
-      </div>
-      ${b.sub_option ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">${sanitize(b.sub_option)}</div>` : ''}
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">${sanitize(b.area||'')} · ${sanitize(b.appointment_time||'')}</div>
-    </div>`).join('');
-}
-
-// ملء بيانات الفورم تلقائياً من الـ localStorage
-function prefillFromSavedProfile() {
-  const saved = JSON.parse(localStorage.getItem('malaaz_client') || '{}');
-  if(saved.name)  { const el = document.getElementById('bm-name');  if(el && !el.value) el.value = saved.name; }
-  if(saved.phone) { const el = document.getElementById('bm-phone'); if(el && !el.value) el.value = saved.phone; }
-  if(saved.email) { const el = document.getElementById('bm-email'); if(el && !el.value) el.value = saved.email; }
-}
-
 function showToast(msg, type) {
   const t = document.getElementById('toast');
   if(!t) return;
@@ -2892,66 +2728,6 @@ window.addEventListener('load', async () => {
 
 
 </script>
-
-<!-- CLIENT PROFILE MODAL -->
-<div class="modal-overlay" id="client-profile-modal">
-  <div class="modal-panel" style="max-height:90vh;overflow-y:auto;border-radius:20px 20px 0 0;background:var(--bg)">
-    <!-- Header -->
-    <div style="background:var(--dark2);padding:20px;border-radius:20px 20px 0 0;display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-size:18px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif">👤 ملفي الشخصي</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">بياناتك محفوظة على جهازك</div>
-      </div>
-      <button onclick="closeModal('client-profile-modal')" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">×</button>
-    </div>
-
-    <div style="padding:20px">
-      <!-- بيانات العميل -->
-      <div style="margin-bottom:20px">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">البيانات الشخصية</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">الاسم</div>
-            <input id="cp-name" class="bm-input" placeholder="اسمك الكامل" style="width:100%;margin:0">
-          </div>
-          <div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">رقم الموبايل</div>
-            <input id="cp-phone" class="bm-input" placeholder="01xxxxxxxxx" dir="ltr" style="width:100%;margin:0">
-          </div>
-          <div style="grid-column:1/-1">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">البريد الإلكتروني (اختياري)</div>
-            <input id="cp-email" class="bm-input" type="email" placeholder="example@gmail.com" style="width:100%;margin:0">
-          </div>
-        </div>
-      </div>
-
-      <!-- العناوين -->
-      <div style="margin-bottom:20px">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">عناوين التوصيل</div>
-        <div id="cp-addresses-list" style="margin-bottom:10px"></div>
-        <div style="display:flex;gap:8px">
-          <input id="cp-new-address" class="bm-input" placeholder="أضف عنوان جديد..." style="flex:1;margin:0">
-          <select id="cp-new-area" class="bm-input" style="width:130px;margin:0">
-            <option value="">المنطقة</option>
-          </select>
-          <button onclick="addClientAddress()" style="background:var(--dark);color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer;font-size:13px;white-space:nowrap;font-family:'Cairo',sans-serif">+ إضافة</button>
-        </div>
-      </div>
-
-      <!-- سجل الحجوزات -->
-      <div>
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">آخر حجوزاتي</div>
-        <div id="cp-bookings-list">
-          <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">أدخل رقم موبايلك لعرض حجوزاتك</div>
-        </div>
-      </div>
-
-      <button onclick="saveClientProfile()" style="width:100%;background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:16px">
-        <i class="fas fa-save" style="margin-left:8px"></i> حفظ البيانات
-      </button>
-    </div>
-  </div>
-</div>
 
 <div id="toast" style="position:fixed;top:90px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:var(--dark);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid rgba(201,168,76,.2);"></div>
 
