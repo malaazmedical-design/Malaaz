@@ -219,6 +219,9 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
       <input class="login-input" type="password" id="p-pass" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter')doProviderLogin()">
       <div id="login-err" style="color:#ff6b6b;font-size:12px;margin-bottom:8px;display:none"></div>
       <button class="login-btn" onclick="doProviderLogin()"><i class="fas fa-sign-in-alt" style="margin-left:8px"></i> دخول</button>
+      <button onclick="forgotPassword()" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;margin-top:10px;font-family:'Cairo',sans-serif;width:100%">
+        نسيت كلمة المرور؟
+      </button>
     </div>
     <!-- Register -->
     <div id="tab-register" style="display:none">
@@ -552,6 +555,25 @@ async function doProviderLogin() {
 // ============================================================
 // REGISTER — Supabase Auth + insert providers row
 // ============================================================
+async function forgotPassword() {
+  const email = document.getElementById('p-email')?.value?.trim();
+  if(!email) {
+    const input = prompt('أدخل بريدك الإلكتروني المسجل:');
+    if(!input) return;
+    const { error } = await sb.auth.resetPasswordForEmail(input, {
+      redirectTo: window.location.origin + '/provider.html'
+    });
+    if(error) { alert('❌ ' + error.message); return; }
+    alert('✅ تم إرسال رابط إعادة تعيين كلمة المرور على بريدك الإلكتروني');
+    return;
+  }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/provider.html'
+  });
+  if(error) { alert('❌ ' + error.message); return; }
+  alert('✅ تم إرسال رابط إعادة تعيين كلمة المرور على: ' + email);
+}
+
 async function doRegister() {
   const name        = document.getElementById('r-name').value.trim();
   const email       = document.getElementById('r-email').value.trim();
@@ -819,7 +841,7 @@ async function updateBooking(id, status) {
     if(status === 'completed') {
       // مكتمل — بعت رسالة تقييم للعميل على واتساب
       if(b.phone) {
-        const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}`;
+        const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}&pid=${currentProvider.id}`;
         const waMsg = encodeURIComponent(
           `مرحباً ${b.patient_name||''} 👋\n\n` +
           `شكراً لاختيارك منصة *ملاذ* 🏥\n\n` +
