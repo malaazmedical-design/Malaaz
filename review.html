@@ -109,6 +109,13 @@ const ratingLabels = ['', 'سيء 😞', 'مقبول 😐', 'كويس 🙂', 'ج
 const params = new URLSearchParams(location.search);
 bookingId   = params.get('bid');
 serviceType = params.get('svc') || '';
+let providerId = params.get('pid') || null;
+
+// لو مفيش pid في الـ URL — جيبه من الحجز
+if(bookingId && !providerId) {
+  sb.from('bookings').select('provider_id').eq('id', bookingId).single()
+    .then(({data}) => { if(data?.provider_id) providerId = data.provider_id; });
+}
 
 // Show service badge
 if(serviceType) {
