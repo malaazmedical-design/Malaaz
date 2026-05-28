@@ -562,7 +562,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     </div>
     <div class="card-body" style="padding:0">
       <table class="tbl">
-        <thead><tr><th>اسم العميل</th><th>الخدمة</th><th>المقدم</th><th>التقييم</th><th>الرأي</th><th>الحالة</th><th>إجراء</th></tr></thead>
+        <thead><tr><th>اسم العميل</th><th>الخدمة</th><th>التقييم</th><th>الرأي</th><th>الحالة</th><th>إجراء</th></tr></thead>
         <tbody id="testimonials-body"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
       </table>
     </div>
@@ -849,6 +849,12 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
         <textarea class="form-input" id="testi-text" rows="4" placeholder="اكتب رأي العميل هنا..."></textarea>
       </div>
       <div class="form-group" style="margin-top:12px">
+        <div class="form-label">مقدم الخدمة (لربط الرأي بمقدم معين)</div>
+        <select class="form-input" id="testi-provider">
+          <option value="">— عام (غير مرتبط بمقدم) —</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-top:12px">
         <div class="form-label">الحالة</div>
         <select class="form-input" id="testi-active">
           <option value="true">نشط — يظهر في الموقع</option>
@@ -1127,7 +1133,7 @@ async function updateBookingStatus(id, status) {
   if(status === 'completed') {
     const b = allBookings.find(x => x.id === id);
     if(b?.phone) {
-      const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}${b.provider_id?'&pid='+b.provider_id:''}`;
+      const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}`;
       const waMsg = encodeURIComponent(
         `مرحباً ${b.patient_name||''}! 👋\n\n` +
         `شكراً لاختيارك منصة *ملاذ* للرعاية الطبية المنزلية 🏥\n\n` +
@@ -1871,20 +1877,15 @@ async function loadTestimonials() {
   const { data } = await sb.from('testimonials').select('*').order('created_at', {ascending:false});
   const tbody = document.getElementById('testimonials-body');
   if(!data?.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">لا يوجد آراء — أضف واحداً</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">لا يوجد آراء — أضف واحداً</td></tr>';
     return;
   }
-  // جلب أسماء المقدمين
-  const provMap = {};
-  allProviders.forEach(p => { provMap[p.id] = p.name; });
-
   tbody.innerHTML = data.map(t => `
     <tr>
       <td><strong>${s(t.client_name)}</strong></td>
       <td>${s(t.service_type||'—')}</td>
-      <td style="font-size:12px;color:var(--info)">${t.provider_id ? s(provMap[t.provider_id]||'مقدم خدمة') : '<span style="color:var(--muted)">عام</span>'}</td>
       <td style="color:var(--accent)">${'★'.repeat(t.rating||5)}</td>
-      <td style="max-width:160px;font-size:12px;color:var(--muted)">${s(t.text||'—')}</td>
+      <td style="max-width:200px;font-size:12px;color:var(--muted)">${s(t.text||'—')}</td>
       <td><label class="toggle"><input type="checkbox" ${t.is_active?'checked':''} onchange="toggleTestimonial('${t.id}',this.checked)"><span class="toggle-slider"></span></label></td>
       <td><div class="act-btns">
         <button class="act-btn edit" onclick="editTestimonial(${JSON.stringify(t).replace(/"/g,'&quot;')})">تعديل</button>
@@ -1893,7 +1894,7 @@ async function loadTestimonials() {
     </tr>`).join('');
 }
 
-function openTestimonialModal(data) {
+async function openTestimonialModal(data) {
   document.getElementById('testi-modal-title').textContent = data ? 'تعديل رأي' : 'إضافة رأي عميل';
   document.getElementById('testi-id').value      = data?.id || '';
   document.getElementById('testi-name').value    = data?.client_name || '';
@@ -1901,6 +1902,20 @@ function openTestimonialModal(data) {
   document.getElementById('testi-rating').value  = data?.rating || 5;
   document.getElementById('testi-text').value    = data?.text || '';
   document.getElementById('testi-active').value  = data?.is_active !== false ? 'true' : 'false';
+
+  // ملء الـ providers dropdown
+  const provSelect = document.getElementById('testi-provider');
+  if(provSelect) {
+    provSelect.innerHTML = '<option value="">— عام (غير مرتبط بمقدم) —</option>';
+    const { data: providers } = await sb.from('providers').select('id,name,service_type').eq('status','active').order('name');
+    (providers||[]).forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = s(p.name) + ' — ' + s(p.service_type||'');
+      if(data?.provider_id === p.id) o.selected = true;
+      provSelect.appendChild(o);
+    });
+  }
   openModal('testimonial-modal');
 }
 function editTestimonial(data) { openTestimonialModal(data); }
@@ -1910,12 +1925,14 @@ async function saveTestimonial() {
   const name = document.getElementById('testi-name').value.trim();
   const text = document.getElementById('testi-text').value.trim();
   if(!name||!text) { showToast('⚠️ أدخل الاسم والرأي','error'); return; }
+  const providerId = document.getElementById('testi-provider')?.value || null;
   const payload = {
     client_name:  name,
     service_type: document.getElementById('testi-service').value || null,
     rating:       parseInt(document.getElementById('testi-rating').value)||5,
     text,
     is_active:    document.getElementById('testi-active').value === 'true',
+    provider_id:  providerId || null,
   };
   const { error } = id
     ? await sb.from('testimonials').update(payload).eq('id', id)
