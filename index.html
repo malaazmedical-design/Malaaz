@@ -378,7 +378,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
   <div class="nav-right">
     <button class="nav-provider-btn" onclick="window.open('provider.html','_blank')">مقدم خدمة؟ سجّل هنا</button>
     <button onclick="window.open('client.html','_blank')" title="حسابي"
-      style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;margin-left:4px">
+      style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.8);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">
       <i class="fas fa-user"></i>
     </button>
     <button class="nav-cta" onclick="openBookingModal()">احجز الآن <i class="fas fa-arrow-left" style="margin-right:5px;font-size:12px"></i></button>
@@ -1152,7 +1152,7 @@ async function loadServices() {
 // ============================================================
 let allDocs = [];
 async function loadDoctors() {
-  const { data } = await sb.from('providers').select('*').eq('status','active').eq('is_available',true).order('rating',{ascending:false});
+  const { data } = await sb.from('providers').select('*').eq('status','active').order('rating',{ascending:false});
   allDocs = data || [];
   renderDocs(allDocs);
 }
@@ -1221,28 +1221,28 @@ async function viewProviderProfile(providerId) {
     });
 
     const svcIcons = {'كشف منزلي':'🩺','تمريض منزلي':'👩‍⚕️','أشعة منزلية':'🔬'};
+    const uniqId = 'svc-select-' + providerId.slice(-6);
+    // بناء options لكل الخدمات مجمعة
+    const allOpts = [];
     Object.entries(grouped).forEach(([svcName, subs]) => {
-      servicesHtml += `
-        <div style="margin-bottom:16px">
-          <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px;display:flex;align-items:center;gap:6px">
-            <span>${svcIcons[svcName] || '🔧'}</span> ${sanitize(svcName)}
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            ${subs.map(ps => `
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px;cursor:pointer"
-                onclick="openBookingModal('${sanitize(svcName)}','${sanitize(ps.sub_name)}')">
-                <div>
-                  <div style="font-size:13px;font-weight:700">${sanitize(ps.sub_name)}</div>
-                  ${ps.duration ? `<div style="font-size:11px;color:var(--muted)">⏱ ${sanitize(ps.duration)}</div>` : ''}
-                </div>
-                <div style="text-align:left">
-                  <div style="font-size:16px;font-weight:900;color:var(--dark)">${ps.custom_price || ps.price_min || '—'} <span style="font-size:11px;color:var(--muted)">ج.م</span></div>
-                  ${ps.price_min ? `<div style="font-size:10px;color:var(--muted)">نطاق: ${ps.price_min}–${ps.price_max}</div>` : ''}
-                </div>
-              </div>`).join('')}
-          </div>
-        </div>`;
+      subs.forEach(ps => {
+        const price = ps.custom_price || ps.price_min || 0;
+        allOpts.push({ svcName, ps, price });
+      });
     });
+
+    servicesHtml = `
+      <div style="margin-bottom:12px">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">اختر الخدمة</div>
+        <select id="${uniqId}" onchange="onProviderServiceSelect(this,'${providerId}',${JSON.stringify(allOpts).replace(/"/g,'&quot;')})"
+          style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:13px;font-family:'Cairo',sans-serif;background:#fff;color:var(--text);cursor:pointer">
+          <option value="">— اختر الخدمة والسعر —</option>
+          ${allOpts.map((o,i) => `<option value="${i}">${svcIcons[o.svcName]||'🔧'} ${sanitize(o.svcName)} — ${sanitize(o.ps.sub_name)} · ${o.price} ج.م</option>`).join('')}
+        </select>
+        <div id="svc-detail-${providerId.slice(-6)}" style="display:none;margin-top:10px;padding:12px;background:var(--bg);border-radius:10px">
+          <div id="svc-detail-text-${providerId.slice(-6)}" style="font-size:13px;color:var(--muted)"></div>
+        </div>
+      </div>`;
   } else {
     servicesHtml = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">لم يحدد هذا المقدم خدماته الفرعية بعد</div>`;
   }
@@ -1261,39 +1261,17 @@ async function viewProviderProfile(providerId) {
     document.body.appendChild(modal);
   }
 
-  // جلب التقييمات الخاصة بهذا المقدم فقط
-  const { data: provReviews } = await sb.from('testimonials')
-    .select('client_name,rating,text,service_type')
-    .eq('is_active', true)
-    .eq('provider_id', providerId)
-    .limit(5);
-
   const stars = '★'.repeat(Math.round(provider.rating || 5)) + '☆'.repeat(5 - Math.round(provider.rating || 5));
-  const gradeLabel = provider.grade ? `<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px">${sanitize(provider.grade)}</span>` : '';
-
-  const reviewsHtml = provReviews?.length ? `
-    <div style="padding:16px 18px;border-top:1px solid var(--border)">
-      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px">⭐ آراء العملاء</div>
-      ${provReviews.map(r => `
-        <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:12px;font-weight:700">${sanitize(r.client_name||'عميل')}</span>
-            <span style="color:var(--accent);font-size:11px">${'★'.repeat(r.rating||5)}</span>
-          </div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.6">${sanitize(r.text||'')}</div>
-        </div>`).join('')}
-    </div>` : '';
-
   document.getElementById('provider-profile-content').innerHTML = `
-    <div style="background:var(--dark2);padding:20px;border-radius:20px 20px 0 0;margin-bottom:0">
+    <div style="background:var(--dark2);padding:20px;border-radius:20px 20px 0 0;margin-bottom:16px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div style="font-size:18px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif">${sanitize(provider.name)}</div>
-          <div style="margin-top:5px">${gradeLabel}<span style="font-size:12px;color:rgba(255,255,255,.5)">${sanitize(provider.specialty||provider.service_type||'')}</span></div>
-          <div style="color:var(--accent);font-size:13px;margin-top:5px">${stars} <span style="font-size:10px;color:rgba(255,255,255,.3)">(${provider.rating||5}/5)</span></div>
+          <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:3px">${sanitize(provider.specialty || provider.service_type || '')}</div>
+          <div style="color:var(--accent);font-size:14px;margin-top:6px">${stars}</div>
         </div>
         <button onclick="document.getElementById('provider-profile-modal').classList.remove('open');document.body.style.overflow=''"
-          style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0">×</button>
+          style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">×</button>
       </div>
       ${provider.area ? `<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:10px"><i class="fas fa-map-marker-alt" style="margin-left:4px"></i>${sanitize(provider.area)}</div>` : ''}
       ${provider.bio ? `<div style="font-size:13px;color:rgba(255,255,255,.55);margin-top:10px;line-height:1.7">${sanitize(provider.bio)}</div>` : ''}
@@ -1301,12 +1279,11 @@ async function viewProviderProfile(providerId) {
     <div style="padding:0 18px 18px">
       <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>
       ${servicesHtml}
-      <button onclick="openProviderBooking({id:'${provider.id}',name:'${sanitize(provider.name)}',email:'${sanitize(provider.email||'')}',service_type:'${sanitize(provider.service_type || '')}'})"
-        style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px">
-        <i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع ${sanitize(provider.name)}
+      <button id="book-btn-${provider.id.slice(-6)}" disabled
+        style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px;opacity:.4">
+        <i class="fas fa-calendar-check" style="margin-left:8px"></i> اختر الخدمة أولاً
       </button>
-    </div>
-    ${reviewsHtml}`;
+    </div>`;
 
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1862,6 +1839,41 @@ async function openProviderBooking(provData) {
 
   existingProvModal.classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function onProviderServiceSelect(select, providerId, allOpts) {
+  const idx = parseInt(select.value);
+  const detailEl = document.getElementById('svc-detail-' + providerId.slice(-6));
+  const detailText = document.getElementById('svc-detail-text-' + providerId.slice(-6));
+  if(isNaN(idx) || !allOpts[idx]) {
+    if(detailEl) detailEl.style.display = 'none';
+    return;
+  }
+  const opt = allOpts[idx];
+  if(detailEl) detailEl.style.display = 'block';
+  if(detailText) {
+    detailText.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:14px;font-weight:700">${sanitize(opt.ps.sub_name)}</div>
+          ${opt.ps.duration ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">⏱ ${sanitize(opt.ps.duration)}</div>` : ''}
+        </div>
+        <div style="font-size:20px;font-weight:900;color:var(--accent)">${opt.price} <span style="font-size:12px">ج.م</span></div>
+      </div>`;
+  }
+  // تحديث زرار الحجز
+  const bookBtn = document.getElementById('book-btn-' + providerId.slice(-6));
+  if(bookBtn) {
+    bookBtn.disabled = false;
+    bookBtn.style.opacity = '1';
+    bookBtn.onclick = () => {
+      const provider = allDocs.find(p => p.id === providerId) || {id: providerId};
+      selectProviderSub(opt.svcName, opt.ps.sub_name, opt.price, {
+        id: provider.id, name: provider.name, email: provider.email,
+        service_type: provider.service_type, specialty: provider.specialty, grade: provider.grade
+      });
+    };
+  }
 }
 
 function selectProviderSub(serviceName, subName, price, providerData) {
@@ -2437,6 +2449,7 @@ function injectIndexResponsive() {
     @media (max-width: 768px) {
       nav { padding: 0 16px !important; height: 60px !important; }
       .nav-links { display: none !important; }
+      .nav-provider-btn { display: none !important; }
       .hero { padding: 80px 20px 40px !important; min-height: auto !important; }
       .hero-visual { display: none !important; }
       h1 { font-size: 36px !important; letter-spacing: -1px !important; }
