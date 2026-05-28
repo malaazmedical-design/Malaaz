@@ -562,7 +562,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     </div>
     <div class="card-body" style="padding:0">
       <table class="tbl">
-        <thead><tr><th>اسم العميل</th><th>الخدمة</th><th>التقييم</th><th>الرأي</th><th>الحالة</th><th>إجراء</th></tr></thead>
+        <thead><tr><th>اسم العميل</th><th>الخدمة</th><th>المقدم</th><th>التقييم</th><th>الرأي</th><th>الحالة</th><th>إجراء</th></tr></thead>
         <tbody id="testimonials-body"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
       </table>
     </div>
@@ -1127,7 +1127,7 @@ async function updateBookingStatus(id, status) {
   if(status === 'completed') {
     const b = allBookings.find(x => x.id === id);
     if(b?.phone) {
-      const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}`;
+      const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}${b.provider_id?'&pid='+b.provider_id:''}`;
       const waMsg = encodeURIComponent(
         `مرحباً ${b.patient_name||''}! 👋\n\n` +
         `شكراً لاختيارك منصة *ملاذ* للرعاية الطبية المنزلية 🏥\n\n` +
@@ -1871,15 +1871,20 @@ async function loadTestimonials() {
   const { data } = await sb.from('testimonials').select('*').order('created_at', {ascending:false});
   const tbody = document.getElementById('testimonials-body');
   if(!data?.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">لا يوجد آراء — أضف واحداً</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">لا يوجد آراء — أضف واحداً</td></tr>';
     return;
   }
+  // جلب أسماء المقدمين
+  const provMap = {};
+  allProviders.forEach(p => { provMap[p.id] = p.name; });
+
   tbody.innerHTML = data.map(t => `
     <tr>
       <td><strong>${s(t.client_name)}</strong></td>
       <td>${s(t.service_type||'—')}</td>
+      <td style="font-size:12px;color:var(--info)">${t.provider_id ? s(provMap[t.provider_id]||'مقدم خدمة') : '<span style="color:var(--muted)">عام</span>'}</td>
       <td style="color:var(--accent)">${'★'.repeat(t.rating||5)}</td>
-      <td style="max-width:200px;font-size:12px;color:var(--muted)">${s(t.text||'—')}</td>
+      <td style="max-width:160px;font-size:12px;color:var(--muted)">${s(t.text||'—')}</td>
       <td><label class="toggle"><input type="checkbox" ${t.is_active?'checked':''} onchange="toggleTestimonial('${t.id}',this.checked)"><span class="toggle-slider"></span></label></td>
       <td><div class="act-btns">
         <button class="act-btn edit" onclick="editTestimonial(${JSON.stringify(t).replace(/"/g,'&quot;')})">تعديل</button>
