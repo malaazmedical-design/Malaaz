@@ -1304,7 +1304,7 @@ async function viewProviderProfile(providerId) {
     <div style="padding:14px 18px 18px">
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>
       ${servicesHtml}
-      <button onclick="openProviderBooking({id:'${provider.id}',name:'${sanitize(provider.name)}',email:'${sanitize(provider.email||'')}',service_type:'${sanitize(provider.service_type || '')}'})"
+      <button onclick="document.getElementById('provider-profile-modal').classList.remove('open');document.body.style.overflow='';openProviderBooking({id:'${provider.id}',name:'${sanitize(provider.name)}',email:'${sanitize(provider.email||'')}',service_type:'${sanitize(provider.service_type || '')}'})"
         style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px">
         <i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع ${sanitize(provider.name)}
       </button>
