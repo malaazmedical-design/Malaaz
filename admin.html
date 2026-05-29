@@ -530,7 +530,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     </div>
     <div class="card-body" style="padding:0">
       <table class="tbl">
-        <thead><tr><th>العميل</th><th>الخدمة</th><th>التقييم</th><th>التعليق</th><th>الحالة</th><th>إجراء</th></tr></thead>
+        <thead><tr><th>العميل</th><th>مقدم الخدمة</th><th>الخدمة</th><th>التقييم</th><th>التعليق</th><th>الحالة</th><th>إجراء</th></tr></thead>
         <tbody id="reviews-body"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
       </table>
     </div>
@@ -1483,13 +1483,16 @@ async function deleteArea(id){ if(!confirm('حذف؟'))return; await sb.from('co
 async function loadReviews() {
   const { data } = await sb.from('reviews').select('*').order('created_at',{ascending:false}).limit(50);
   const tbody = document.getElementById('reviews-body');
-  if(!data?.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">لا توجد تقييمات</td></tr>'; return; }
+  if(!data?.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">لا توجد تقييمات من العملاء بعد</td></tr>'; return; }
+  const provMap = {};
+  allProviders.forEach(p => { provMap[p.id] = p.name; });
   tbody.innerHTML = data.map(r => `
     <tr>
       <td><strong>${s(r.client_name||'مجهول')}</strong></td>
+      <td style="font-size:12px;font-weight:600;color:var(--info)">${r.provider_id ? s(provMap[r.provider_id]||'—') : '<span style="color:var(--muted)">—</span>'}</td>
       <td>${s(r.service_type||'—')}</td>
-      <td>${'★'.repeat(r.rating||5)}</td>
-      <td style="max-width:200px;font-size:12px">${s(r.text||'—')}</td>
+      <td style="color:var(--accent)">${'★'.repeat(r.rating||5)}</td>
+      <td style="max-width:160px;font-size:12px;color:var(--muted)">${s(r.text||'—')}</td>
       <td>${r.is_approved?'<span class="badge green">معتمد</span>':'<span class="badge yellow">بانتظار</span>'}</td>
       <td><div class="act-btns">
         ${!r.is_approved?`<button class="act-btn activate" onclick="approveReview('${r.id}')">قبول</button>`:''}
