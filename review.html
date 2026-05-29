@@ -153,13 +153,27 @@ async function submitReview() {
   btn.disabled = true;
   btn.textContent = 'جاري الإرسال...';
 
-  const { error } = await sb.from('testimonials').insert([{
-    client_name:  name,
-    service_type: serviceType || null,
-    rating:       selectedRating,
-    text:         text || null,
-    is_active:    false, // مش يظهر إلا بعد موافقة الأدمن
-  }]);
+  // لو فيه provider_id → reviews (تقييم مقدم)
+  // لو مفيش → testimonials (رأي عن المنصة)
+  let error;
+  if(providerId) {
+    ({ error } = await sb.from('reviews').insert([{
+      client_name:  name,
+      service_type: serviceType || null,
+      rating:       selectedRating,
+      text:         text || null,
+      is_approved:  false,
+      provider_id:  providerId,
+    }]));
+  } else {
+    ({ error } = await sb.from('testimonials').insert([{
+      client_name:  name,
+      service_type: serviceType || null,
+      rating:       selectedRating,
+      text:         text || null,
+      is_active:    false,
+    }]));
+  }
 
   if(error) {
     btn.disabled = false;
