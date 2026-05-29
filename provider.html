@@ -189,14 +189,24 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
-  .sidebar{transform:translateX(100%);transition:.3s;}
-  .sidebar.open{transform:translateX(0);}
+  .sidebar{width:260px;transform:translateX(100%);transition:.3s;z-index:200;}
+  .sidebar.open{transform:translateX(0);box-shadow:-4px 0 20px rgba(0,0,0,.3);}
   .main{margin-right:0;}
   .stats-grid{grid-template-columns:1fr 1fr;}
   .service-type-grid{grid-template-columns:1fr 1fr;}
   .sub-svc-grid{grid-template-columns:1fr;}
   .form-grid{grid-template-columns:1fr;}
+  .content{padding:16px;}
+  .topbar{padding:0 14px;}
 }
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:1fr;}
+  .service-type-grid{grid-template-columns:1fr;}
+  .grade-grid{grid-template-columns:1fr;}
+}
+.hamburger-btn{display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);flex-shrink:0;}
+@media(max-width:900px){.hamburger-btn{display:flex;}}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('P2Xy0_OBIWdVXk1gE');</script>
@@ -219,9 +229,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
       <input class="login-input" type="password" id="p-pass" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter')doProviderLogin()">
       <div id="login-err" style="color:#ff6b6b;font-size:12px;margin-bottom:8px;display:none"></div>
       <button class="login-btn" onclick="doProviderLogin()"><i class="fas fa-sign-in-alt" style="margin-left:8px"></i> دخول</button>
-      <button onclick="forgotPassword()" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;margin-top:10px;font-family:'Cairo',sans-serif;width:100%">
-        نسيت كلمة المرور؟
-      </button>
+      <button onclick="forgotPassword()" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;margin-top:10px;font-family:'Cairo',sans-serif;width:100%">نسيت كلمة المرور؟</button>
     </div>
     <!-- Register -->
     <div id="tab-register" style="display:none">
@@ -282,11 +290,15 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 <!-- MAIN -->
 <main class="main">
 <div class="topbar">
-  <div class="topbar-title" id="page-title">نظرة عامة</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="hamburger-btn" onclick="toggleProviderSidebar()">☰</button>
+    <div class="topbar-title" id="page-title">نظرة عامة</div>
+  </div>
   <div class="topbar-right">
     <button class="topbar-btn accent" onclick="saveAll()"><i class="fas fa-save" style="margin-left:6px"></i> حفظ</button>
   </div>
 </div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleProviderSidebar()"></div>
 <div class="content">
 
 <!-- ============================
@@ -556,22 +568,13 @@ async function doProviderLogin() {
 // REGISTER — Supabase Auth + insert providers row
 // ============================================================
 async function forgotPassword() {
-  const email = document.getElementById('p-email')?.value?.trim();
-  if(!email) {
-    const input = prompt('أدخل بريدك الإلكتروني المسجل:');
-    if(!input) return;
-    const { error } = await sb.auth.resetPasswordForEmail(input, {
-      redirectTo: window.location.origin + '/provider.html'
-    });
-    if(error) { alert('❌ ' + error.message); return; }
-    alert('✅ تم إرسال رابط إعادة تعيين كلمة المرور على بريدك الإلكتروني');
-    return;
-  }
-  const { error } = await sb.auth.resetPasswordForEmail(email, {
+  const input = prompt('أدخل بريدك الإلكتروني المسجل:');
+  if(!input) return;
+  const { error } = await sb.auth.resetPasswordForEmail(input.trim(), {
     redirectTo: window.location.origin + '/provider.html'
   });
   if(error) { alert('❌ ' + error.message); return; }
-  alert('✅ تم إرسال رابط إعادة تعيين كلمة المرور على: ' + email);
+  alert('✅ تم إرسال رابط إعادة تعيين كلمة المرور على بريدك');
 }
 
 async function doRegister() {
@@ -585,7 +588,7 @@ async function doRegister() {
   const err   = document.getElementById('register-err');
   const btn   = document.querySelector('#tab-register .login-btn');
 
-  if(!name||!email||!pass||!phone) { err.textContent='يرجى ملء كل الحقول'; err.style.display='block'; return; }
+  if(!name||!email||!pass||!phone||!serviceType||!specialty||!area) { err.textContent='يرجى ملء كل الحقول'; err.style.display='block'; return; }
   if(pass.length < 6)              { err.textContent='كلمة المرور 6 أحرف على الأقل'; err.style.display='block'; return; }
 
   err.style.display = 'none';
@@ -604,7 +607,7 @@ async function doRegister() {
   if(!userId) {
     showToast('✅ تم إنشاء الحساب — تحقق من بريدك الإلكتروني لتأكيد الحساب');
     ['r-name','r-email','r-pass','r-phone','r-specialty','r-area'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('r-service-type').value = '';
+    document.getElementById('r-service-type').value = '';
     switchLoginTab('login', document.querySelector('.login-tab'));
     return;
   }
@@ -626,8 +629,7 @@ async function doRegister() {
   if(provErr) { err.textContent = 'خطأ في إنشاء الملف: ' + provErr.message; err.style.display='block'; return; }
 
   showToast('✅ تم إنشاء الحساب — انتظر موافقة الأدمن');
-  ['r-name','r-email','r-pass','r-phone','r-specialty','r-area'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('r-service-type').value = '';
+  ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
   switchLoginTab('login', document.querySelector('.login-tab'));
 }
 
@@ -667,6 +669,12 @@ function showPage(id) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
   document.getElementById('page-title').textContent = pageTitles[id]||id;
+  // أغلق الـ sidebar على الموبايل
+  if(window.innerWidth <= 900) {
+    document.querySelector('.sidebar')?.classList.remove('open');
+    const ov = document.getElementById('sidebar-overlay');
+    if(ov) ov.style.display = 'none';
+  }
   document.querySelectorAll('.nav-item').forEach(n=>{
     if(n.getAttribute('onclick')?.includes("'"+id+"'")) n.classList.add('active');
   });
@@ -841,7 +849,7 @@ async function updateBooking(id, status) {
     if(status === 'completed') {
       // مكتمل — بعت رسالة تقييم للعميل على واتساب
       if(b.phone) {
-        const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}&pid=${currentProvider.id}`;
+        const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}`;
         const waMsg = encodeURIComponent(
           `مرحباً ${b.patient_name||''} 👋\n\n` +
           `شكراً لاختيارك منصة *ملاذ* 🏥\n\n` +
@@ -1140,6 +1148,15 @@ function showToast(msg,type='') {
 // ============================================================
 // INIT
 // ============================================================
+function toggleProviderSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if(!sidebar) return;
+  const isOpen = sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', !isOpen);
+  if(overlay) overlay.style.display = isOpen ? 'none' : 'block';
+}
+
 window.addEventListener('load', async () => {
   const { data: { session } } = await sb.auth.getSession();
   if(session) {
