@@ -1422,6 +1422,30 @@ let allSubsCache       = {};        // cache الخدمات الفرعية
 // ============================================================
 // BOOKING MODAL OPEN
 // ============================================================
+async function prefillClientData() {
+  const clientId = localStorage.getItem('malaaz_client_id');
+  const phone    = localStorage.getItem('malaaz_client_phone');
+  if(!clientId && !phone) return;
+  try {
+    let client = null;
+    if(clientId) {
+      const { data } = await sb.from('clients').select('name,phone,email').eq('id', clientId).single();
+      client = data;
+    }
+    if(client) {
+      const nameEl  = document.getElementById('bm-name');
+      const phoneEl = document.getElementById('bm-phone');
+      const emailEl = document.getElementById('bm-email');
+      if(nameEl && client.name && !nameEl.value)    nameEl.value  = client.name;
+      if(phoneEl && client.phone && !phoneEl.value)  phoneEl.value = client.phone;
+      if(emailEl && client.email && !emailEl.value)  emailEl.value = client.email;
+    } else if(phone) {
+      const phoneEl = document.getElementById('bm-phone');
+      if(phoneEl && !phoneEl.value) phoneEl.value = phone;
+    }
+  } catch(e) {}
+}
+
 async function openBookingModal(service, sub, provider) {
   bmSelectedService      = service || 'كشف منزلي';
   bmSelectedSub          = sub || '';
@@ -1442,6 +1466,9 @@ async function openBookingModal(service, sub, provider) {
 
   document.getElementById('booking-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // ملء البيانات المحفوظة تلقائياً من حساب العميل
+  prefillClientData();
 
   // لو في مقدم خدمة محدد — تخطى step1 واعرض step2 مباشرة
   if(bmSelectedProvider) {
@@ -1917,7 +1944,6 @@ async function bmSubmit() {
       appointment_time: time,
       service_type:     bmSelectedService,
       payment_method:   bmSelectedPayment,
-      payment_status:   'unpaid',
       status:           'pending',
     };
 
@@ -2440,6 +2466,8 @@ function injectIndexResponsive() {
     @media (max-width: 768px) {
       nav { padding: 0 16px !important; height: 60px !important; }
       .nav-links { display: none !important; }
+      .modal-panel { padding: 18px !important; border-radius: 20px 20px 0 0 !important; }
+      #provider-profile-content { font-size: 13px; }
       .nav-provider-btn { display: none !important; }
       .hero { padding: 80px 20px 40px !important; min-height: auto !important; }
       .hero-visual { display: none !important; }
