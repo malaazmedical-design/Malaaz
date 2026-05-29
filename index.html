@@ -1261,10 +1261,10 @@ async function viewProviderProfile(providerId) {
     document.body.appendChild(modal);
   }
 
-  // جلب تقييمات هذا المقدم فقط
-  const { data: provReviews } = await sb.from('testimonials')
+  // جلب تقييمات هذا المقدم من جدول reviews
+  const { data: provReviews } = await sb.from('reviews')
     .select('client_name,rating,text')
-    .eq('is_active', true)
+    .eq('is_approved', true)
     .eq('provider_id', providerId)
     .limit(5);
 
