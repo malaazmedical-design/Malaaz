@@ -126,13 +126,39 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
   <div class="login-card">
     <div class="login-logo">ملاذ</div>
     <div class="login-sub">MALAAZ</div>
-    <div class="login-title">سجّل دخولك برقم موبايلك</div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin:16px 0">
+      <button id="tab-login-btn" class="login-btn" onclick="switchAuthTab('login')"
+        style="flex:1;padding:10px;font-size:14px">دخول</button>
+      <button id="tab-register-btn" onclick="switchAuthTab('register')"
+        style="flex:1;padding:10px;font-size:14px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:none;border-radius:12px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700">حساب جديد</button>
+    </div>
+
     <div id="login-err" class="login-err"></div>
-    <input class="login-input" type="tel" id="login-phone" placeholder="01xxxxxxxxx" dir="ltr"
-      onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="login-btn" id="login-btn" onclick="doLogin()">
-      <i class="fas fa-arrow-left" style="margin-right:6px"></i> دخول
-    </button>
+
+    <!-- LOGIN FORM -->
+    <div id="auth-login">
+      <input class="login-input" type="email" id="login-email" placeholder="البريد الإلكتروني" dir="ltr">
+      <input class="login-input" type="password" id="login-pass" placeholder="كلمة المرور" dir="ltr"
+        onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="login-btn" id="login-btn" onclick="doLogin()">
+        <i class="fas fa-sign-in-alt" style="margin-left:6px"></i> دخول
+      </button>
+      <button onclick="forgotClientPassword()" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;margin-top:10px;font-family:'Cairo',sans-serif;width:100%">نسيت كلمة المرور؟</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="auth-register" style="display:none">
+      <input class="login-input" type="text" id="reg-name" placeholder="الاسم الكامل">
+      <input class="login-input" type="tel" id="reg-phone" placeholder="رقم الموبايل" dir="ltr">
+      <input class="login-input" type="email" id="reg-email" placeholder="البريد الإلكتروني" dir="ltr">
+      <input class="login-input" type="password" id="reg-pass" placeholder="كلمة المرور (6 أحرف على الأقل)" dir="ltr">
+      <button class="login-btn" id="register-btn" onclick="doRegister()">
+        <i class="fas fa-user-plus" style="margin-left:6px"></i> إنشاء حساب
+      </button>
+    </div>
+
     <a class="back-link" href="/">← العودة للصفحة الرئيسية</a>
   </div>
 </div>
@@ -265,52 +291,108 @@ let coverageAreas  = [];
 // ============================================================
 // LOGIN
 // ============================================================
-async function doLogin() {
-  const phone = document.getElementById('login-phone').value.trim().replace(/\s/g,'');
-  const err   = document.getElementById('login-err');
-  const btn   = document.getElementById('login-btn');
+function switchAuthTab(tab) {
+  document.getElementById('login-err').style.display = 'none';
+  const isLogin = tab === 'login';
+  document.getElementById('auth-login').style.display    = isLogin ? 'block' : 'none';
+  document.getElementById('auth-register').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('tab-login-btn').style.cssText    = isLogin
+    ? 'flex:1;padding:10px;font-size:14px'
+    : 'flex:1;padding:10px;font-size:14px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:none;border-radius:12px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700';
+  document.getElementById('tab-register-btn').style.cssText = !isLogin
+    ? 'flex:1;padding:10px;font-size:14px'
+    : 'flex:1;padding:10px;font-size:14px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:none;border-radius:12px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700';
+  document.getElementById('tab-login-btn').className    = isLogin ? 'login-btn' : '';
+  document.getElementById('tab-register-btn').className = !isLogin ? 'login-btn' : '';
+}
 
-  err.style.display = 'none';
-  if(!/^01[0125]\d{8}$/.test(phone)) {
-    err.textContent = '⚠️ رقم الموبايل غير صحيح';
-    err.style.display = 'block';
+function showErr(msg) {
+  const err = document.getElementById('login-err');
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const btn   = document.getElementById('login-btn');
+  document.getElementById('login-err').style.display = 'none';
+
+  if(!email || !pass) { showErr('⚠️ أدخل البريد وكلمة المرور'); return; }
+
+  btn.disabled = true; btn.textContent = 'جاري...';
+
+  const { data: authData, error: authErr } = await sb.auth.signInWithPassword({ email, password: pass });
+  if(authErr) {
+    showErr('❌ بيانات الدخول غير صحيحة');
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-left:6px"></i> دخول';
     return;
   }
 
-  btn.disabled = true;
-  btn.textContent = 'جاري...';
+  // جلب بيانات العميل المرتبطة
+  const { data: client } = await sb.from('clients').select('*').eq('auth_id', authData.user.id).single();
+  if(client) {
+    currentClient = client;
+    showApp(client);
+  } else {
+    showErr('❌ لم يتم العثور على حسابك');
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-left:6px"></i> دخول';
+}
 
-  // ابحث عن العميل، لو مش موجود أنشئه
-  let { data: client } = await sb.from('clients').select('*').eq('phone', phone).single();
+async function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim().replace(/\s/g,'');
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  const btn   = document.getElementById('register-btn');
+  document.getElementById('login-err').style.display = 'none';
 
-  if(!client) {
-    const { data: newClient, error } = await sb.from('clients').insert([{ phone }]).select().single();
-    if(error) {
-      err.textContent = '❌ حصل خطأ: ' + error.message;
-      err.style.display = 'block';
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-arrow-left" style="margin-right:6px"></i> دخول';
-      return;
-    }
-    client = newClient;
+  if(!name || !phone || !email || !pass) { showErr('⚠️ املأ كل الحقول'); return; }
+  if(!/^01[0125]\d{8}$/.test(phone))     { showErr('⚠️ رقم الموبايل غير صحيح'); return; }
+  if(pass.length < 6)                    { showErr('⚠️ كلمة المرور 6 أحرف على الأقل'); return; }
+
+  btn.disabled = true; btn.textContent = 'جاري الإنشاء...';
+
+  // 1) إنشاء حساب Auth
+  const { data: authData, error: authErr } = await sb.auth.signUp({ email, password: pass });
+  if(authErr) {
+    showErr('❌ ' + (authErr.message.includes('already') ? 'البريد مسجّل بالفعل' : authErr.message));
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus" style="margin-left:6px"></i> إنشاء حساب';
+    return;
+  }
+
+  // 2) إنشاء سجل العميل مربوط بالـ auth
+  const { data: client, error: cErr } = await sb.from('clients')
+    .insert([{ auth_id: authData.user.id, name, phone, email }])
+    .select().single();
+
+  if(cErr) {
+    showErr('❌ ' + cErr.message);
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus" style="margin-left:6px"></i> إنشاء حساب';
+    return;
   }
 
   currentClient = client;
-  localStorage.setItem('malaaz_client_id', client.id);
-  localStorage.setItem('malaaz_client_phone', phone);
   showApp(client);
-
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fas fa-arrow-left" style="margin-right:6px"></i> دخول';
+  btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus" style="margin-left:6px"></i> إنشاء حساب';
 }
 
-function doLogout() {
+async function forgotClientPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  if(!email) { showErr('⚠️ أدخل بريدك الإلكتروني أولاً'); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/client.html' });
+  if(error) { showErr('❌ ' + error.message); return; }
+  alert('✅ تم إرسال رابط إعادة تعيين كلمة المرور على بريدك');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
   currentClient = null;
-  localStorage.removeItem('malaaz_client_id');
-  localStorage.removeItem('malaaz_client_phone');
   document.getElementById('app-wrap').style.display    = 'none';
   document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('login-phone').value = '';
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-pass').value  = '';
 }
 
 // ============================================================
@@ -455,9 +537,16 @@ async function deleteAddress(id) {
 // BOOKINGS
 // ============================================================
 async function loadBookings() {
+  // اربط أي حجوزات قديمة بنفس الموبايل بالحساب (لمرة واحدة)
+  if(currentClient.phone) {
+    try {
+      await sb.from('bookings').update({ client_id: currentClient.id })
+        .eq('phone', currentClient.phone).is('client_id', null);
+    } catch(e) {}
+  }
   const { data } = await sb.from('bookings')
     .select('id,service_type,sub_option,area,address,appointment_time,status,created_at,price,payment_method,provider_id')
-    .eq('phone', currentClient.phone)
+    .eq('client_id', currentClient.id)
     .order('created_at', {ascending:false})
     .limit(20);
 
@@ -634,12 +723,10 @@ function showToast(msg) {
 // INIT
 // ============================================================
 window.addEventListener('load', async () => {
-  // تحقق لو في client محفوظ
-  const savedId    = localStorage.getItem('malaaz_client_id');
-  const savedPhone = localStorage.getItem('malaaz_client_phone');
-
-  if(savedId && savedPhone) {
-    const { data: client } = await sb.from('clients').select('*').eq('id', savedId).single();
+  // تحقق من جلسة Supabase النشطة
+  const { data: { session } } = await sb.auth.getSession();
+  if(session?.user) {
+    const { data: client } = await sb.from('clients').select('*').eq('auth_id', session.user.id).single();
     if(client) {
       currentClient = client;
       showApp(client);
