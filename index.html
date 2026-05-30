@@ -1487,44 +1487,33 @@ let allSubsCache       = {};        // cache الخدمات الفرعية
 // BOOKING MODAL OPEN
 // ============================================================
 async function prefillClientData() {
-  const clientId = localStorage.getItem('malaaz_client_id');
-  const phone    = localStorage.getItem('malaaz_client_phone');
-  if(!clientId && !phone) return;
   try {
-    let client = null;
-    if(clientId) {
-      const { data } = await sb.from('clients').select('name,phone,email').eq('id', clientId).single();
-      client = data;
-    }
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session?.user) return;
+    const { data: client } = await sb.from('clients').select('id,name,phone,email').eq('auth_id', session.user.id).single();
+    if(!client) return;
     setTimeout(async () => {
       const nameEl  = document.getElementById('bm-name');
       const phoneEl = document.getElementById('bm-phone');
       const emailEl = document.getElementById('bm-email');
-      if(client) {
-        if(nameEl && client.name && !nameEl.value)    nameEl.value  = client.name;
-        if(phoneEl && client.phone && !phoneEl.value)  phoneEl.value = client.phone;
-        if(emailEl && client.email && !emailEl.value)  emailEl.value = client.email;
-      } else if(phone && phoneEl && !phoneEl.value) {
-        phoneEl.value = phone;
-      }
+      if(nameEl && client.name && !nameEl.value)    nameEl.value  = client.name;
+      if(phoneEl && client.phone && !phoneEl.value)  phoneEl.value = client.phone;
+      if(emailEl && client.email && !emailEl.value)  emailEl.value = client.email;
       // جلب العنوان الافتراضي
-      if(clientId) {
-        const { data: addrs } = await sb.from('client_addresses')
-          .select('area,address,is_default')
-          .eq('client_id', clientId)
-          .order('is_default', {ascending:false})
-          .limit(1);
-        if(addrs?.length) {
-          const addr = addrs[0];
-          const addrEl = document.getElementById('bm-address');
-          const areaEl = document.getElementById('bm-area');
-          if(addrEl && addr.address && !addrEl.value) addrEl.value = addr.address;
-          if(areaEl && addr.area && areaEl.options.length > 1) {
-            // تأكد إن المنطقة موجودة في الـ options
-            Array.from(areaEl.options).forEach(o => {
-              if(o.value === addr.area) areaEl.value = addr.area;
-            });
-          }
+      const { data: addrs } = await sb.from('client_addresses')
+        .select('area,address,is_default')
+        .eq('client_id', client.id)
+        .order('is_default', {ascending:false})
+        .limit(1);
+      if(addrs?.length) {
+        const addr = addrs[0];
+        const addrEl = document.getElementById('bm-address');
+        const areaEl = document.getElementById('bm-area');
+        if(addrEl && addr.address && !addrEl.value) addrEl.value = addr.address;
+        if(areaEl && addr.area && areaEl.options.length > 1) {
+          Array.from(areaEl.options).forEach(o => {
+            if(o.value === addr.area) areaEl.value = addr.area;
+          });
         }
       }
     }, 150);
@@ -2038,6 +2027,14 @@ async function bmSubmit() {
     if (bmSelectedProvider?.id) payload.provider_id   = bmSelectedProvider.id;
     if (email)                  payload.patient_email = email;
     if (bmSelectedPrice)        payload.price         = bmSelectedPrice;
+    // ربط الحجز بحساب العميل لو مسجّل دخول
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if(session?.user) {
+        const { data: c } = await sb.from('clients').select('id').eq('auth_id', session.user.id).single();
+        if(c?.id) payload.client_id = c.id;
+      }
+    } catch(e) {}
 
     // ✅ FIX: الحقول دي اتحذفت لأنها مش موجودة في جدول bookings في Supabase
     // لو أضفتها في الـ DB، شيل الـ // من قبل كل سطر:
