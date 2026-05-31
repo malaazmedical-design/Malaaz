@@ -2100,11 +2100,17 @@ async function bmSubmit() {
         showToast('✅ تم الحجز بنجاح!');
         const successBtn2 = document.getElementById('bm-success-btn');
         if(successBtn2) {
+          const payMap2 = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
+          const mapsLink2 = window.bmGoogleMapsLink ? `\n📍 الموقع على الخريطة: ${window.bmGoogleMapsLink}` : '';
+          const gradeText2 = bmSelectedGrade ? ` (${bmSelectedGrade})` : '';
           const waUrl2 = `https://wa.me/201006484908?text=${encodeURIComponent(
-            `🔔 *حجز جديد على ملاذ*\n\n👤 *العميل:* ${name}\n📱 *الموبايل:* ${phone}\n` +
-            `⚕️ *الخدمة:* ${bmSelectedService}${bmSelectedSub?' — '+bmSelectedSub:''}\n` +
-            `📍 *المنطقة:* ${area}\n🏠 *العنوان:* ${address}\n` +
-            `🕐 *الفترة:* ${time}\n\n_يرجى التواصل مع العميل لتأكيد الحجز_`
+            `🔔 *حجز جديد على ملاذ*\n\n` +
+            `👤 *العميل:* ${name}\n📱 *الموبايل:* ${phone}\n` +
+            `⚕️ *الخدمة:* ${bmSelectedService}${bmSelectedSub?' — '+bmSelectedSub:''}${gradeText2}\n` +
+            `📍 *المنطقة:* ${area}\n🏠 *العنوان:* ${address}${mapsLink2}\n` +
+            `🕐 *الفترة:* ${time}\n💳 *الدفع:* ${payMap2[bmSelectedPayment]||bmSelectedPayment}\n` +
+            (email ? `📧 *الإيميل:* ${email}\n` : '') +
+            `\n⏳ جاري توفير مقدم الخدمة المناسب — سنؤكد معك خلال 15 دقيقة 🏥`
           )}`;
           successBtn2.innerHTML = '<i class="fab fa-whatsapp" style="margin-left:8px;font-size:18px"></i> أرسل تفاصيل الحجز على واتساب';
           successBtn2.style.cssText = 'margin-top:16px;background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 24px;font-size:15px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;width:100%;display:block';
