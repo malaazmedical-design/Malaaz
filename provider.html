@@ -253,7 +253,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
         <option value="أشعة منزلية">أشعة منزلية</option>
       </select>
       <input class="login-input" type="text" id="r-specialty" placeholder="التخصص (مثال: باطنة، أطفال، تمريض) *">
-      <input class="login-input" type="text" id="r-area" placeholder="منطقة تقديم الخدمة (مثال: مدينة نصر) *">
+      <input class="login-input" type="text" id="r-area" placeholder="مناطق الخدمة (افصل بينها بفاصلة) *">
       <div id="register-err" style="color:#ff6b6b;font-size:12px;margin-bottom:8px;display:none"></div>
       <button class="login-btn" onclick="doRegister()"><i class="fas fa-user-plus" style="margin-left:8px"></i> إنشاء حساب</button>
       <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:12px">سيتم مراجعة طلبك من الأدمن قبل التفعيل</div>
@@ -386,8 +386,8 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
           <input class="form-input" id="p-price" type="number" placeholder="مثال: 200">
         </div>
         <div class="form-group">
-          <div class="form-label">منطقة التغطية الأساسية</div>
-          <select class="form-input" id="p-area"></select>
+          <div class="form-label">مناطق التغطية (اختر منطقة أو أكثر)</div>
+          <div id="p-areas-box" style="display:flex;flex-wrap:wrap;gap:8px;padding:12px;border:1.5px solid var(--border);border-radius:12px;max-height:160px;overflow-y:auto;background:var(--bg)"></div>
         </div>
       </div>
 
@@ -622,6 +622,8 @@ async function doRegister() {
   }
 
   // 2) إنشاء row في providers مرتبط بالـ user_id
+  // المناطق: نص متعدد + أول منطقة للتوافق
+  const areasList = area.split(',').map(a=>a.trim()).filter(Boolean);
   const { error: provErr } = await sb.from('providers').insert([{
     user_id:      userId,
     name,
@@ -629,7 +631,8 @@ async function doRegister() {
     phone,
     service_type: serviceType,
     specialty,
-    area,
+    area:         areasList[0] || area,
+    areas:        areasList.join(', '),
     status:       'pending',
     is_available: false,
     rating:       5
@@ -845,7 +848,15 @@ async function sendRejectionEmail(booking) {
 }
 
 async function updateBooking(id, status) {
-  await sb.from('bookings').update({status}).eq('id', id);
+  const { data, error } = await sb.from('bookings').update({status}).eq('id', id).select();
+  if(error) {
+    showToast('❌ خطأ: ' + error.message, 'error');
+    return;
+  }
+  if(!data || data.length === 0) {
+    showToast('❌ لم يتم التحديث — تحقق من الصلاحيات', 'error');
+    return;
+  }
   const b = myBookings.find(x => x.id === id);
   if(b) {
     b.status = status;
@@ -896,11 +907,9 @@ function prefillProfile() {
       p.service_type==='تمريض منزلي'?'nursing': p.service_type==='أشعة منزلية'?'radio':'exam'
     )));
   }
-  // fill area select then set value
-  const areaEl = document.getElementById('p-area');
-  if(areaEl && allAreas.length) {
-    areaEl.innerHTML = '<option value="">اختر المنطقة</option>' + allAreas.map(a=>`<option value="${san(a.name)}" ${a.name===p.area?'selected':''}>${san(a.name)}</option>`).join('');
-  }
+  // fill area checkboxes with saved areas
+  const savedAreas = (p.areas || p.area || '').split(',').map(a=>a.trim()).filter(Boolean);
+  renderAreaCheckboxes(savedAreas);
   // specialty
   if(p.specialty && document.getElementById('p-specialty')) {
     loadSpecialtiesDropdown(p.grade||'أخصائي', p.specialty);
@@ -953,14 +962,17 @@ async function saveProfile() {
   const phone   = document.getElementById('p-mobile').value.trim();
   const exp     = parseFloat(document.getElementById('p-exp').value)||null;
   const bio     = document.getElementById('p-bio').value.trim();
-  const area    = document.getElementById('p-area').value;
+  const selectedAreas = getSelectedAreas();
+  const areasStr = selectedAreas.join(', ');
   const svcType = document.getElementById('p-service-type').value;
   const grade   = document.getElementById('p-grade').value;
   const spec    = document.getElementById('p-specialty')?.value||null;
 
   if(!name) { showToast('⚠️ أدخل اسمك','error'); return; }
+  if(!selectedAreas.length) { showToast('⚠️ اختر منطقة واحدة على الأقل','error'); return; }
 
-  const payload = { name, phone, experience:exp, bio, area, service_type:svcType, grade, specialty:spec, price: parseFloat(document.getElementById('p-price')?.value)||null };
+  // نحفظ في areas (متعدد) + area (أول منطقة للتوافق القديم)
+  const payload = { name, phone, experience:exp, bio, areas: areasStr, area: selectedAreas[0], service_type:svcType, grade, specialty:spec, price: parseFloat(document.getElementById('p-price')?.value)||null };
   const { error } = await sb.from('providers').update(payload).eq('id', currentProvider.id);
   if(error) { showToast('❌ '+error.message,'error'); return; }
 
@@ -1106,10 +1118,30 @@ async function loadSubServicesAll() {
 async function loadAreas() {
   const { data } = await sb.from('coverage_areas').select('*').eq('is_active',true).order('name');
   allAreas = data || [];
-  const sel = document.getElementById('p-area');
-  if(sel) {
-    sel.innerHTML = '<option value="">اختر المنطقة</option>' + allAreas.map(a=>`<option value="${san(a.name)}">${san(a.name)}</option>`).join('');
+  renderAreaCheckboxes();
+}
+
+function renderAreaCheckboxes(selectedAreas) {
+  const box = document.getElementById('p-areas-box');
+  if(!box) return;
+  // المناطق المختارة حالياً (من areas النصي أو area القديم)
+  let selected = selectedAreas;
+  if(!selected) {
+    const raw = currentProvider?.areas || currentProvider?.area || '';
+    selected = raw.split(',').map(a=>a.trim()).filter(Boolean);
   }
+  if(!allAreas.length) { box.innerHTML = '<span style="font-size:12px;color:var(--muted)">جاري التحميل...</span>'; return; }
+  box.innerHTML = allAreas.map(a => {
+    const checked = selected.includes(a.name) ? 'checked' : '';
+    return `<label style="display:inline-flex;align-items:center;gap:6px;background:var(--white);padding:7px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;font-size:13px">
+      <input type="checkbox" class="area-cb" value="${san(a.name)}" ${checked} style="cursor:pointer;accent-color:var(--accent)">
+      ${san(a.name)}
+    </label>`;
+  }).join('');
+}
+
+function getSelectedAreas() {
+  return Array.from(document.querySelectorAll('.area-cb:checked')).map(cb => cb.value);
 }
 
 // ============================================================
