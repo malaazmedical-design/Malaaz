@@ -1205,7 +1205,7 @@ function renderDocCard(p, i) {
       <div class="doc-stars">${stars}</div>
       ${availHtml}
       <div class="doc-stats">
-        ${p.area ? `<span class="doc-badge"><i class="fas fa-map-marker-alt" style="margin-left:2px;font-size:9px"></i> ${sanitize(p.area)}</span>` : ''}
+        ${(p.areas || p.area) ? `<span class="doc-badge"><i class="fas fa-map-marker-alt" style="margin-left:2px;font-size:9px"></i> ${sanitize((p.areas || p.area).split(',').slice(0,2).map(a=>a.trim()).join('، '))}${(p.areas||'').split(',').length > 2 ? ' +' : ''}</span>` : ''}
         ${p.experience ? `<span class="doc-badge">${sanitize(String(p.experience))} سنة خبرة</span>` : ''}
         <span class="doc-badge">${sanitize(p.service_type || '')}</span>
       </div>
@@ -1328,7 +1328,7 @@ async function viewProviderProfile(providerId) {
           style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0">×</button>
       </div>
       <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">
-        ${provider.area ? `<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px"><i class="fas fa-map-marker-alt" style="margin-left:3px"></i>${sanitize(provider.area)}</span>` : ''}
+        ${(provider.areas || provider.area) ? `<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px"><i class="fas fa-map-marker-alt" style="margin-left:3px"></i>${sanitize((provider.areas || provider.area).split(',').map(a=>a.trim()).join('، '))}</span>` : ''}
         ${provider.experience ? `<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">${sanitize(String(provider.experience))} سنة خبرة</span>` : ''}
       </div>
       ${provider.bio ? `<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.7">${sanitize(provider.bio)}</div>` : ''}
@@ -1375,7 +1375,10 @@ function applyDocFilters() {
 
   let filtered = allDocs;
   if(currentDocType !== 'all') filtered = filtered.filter(d => d.service_type === currentDocType);
-  if(areaFilter) filtered = filtered.filter(d => d.area === areaFilter);
+  if(areaFilter) filtered = filtered.filter(d => {
+    const provAreas = (d.areas || d.area || '');
+    return provAreas.split(',').map(a=>a.trim()).includes(areaFilter);
+  });
   if(searchTerm) {
     filtered = filtered.filter(d =>
       (d.name||'').toLowerCase().includes(searchTerm) ||
@@ -1390,7 +1393,13 @@ function applyDocFilters() {
 function populateDocAreaFilter() {
   const sel = document.getElementById('doc-area-filter');
   if(!sel) return;
-  const areas = [...new Set(allDocs.map(d => d.area).filter(Boolean))];
+  // اجمع كل المناطق من حقل areas المتعدد
+  const areaSet = new Set();
+  allDocs.forEach(d => {
+    const raw = d.areas || d.area || '';
+    raw.split(',').map(a=>a.trim()).filter(Boolean).forEach(a => areaSet.add(a));
+  });
+  const areas = [...areaSet].sort();
   sel.innerHTML = '<option value="">كل المناطق</option>' +
     areas.map(a => `<option value="${sanitize(a)}">${sanitize(a)}</option>`).join('');
 }
@@ -2185,8 +2194,9 @@ async function bmSubmit() {
     }
 
   } catch (e) {
-    showBmError('❌ حصل خطأ — جرب تاني أو تواصل معنا');
-    console.error('Booking error:', e);
+    const detail = e?.message || e?.error_description || e?.hint || JSON.stringify(e);
+    showBmError('❌ حصل خطأ: ' + (detail || 'جرب تاني'));
+    console.error('Booking error:', e, JSON.stringify(e));
   } finally {
     btn.disabled = false;
     btn.innerHTML = 'تأكيد الحجز <i class="fas fa-check" style="margin-right:8px"></i>';
