@@ -1058,17 +1058,20 @@ async function loadOverviewBookings() {
 // BOOKINGS PAGE
 // ============================================================
 let allBookings = [];
+let bookingsPage = 1;
+const BOOKINGS_PER_PAGE = 20;
 async function loadBookings() {
   const tbody = document.getElementById('bookings-body');
   tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted)">جاري التحميل...</td></tr>';
   const [bRes, pRes] = await Promise.all([
-    sb.from('bookings').select('*').order('created_at', {ascending:false}),
+    sb.from('bookings').select('*').order('created_at', {ascending:false}).limit(500),
     sb.from('providers').select('id,name,email,phone')
   ]);
   allBookings = bRes.data || [];
   if(pRes.data) allProviders = pRes.data;
   updateBookingQuickStats(allBookings);
-  renderBookings(allBookings);
+  bookingsPage = 1;
+  filterBookings();
   loadOverviewStats();
 }
 
@@ -1081,10 +1084,12 @@ function updateBookingQuickStats(data) {
 }
 
 let currentBookingFilter = 'all';
+let filteredBookings = [];
 function filterBookingStatus(status, btn) {
   currentBookingFilter = status;
   document.querySelectorAll('#booking-filters .filter-chip').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  bookingsPage = 1;
   filterBookings();
 }
 function filterBookings() {
@@ -1096,13 +1101,24 @@ function filterBookings() {
     (b.phone||'').includes(q) ||
     (b.area||'').includes(q)
   );
+  filteredBookings = filtered;
   renderBookings(filtered);
 }
 
 function renderBookings(data) {
   const tbody = document.getElementById('bookings-body');
-  if(!data?.length) { tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--muted)">لا توجد نتائج</td></tr>'; return; }
-  tbody.innerHTML = data.map((b,i) => {
+  if(!data?.length) {
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--muted)">لا توجد نتائج</td></tr>';
+    renderBookingsPagination(0);
+    return;
+  }
+  // pagination — اعرض صفحة واحدة بس
+  const totalPages = Math.ceil(data.length / BOOKINGS_PER_PAGE);
+  if(bookingsPage > totalPages) bookingsPage = totalPages;
+  const start = (bookingsPage - 1) * BOOKINGS_PER_PAGE;
+  const pageData = data.slice(start, start + BOOKINGS_PER_PAGE);
+
+  tbody.innerHTML = pageData.map((b,i) => {
     // إيجاد اسم مقدم الخدمة من الـ allProviders
     const prov = allProviders.find(p => p.id === b.provider_id);
     const provName = prov ? s(prov.name) : '—';
@@ -1110,7 +1126,7 @@ function renderBookings(data) {
       ? `<span class="badge blue" style="font-size:10px">مباشر</span>`
       : `<span class="badge yellow" style="font-size:10px">عام</span>`;
     return `<tr>
-      <td style="font-size:11px;color:var(--muted)">${s(b.id?.slice(-6)?.toUpperCase()||String(i+1))}</td>
+      <td style="font-size:11px;color:var(--muted)">${s(b.id?.slice(-6)?.toUpperCase()||String(start+i+1))}</td>
       <td><strong>${s(b.patient_name)}</strong></td>
       <td dir="ltr">${s(b.phone)}</td>
       <td>${s(b.service_type)}</td>
@@ -1131,6 +1147,33 @@ function renderBookings(data) {
       </div></td>
     </tr>`;
   }).join('');
+  renderBookingsPagination(data.length);
+}
+
+function renderBookingsPagination(total) {
+  let nav = document.getElementById('bookings-pagination');
+  if(!nav) {
+    nav = document.createElement('div');
+    nav.id = 'bookings-pagination';
+    nav.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;flex-wrap:wrap';
+    const tbl = document.getElementById('bookings-body')?.closest('table');
+    if(tbl && tbl.parentNode) tbl.parentNode.appendChild(nav);
+  }
+  if(total <= BOOKINGS_PER_PAGE) { nav.innerHTML = ''; return; }
+  const totalPages = Math.ceil(total / BOOKINGS_PER_PAGE);
+  nav.innerHTML = `
+    <button onclick="changeBookingsPage(-1)" ${bookingsPage<=1?'disabled':''}
+      style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:${bookingsPage<=1?'var(--bg)':'var(--white)'};cursor:${bookingsPage<=1?'default':'pointer'};font-family:'Cairo',sans-serif;font-size:13px;opacity:${bookingsPage<=1?'.5':'1'}">السابق ←</button>
+    <span style="font-size:13px;color:var(--muted);font-weight:700">صفحة ${bookingsPage} من ${totalPages} (${total} حجز)</span>
+    <button onclick="changeBookingsPage(1)" ${bookingsPage>=totalPages?'disabled':''}
+      style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:${bookingsPage>=totalPages?'var(--bg)':'var(--white)'};cursor:${bookingsPage>=totalPages?'default':'pointer'};font-family:'Cairo',sans-serif;font-size:13px;opacity:${bookingsPage>=totalPages?'.5':'1'}">→ التالي</button>`;
+}
+
+function changeBookingsPage(dir) {
+  bookingsPage += dir;
+  if(bookingsPage < 1) bookingsPage = 1;
+  renderBookings(filteredBookings);
+  document.getElementById('bookings-body')?.closest('table')?.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 async function updateBookingStatus(id, status) {
@@ -1986,7 +2029,8 @@ function setupRealtime() {
       // تحديث الـ row في الـ allBookings
       const idx = allBookings.findIndex(b => b.id === payload.new.id);
       if(idx !== -1) allBookings[idx] = {...allBookings[idx], ...payload.new};
-      if(document.getElementById('page-bookings').classList.contains('active')) renderBookings(allBookings);
+      updateBookingQuickStats(allBookings);
+      if(document.getElementById('page-bookings').classList.contains('active')) filterBookings();
       loadOverviewStats();
     }).subscribe();
 
