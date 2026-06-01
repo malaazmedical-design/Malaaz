@@ -273,10 +273,16 @@ h1 span.accent{color:var(--accent);}
 .svc-range-val{font-size:15px;font-weight:900;color:var(--accent);margin-top:2px;}
 
 /* Coverage */
-.coverage-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;}
-.coverage-card{background:#fff;border:.5px solid var(--border);border-radius:20px;padding:28px;}
-.coverage-areas{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
-.area-tag{background:var(--bg);color:var(--text);border-radius:20px;font-size:12px;padding:6px 14px;font-weight:600;}
+.coverage-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.coverage-card{background:linear-gradient(180deg,#fff,#fdfcfa);border:1px solid var(--border);border-radius:24px;padding:28px;box-shadow:0 4px 24px rgba(58,74,78,.04);}
+.coverage-card-head{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px dashed var(--border);margin-bottom:18px;}
+.coverage-city-icon{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#d4b65e);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 4px 12px rgba(201,168,76,.3);}
+.coverage-city-name{font-size:18px;font-weight:900;color:var(--dark);font-family:'Tajawal',sans-serif;}
+.coverage-city-count{font-size:12px;color:var(--muted);margin-top:2px;}
+.coverage-areas{display:flex;flex-wrap:wrap;gap:8px;}
+.area-tag{display:inline-flex;align-items:center;gap:5px;background:var(--bg);color:var(--text);border:1px solid transparent;border-radius:20px;font-size:12.5px;padding:7px 14px;font-weight:600;transition:all .2s;cursor:default;}
+.area-tag::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.area-tag:hover{background:#fff;border-color:var(--accent);color:var(--dark);transform:translateY(-1px);box-shadow:0 4px 10px rgba(201,168,76,.15);}
 
 /* FAQ */
 .faq-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;margin-bottom:10px;}
@@ -553,11 +559,23 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
     </div>
     <div class="coverage-grid">
       <div class="coverage-card">
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">🏙️ القاهرة</div>
+        <div class="coverage-card-head">
+          <div class="coverage-city-icon">🏙️</div>
+          <div>
+            <div class="coverage-city-name">القاهرة</div>
+            <div class="coverage-city-count" id="lp-count-cairo">مناطق التغطية</div>
+          </div>
+        </div>
         <div class="coverage-areas" id="lp-areas-cairo"><span class="area-tag" style="opacity:.4">جاري التحميل...</span></div>
       </div>
       <div class="coverage-card">
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">🌆 الجيزة</div>
+        <div class="coverage-card-head">
+          <div class="coverage-city-icon">🌆</div>
+          <div>
+            <div class="coverage-city-name">الجيزة</div>
+            <div class="coverage-city-count" id="lp-count-giza">مناطق التغطية</div>
+          </div>
+        </div>
         <div class="coverage-areas" id="lp-areas-giza"><span class="area-tag" style="opacity:.4">جاري التحميل...</span></div>
       </div>
     </div>
@@ -996,11 +1014,15 @@ async function loadAreas() {
   if (!data) return;
   const cairo = data.filter(a => a.city === 'القاهرة');
   const giza  = data.filter(a => a.city === 'الجيزة');
-  const tagHtml = list => list.map(a => `<span class="area-tag"><i class="fas fa-map-marker-alt" style="font-size:9px;margin-left:3px;color:var(--muted)"></i>${sanitize(a.name)}</span>`).join('');
+  const tagHtml = list => list.map(a => `<span class="area-tag">${sanitize(a.name)}</span>`).join('');
   const cEl = document.getElementById('lp-areas-cairo');
   const gEl = document.getElementById('lp-areas-giza');
   if (cEl) cEl.innerHTML = cairo.length ? tagHtml(cairo) : '<span style="color:var(--muted)">لا توجد مناطق</span>';
   if (gEl) gEl.innerHTML = giza.length  ? tagHtml(giza)  : '<span style="color:var(--muted)">لا توجد مناطق</span>';
+  const cCount = document.getElementById('lp-count-cairo');
+  const gCount = document.getElementById('lp-count-giza');
+  if(cCount) cCount.textContent = `${cairo.length} منطقة تغطية`;
+  if(gCount) gCount.textContent = `${giza.length} منطقة تغطية`;
 
   // ملء مناطق الـ booking modal
   const areaSelect = document.getElementById('bm-area');
@@ -2524,7 +2546,9 @@ function injectIndexResponsive() {
       .doctors-grid { grid-template-columns: 1fr !important; }
       .testi-grid { grid-template-columns: 1fr !important; }
       .pricing-grid { grid-template-columns: 1fr !important; }
-      .coverage-grid { grid-template-columns: 1fr !important; }
+      .coverage-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+      .coverage-card { padding: 20px !important; border-radius: 18px !important; }
+      .area-tag { font-size: 12px !important; padding: 6px 12px !important; }
       .steps-grid { grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
       .section-title { font-size: 28px !important; }
       .modal-panel { border-radius: 20px 20px 0 0 !important; max-height: 95vh !important; }
