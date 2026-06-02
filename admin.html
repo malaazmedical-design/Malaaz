@@ -1191,6 +1191,28 @@ async function updateBookingStatus(id, status) {
   if(error) { showToast('❌ خطأ: '+error.message,'error'); return; }
   showToast('✅ تم تحديث الحالة','success');
 
+  const bk = allBookings.find(x => x.id === id);
+
+  // تأكيد الحجز — إيميل للعميل
+  if(status === 'confirmed' && bk?.patient_email) {
+    const details = `⚕️ الخدمة: ${bk.service_type||'—'}<br>📍 المنطقة: ${bk.area||'—'}<br>🕐 الميعاد: ${bk.appointment_time||'—'}`;
+    try { await emailjs.send('service_tv0w6ov','template_3arzsvv',{
+      to_email: bk.patient_email, subject:'✅ تم تأكيد حجزك مع ملاذ', title:'✅ تم تأكيد حجزك!',
+      title_color:'#2e7d32', message:`أهلاً ${bk.patient_name||''} 💙 تم تأكيد حجزك بنجاح. سيتم التواصل معك لتنسيق الزيارة.`,
+      details, button_text:'📱 تواصل معنا', button_link:'https://wa.me/201039091989', button_color:'#25D366'
+    }); } catch(e){ console.warn(e); }
+  }
+
+  // إلغاء الحجز — إيميل للعميل
+  if(status === 'cancelled' && bk?.patient_email) {
+    const details = `⚕️ الخدمة: ${bk.service_type||'—'}<br>📍 المنطقة: ${bk.area||'—'}<br>🕐 الميعاد: ${bk.appointment_time||'—'}`;
+    try { await emailjs.send('service_tv0w6ov','template_3arzsvv',{
+      to_email: bk.patient_email, subject:'تحديث بخصوص حجزك مع ملاذ', title:'⚠️ تم إلغاء حجزك',
+      title_color:'#c62828', message:`عزيزي ${bk.patient_name||''}، نعتذر — تم إلغاء حجزك. يمكنك إعادة الحجز أو التواصل معنا.`,
+      details, button_text:'🔍 احجز مرة أخرى', button_link:'https://malaaz-plum.vercel.app', button_color:'#c9a84c'
+    }); } catch(e){ console.warn(e); }
+  }
+
   // لو الحالة "مكتمل" — ابعت لينك التقييم للعميل على واتساب
   if(status === 'completed') {
     const b = allBookings.find(x => x.id === id);
@@ -1549,8 +1571,35 @@ async function updateProviderPrice(id) {
   if(error) { showToast('❌ '+error.message,'error'); return; }
   showToast('✅ تم تحديث السعر','success');
 }
-async function approveProvider(id){ await sb.from('providers').update({status:'active'}).eq('id',id); showToast('✅ تم القبول','success'); loadProviders(); }
-async function suspendProvider(id){ await sb.from('providers').update({status:'suspended'}).eq('id',id); showToast('⏸ تم الإيقاف'); loadProviders(); }
+async function notifyProvider(id, type) {
+  const p = allProviders.find(x => x.id === id);
+  if(!p?.email) return;
+  const cfg = type === 'approve' ? {
+    subject: '🎉 تم تفعيل حسابك على ملاذ',
+    title: '🎉 مبروك! تم تفعيل حسابك',
+    title_color: '#2e7d32',
+    message: `أهلاً ${p.name||''}، تم تفعيل حسابك كمقدم خدمة على ملاذ. حسابك الآن ظاهر للعملاء وستبدأ باستقبال الحجوزات.`,
+    details: '✔️ أكمل بياناتك وأضف صورتك<br>✔️ حدّد أسعار خدماتك<br>✔️ فعّل "متاح الآن" لتظهر للعملاء',
+    button_text: '🚀 ادخل حسابك',
+    button_link: 'https://malaaz-plum.vercel.app/provider.html',
+    button_color: '#c9a84c',
+  } : {
+    subject: 'تحديث بخصوص حسابك على ملاذ',
+    title: '⏸️ تم إيقاف حسابك مؤقتاً',
+    title_color: '#c62828',
+    message: `عزيزي ${p.name||''}، تم إيقاف حسابك مؤقتاً. للاستفسار أو إعادة التفعيل، تواصل معنا.`,
+    details: 'حسابك غير ظاهر للعملاء حالياً.',
+    button_text: '📱 تواصل معنا',
+    button_link: 'https://wa.me/201039091989',
+    button_color: '#25D366',
+  };
+  try {
+    await emailjs.send('service_tv0w6ov', 'template_3arzsvv', { to_email: p.email, ...cfg });
+  } catch(e) { console.warn('provider notify error:', e); }
+}
+
+async function approveProvider(id){ await sb.from('providers').update({status:'active'}).eq('id',id); await notifyProvider(id,'approve'); showToast('✅ تم القبول','success'); loadProviders(); }
+async function suspendProvider(id){ await sb.from('providers').update({status:'suspended'}).eq('id',id); await notifyProvider(id,'suspend'); showToast('⏸ تم الإيقاف'); loadProviders(); }
 async function activateProvider(id){ await sb.from('providers').update({status:'active'}).eq('id',id); showToast('✅ تم التفعيل','success'); loadProviders(); }
 async function deleteProvider(id){ if(!confirm('حذف هذا المقدم؟'))return; await sb.from('providers').delete().eq('id',id); showToast('🗑 تم الحذف'); loadProviders(); }
 
