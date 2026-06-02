@@ -45,7 +45,7 @@
   "alternateName": "Malaaz Home Healthcare",
   "description": "منصة رعاية طبية منزلية متكاملة — كشف منزلي، تمريض منزلي، أشعة منزلية. أطباء معتمدون في القاهرة والجيزة.",
   "url": "https://malaaz.com",
-  "telephone": "+201006484908",
+  "telephone": "+201039091989",
   "address": {
     "@type": "PostalAddress",
     "addressCountry": "EG",
@@ -133,10 +133,14 @@ h1{font-family:'Tajawal',sans-serif;font-size:clamp(46px,5vw,72px);font-weight:9
 h1 span.accent{color:var(--accent);}
 .hero-sub{font-size:18px;color:rgba(255,255,255,.55);line-height:1.8;margin-bottom:36px;font-weight:400;max-width:480px;}
 .hero-actions{display:flex;align-items:center;gap:14px;margin-bottom:48px;}
-.btn-primary{background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:16px 32px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;box-shadow:0 8px 32px rgba(201,168,76,.3);}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(201,168,76,.4);}
-.btn-secondary{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:15px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;}
-.btn-secondary:hover{background:rgba(255,255,255,.12);}
+.btn-primary{background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:16px 32px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .25s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 32px rgba(201,168,76,.3);position:relative;overflow:hidden;}
+.btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);transition:transform .6s;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 44px rgba(201,168,76,.45);}
+.btn-primary:hover::after{transform:translateX(120%);}
+.btn-primary:active{transform:translateY(0) scale(.98);}
+.btn-secondary{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:15px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .25s;}
+.btn-secondary:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);transform:translateY(-1px);}
+.btn-secondary:active{transform:translateY(0) scale(.98);}
 .hero-stats{display:flex;gap:32px;}
 .stat-item{text-align:center;}
 .stat-num{font-size:28px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;}
@@ -174,6 +178,18 @@ h1 span.accent{color:var(--accent);}
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-18px);}}
 @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
 
+/* ===== Hero entrance — staggered reveal ===== */
+@keyframes heroRise{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+@keyframes heroFade{from{opacity:0;}to{opacity:1;}}
+.hero-content > *{opacity:0;animation:heroRise .8s cubic-bezier(.16,1,.3,1) forwards;}
+.hero-content > *:nth-child(1){animation-delay:.1s;}
+.hero-content > *:nth-child(2){animation-delay:.22s;}
+.hero-content > *:nth-child(3){animation-delay:.34s;}
+.hero-content > *:nth-child(4){animation-delay:.46s;}
+.hero-content > *:nth-child(5){animation-delay:.58s;}
+.hero-visual{animation:heroFade 1.2s ease .5s both;}
+@media(prefers-reduced-motion:reduce){.hero-content > *,.hero-visual{animation:none;opacity:1;}}
+
 /* Trust Bar */
 .trust-bar{background:var(--dark2);padding:18px 60px;display:flex;align-items:center;justify-content:center;gap:50px;border-top:1px solid rgba(201,168,76,.1);}
 .trust-item{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.5);font-size:13px;font-weight:600;}
@@ -189,8 +205,10 @@ h1 span.accent{color:var(--accent);}
 
 /* Services */
 .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-.svc-card{background:var(--white);border:.5px solid var(--border);border-radius:20px;padding:28px 24px;transition:all .25s;cursor:pointer;position:relative;overflow:hidden;}
-.svc-card:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(45,59,62,.1);border-color:rgba(201,168,76,.25);}
+.svc-card{background:var(--white);border:.5px solid var(--border);border-radius:20px;padding:28px 24px;transition:all .3s cubic-bezier(.16,1,.3,1);cursor:pointer;position:relative;overflow:hidden;}
+.svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transform:scaleX(0);transform-origin:right;transition:transform .35s cubic-bezier(.16,1,.3,1);}
+.svc-card:hover{transform:translateY(-6px);box-shadow:0 24px 56px rgba(45,59,62,.12);border-color:rgba(201,168,76,.25);}
+.svc-card:hover::before{transform:scaleX(1);transform-origin:left;}
 .svc-ico-wrap{width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:18px;}
 .svc-name{font-size:18px;font-weight:700;margin-bottom:8px;}
 .svc-desc{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:16px;}
@@ -618,7 +636,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       </div>
       <div class="footer-col">
         <h4>تواصل معنا</h4>
-        <span>📱 <a id="footer-phone" href="tel:+201006484908" style="color:inherit;text-decoration:none">01006484908</a></span>
+        <span>📱 <a id="footer-phone" href="tel:+201039091989" style="color:inherit;text-decoration:none">01039091989</a></span>
         <span>📧 <a id="footer-email" href="mailto:malaaz.medical@gmail.com" style="color:inherit;text-decoration:none">malaaz.medical@gmail.com</a></span>
         <span>⏰ 24 ساعة / 7 أيام</span>
       </div>
@@ -811,7 +829,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       <div id="instapay-hint" style="display:none;background:rgba(201,168,76,.1);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--accent);margin-bottom:12px">
         📱 <strong>انستا باي / محفظة إلكترونية:</strong><br>
         برجاء تحويل المبلغ إلى حساب/محفظة الشركة الرسمية:<br>
-        <strong style="font-size:15px;color:#fff">📱 01006484908</strong><br>
+        <strong style="font-size:15px;color:#fff">📱 01039091989</strong><br>
         وإظهار لقطة الشاشة لمقدم الخدمة عند الوصول.
       </div>
 
@@ -2128,7 +2146,7 @@ async function bmSubmit() {
           const payMap2 = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
           const mapsLink2 = window.bmGoogleMapsLink ? `\n📍 الموقع على الخريطة: ${window.bmGoogleMapsLink}` : '';
           const gradeText2 = bmSelectedGrade ? ` (${bmSelectedGrade})` : '';
-          const waUrl2 = `https://wa.me/201006484908?text=${encodeURIComponent(
+          const waUrl2 = `https://wa.me/201039091989?text=${encodeURIComponent(
             `🔔 *حجز جديد على ملاذ*\n\n` +
             `👤 *العميل:* ${name}\n📱 *الموبايل:* ${phone}\n` +
             `⚕️ *الخدمة:* ${bmSelectedService}${bmSelectedSub?' — '+bmSelectedSub:''}${gradeText2}\n` +
@@ -2272,8 +2290,8 @@ document.getElementById('booking-modal')?.addEventListener('click', e => {
 // Leaflet Map + Company Number + Responsive + Client Notifications
 // ============================================================
 
-const COMPANY_PHONE    = '01006484908';
-const COMPANY_WHATSAPP = 'https://wa.me/201006484908';
+const COMPANY_PHONE    = '01039091989';
+const COMPANY_WHATSAPP = 'https://wa.me/201039091989';
 const INSTAPAY_MSG     = `برجاء تحويل المبلغ إلى حساب/محفظة الشركة الرسمية:\n📱 ${COMPANY_PHONE}\nوإظهار لقطة الشاشة لمقدم الخدمة عند الوصول.`;
 
 // ============================================================
