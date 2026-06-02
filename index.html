@@ -1498,6 +1498,62 @@ let bmSelectedPrice    = null;      // سعر الخدمة المختارة
 // ============================================================
 // EMAILJS — إشعار مقدم الخدمة بالحجز
 // ============================================================
+// ============================================================
+// 📧 دالة الإيميل الديناميكية (template_3arzsvv) — لكل الإشعارات
+// ============================================================
+const MALAAZ_ADMIN_EMAIL = 'malaaz.medical@gmail.com';
+const MALAAZ_GREEN = '#2e7d32';
+const MALAAZ_RED   = '#c62828';
+const MALAAZ_GOLD  = '#c9a84c';
+
+async function sendMalaazEmail({ to_email, subject, title, title_color, message, details, button_text, button_link, button_color }) {
+  if(!to_email) { console.warn('sendMalaazEmail: no to_email'); return; }
+  if(typeof emailjs === 'undefined') { console.warn('emailjs not loaded'); return; }
+  try {
+    await emailjs.send('service_tv0w6ov', 'template_3arzsvv', {
+      to_email,
+      subject:      subject      || 'إشعار من ملاذ',
+      title:        title        || 'إشعار',
+      title_color:  title_color  || MALAAZ_GREEN,
+      message:      message      || '',
+      details:      details      || '',
+      button_text:  button_text  || 'زيارة الموقع',
+      button_link:  button_link  || (window.location.origin),
+      button_color: button_color || MALAAZ_GOLD,
+    });
+    console.log('✅ إيميل أُرسل لـ', to_email);
+  } catch(e) {
+    console.warn('EmailJS (dynamic) error:', e);
+  }
+}
+
+// إشعار الأدمن بحجز جديد (عام أو مباشر)
+async function notifyAdminNewBooking(b) {
+  const payMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
+  const bookingType = b.provider_name ? `حجز مباشر — ${b.provider_name}` : 'حجز عام';
+  const details =
+    `👤 العميل: ${b.patient_name||'—'}<br>` +
+    `📱 الموبايل: ${b.phone||'—'}<br>` +
+    `✉️ الإيميل: ${b.patient_email||'—'}<br>` +
+    `⚕️ الخدمة: ${b.service_type||'—'}${b.sub_option?(' — '+b.sub_option):''}<br>` +
+    `📍 المنطقة: ${b.area||'—'}<br>` +
+    `🏠 العنوان: ${b.address||'—'}<br>` +
+    `🕐 الميعاد: ${b.appointment_time||'—'}<br>` +
+    `💳 الدفع: ${payMap[b.payment_method]||b.payment_method||'—'}<br>` +
+    `🔖 النوع: ${bookingType}`;
+  await sendMalaazEmail({
+    to_email: MALAAZ_ADMIN_EMAIL,
+    subject: `🔔 حجز جديد على ملاذ — ${b.patient_name||''}`,
+    title: '🔔 حجز جديد!',
+    title_color: MALAAZ_GREEN,
+    message: 'وصل حجز جديد على المنصة. التفاصيل بالأسفل:',
+    details,
+    button_text: '✅ فتح لوحة التحكم',
+    button_link: `${window.location.origin}/admin.html`,
+    button_color: MALAAZ_GOLD,
+  });
+}
+
 async function sendProviderNotification(bookingData, providerData) {
   console.log('📧 sendProviderNotification called:', providerData?.email, bookingData);
   if(!providerData?.email) {
@@ -2131,12 +2187,25 @@ async function bmSubmit() {
           appointment_time: time, payment_method: bmSelectedPayment,
           patient_email: email,
         }, bmSelectedProvider);
+        // + إشعار الأدمن
+        await notifyAdminNewBooking({
+          patient_name: name, phone, area, address, patient_email: email,
+          service_type: bmSelectedService, sub_option: bmSelectedSub,
+          appointment_time: time, payment_method: bmSelectedPayment,
+          provider_name: bmSelectedProvider.name,
+        });
         document.getElementById('bm-step2').style.display = 'none';
         document.getElementById('bm-success').style.display = 'block';
         trackBookingConversion(bmSelectedService, bmSelectedPrice, !!bmSelectedProvider);
         showToast('✅ تم الحجز — سيصلك تأكيد من مقدم الخدمة!');
       } else {
         // حجز عام — واتساب للأدمن
+        // + إشعار الأدمن بالإيميل
+        await notifyAdminNewBooking({
+          patient_name: name, phone, area, address, patient_email: email,
+          service_type: bmSelectedService, sub_option: bmSelectedSub,
+          appointment_time: time, payment_method: bmSelectedPayment,
+        });
         document.getElementById('bm-step2').style.display = 'none';
         document.getElementById('bm-success').style.display = 'block';
         trackBookingConversion(bmSelectedService, bmSelectedPrice, !!bmSelectedProvider);
