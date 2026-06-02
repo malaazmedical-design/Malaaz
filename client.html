@@ -590,7 +590,7 @@ async function loadBookings() {
             ⭐ قيّم تجربتك
           </a>` : ''}
           ${(b.status==='pending' || b.status==='confirmed') ? `
-          <a href="https://wa.me/201006484908?text=${encodeURIComponent('مرحباً، أريد إلغاء حجزي رقم #'+(b.id?.slice(-6)?.toUpperCase()||'')+' — الخدمة: '+(b.service_type||'')+' — الموعد: '+(b.appointment_time||''))}"
+          <a href="https://wa.me/201039091989?text=${encodeURIComponent('مرحباً، أريد إلغاء حجزي رقم #'+(b.id?.slice(-6)?.toUpperCase()||'')+' — الخدمة: '+(b.service_type||'')+' — الموعد: '+(b.appointment_time||''))}"
             target="_blank"
             style="font-size:11px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger);padding:5px 10px;border-radius:8px;text-decoration:none;font-weight:700">
             <i class="fas fa-times-circle" style="margin-left:4px"></i> طلب إلغاء
@@ -697,7 +697,7 @@ async function showBookingDetails(bookingId) {
             </div>
             <div style="text-align:left">
               <div style="color:var(--accent);font-size:13px">${'★'.repeat(Math.round(provider.rating||5))}</div>
-              <a href="https://wa.me/201006484908?text=${encodeURIComponent('مرحباً، أريد الاستفسار عن حجزي #'+b.id?.slice(-6)?.toUpperCase())}"
+              <a href="https://wa.me/201039091989?text=${encodeURIComponent('مرحباً، أريد الاستفسار عن حجزي #'+b.id?.slice(-6)?.toUpperCase())}"
                 target="_blank" style="display:block;margin-top:6px;background:#25D366;color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;text-align:center">
                 <i class="fab fa-whatsapp" style="margin-left:4px"></i> تواصل مع ملاذ
               </a>
@@ -710,7 +710,7 @@ async function showBookingDetails(bookingId) {
           ⭐ قيّم تجربتك
         </a>` : ''}
       ${(b.status==='pending' || b.status==='confirmed') ? `
-        <a href="https://wa.me/201006484908?text=${encodeURIComponent('مرحباً، أريد إلغاء حجزي رقم #'+(b.id?.slice(-6)?.toUpperCase()||'')+' — الخدمة: '+(b.service_type||'')+' — الموعد: '+(b.appointment_time||''))}"
+        <a href="https://wa.me/201039091989?text=${encodeURIComponent('مرحباً، أريد إلغاء حجزي رقم #'+(b.id?.slice(-6)?.toUpperCase()||'')+' — الخدمة: '+(b.service_type||'')+' — الموعد: '+(b.appointment_time||''))}"
           target="_blank"
           style="display:block;text-align:center;margin-top:12px;background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.2);padding:12px;border-radius:12px;text-decoration:none;font-weight:700">
           <i class="fas fa-times-circle" style="margin-left:6px"></i> طلب إلغاء الحجز
