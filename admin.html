@@ -592,7 +592,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
         </div>
         <div class="form-group">
           <div class="form-label">رقم الشركة (واتساب + انستا باي)</div>
-          <input class="form-input" id="s-phone" value="01006484908">
+          <input class="form-input" id="s-phone" value="01039091989">
         </div>
         <div class="form-group">
           <div class="form-label">وقت تأكيد الحجز (بالدقائق)</div>
@@ -907,6 +907,16 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 </div>
 
 <!-- Modal: Booking Detail -->
+<div class="modal-overlay" id="provider-detail-modal">
+  <div class="modal-box" style="width:500px">
+    <div class="modal-head">
+      <div class="modal-title">بيانات مقدم الخدمة</div>
+      <button class="modal-close" onclick="closeProviderDetail()">×</button>
+    </div>
+    <div class="modal-body" id="provider-detail-content"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="booking-detail-modal">
   <div class="modal-box" style="width:480px">
     <div class="modal-head">
@@ -1454,10 +1464,15 @@ function renderProviders(data) {
   if(!data?.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">لا يوجد مقدمون</td></tr>'; return; }
   tbody.innerHTML = data.map(p => `
     <tr>
-      <td><strong>${s(p.name)}</strong><div style="font-size:11px;color:var(--muted)">${s(p.email||'')}</div></td>
+      <td><strong>${s(p.name)}</strong>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">
+          ${p.phone?`<a href="tel:${s(p.phone)}" style="color:var(--info);text-decoration:none;direction:ltr;display:inline-block">📱 ${s(p.phone)}</a>`:''}
+        </div>
+        <div style="font-size:11px;color:var(--muted)">${p.email?`✉️ ${s(p.email)}`:''}</div>
+      </td>
       <td>${s(p.service_type)||'—'}</td>
       <td style="font-size:12px">${s(p.specialty)||'—'} ${p.grade?'<span class="badge yellow">'+s(p.grade)+'</span>':''}</td>
-      <td style="font-size:12px">${s(p.area)||'—'}</td>
+      <td style="font-size:12px">${s(p.areas||p.area)||'—'}</td>
       <td><span style="color:var(--accent)">★</span> ${p.rating||5}</td>
       <td>
         <div style="display:flex;align-items:center;gap:6px">
@@ -1470,12 +1485,61 @@ function renderProviders(data) {
       </td>
       <td>${providerStatusBadge(p.status, p.is_available)}</td>
       <td><div class="act-btns">
+        <button class="act-btn edit" onclick="showProviderDetail('${p.id}')">عرض</button>
         ${p.status==='pending'?`<button class="act-btn activate" onclick="approveProvider('${p.id}')">قبول</button>`:''}
         ${p.status==='active'?`<button class="act-btn delete" onclick="suspendProvider('${p.id}')">إيقاف</button>`:''}
         ${p.status==='suspended'?`<button class="act-btn activate" onclick="activateProvider('${p.id}')">تفعيل</button>`:''}
         <button class="act-btn delete" onclick="deleteProvider('${p.id}')">حذف</button>
       </div></td>
     </tr>`).join('');
+}
+
+function showProviderDetail(id) {
+  const p = allProviders.find(x => x.id === id);
+  if(!p) return;
+  const waPhone = p.phone ? '2' + p.phone.replace(/^0/,'').replace(/\D/g,'') : '';
+  const statusMap = {active:'نشط', pending:'بانتظار الموافقة', suspended:'موقوف'};
+  const rows = [
+    ['الاسم', s(p.name)],
+    ['نوع الخدمة', s(p.service_type)||'—'],
+    ['التخصص', s(p.specialty)||'—'],
+    ['الدرجة', s(p.grade)||'—'],
+    ['المناطق', s(p.areas||p.area)||'—'],
+    ['سنوات الخبرة', p.experience?s(String(p.experience))+' سنة':'—'],
+    ['السعر المبدئي', p.price?s(String(p.price))+' ج.م':'—'],
+    ['نسبة العمولة', (p.commission_rate!=null?p.commission_rate:15)+'%'],
+    ['التقييم', '★ '+(p.rating||5)],
+    ['الحالة', statusMap[p.status]||p.status],
+    ['متاح حالياً', p.is_available?'نعم ●':'لا ○'],
+    ['نبذة', s(p.bio)||'—'],
+  ];
+  const html = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      ${p.photo_url?`<img src="${s(p.photo_url)}" style="width:64px;height:64px;border-radius:14px;object-fit:cover">`:`<div style="width:64px;height:64px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:28px">👨‍⚕️</div>`}
+      <div>
+        <div style="font-size:18px;font-weight:900;color:var(--dark)">${s(p.name)}</div>
+        <div style="font-size:13px;color:var(--muted)">${s(p.specialty||p.service_type||'')}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      ${p.phone?`<a href="tel:${s(p.phone)}" style="flex:1;min-width:90px;text-align:center;background:var(--info);color:#fff;padding:10px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700"><i class="fas fa-phone" style="margin-left:4px"></i> اتصال</a>`:''}
+      ${waPhone?`<a href="https://wa.me/${waPhone}" target="_blank" style="flex:1;min-width:90px;text-align:center;background:#25D366;color:#fff;padding:10px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700"><i class="fab fa-whatsapp" style="margin-left:4px"></i> واتساب</a>`:''}
+      ${p.email?`<a href="mailto:${s(p.email)}" style="flex:1;min-width:90px;text-align:center;background:var(--dark);color:#fff;padding:10px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700"><i class="fas fa-envelope" style="margin-left:4px"></i> إيميل</a>`:''}
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      ${rows.map(([k,v])=>`<tr>
+        <td style="padding:8px 12px;font-size:13px;font-weight:700;color:var(--dark);background:var(--bg);border-radius:8px 0 0 8px;width:130px">${k}</td>
+        <td style="padding:8px 12px;font-size:13px;color:var(--text)">${v}</td>
+      </tr>`).join('')}
+    </table>
+    ${p.phone?`<div style="margin-top:14px;padding:10px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--muted);text-align:center">📱 رقم الموبايل: <strong style="color:var(--dark);direction:ltr;display:inline-block">${s(p.phone)}</strong> &nbsp;|&nbsp; ✉️ ${s(p.email||'—')}</div>`:''}
+  `;
+  document.getElementById('provider-detail-content').innerHTML = html;
+  document.getElementById('provider-detail-modal').classList.add('open');
+}
+
+function closeProviderDetail() {
+  document.getElementById('provider-detail-modal').classList.remove('open');
 }
 
 async function updateProviderPrice(id) {
