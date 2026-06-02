@@ -1241,10 +1241,11 @@ function showBookingDetail(id) {
   const prov = allProviders.find(p => p.id === b.provider_id);
   const provName = prov ? s(prov.name) : '—';
 
-  // build provider options for assignment
-  const provOptions = allProviders
-    .filter(p => p.status === 'active')
-    .map(p => `<option value="${p.id}" ${p.id===b.provider_id?'selected':''}>${s(p.name)} — ${s(p.service_type||'')}</option>`)
+  // build provider options for assignment — مفلتر لنفس نوع الخدمة
+  const sameService = allProviders.filter(p => p.status === 'active' && p.service_type === b.service_type);
+  const provList = sameService.length ? sameService : allProviders.filter(p => p.status === 'active');
+  const provOptions = provList
+    .map(p => `<option value="${p.id}" ${p.id===b.provider_id?'selected':''}>${s(p.name)}${p.specialty?' — '+s(p.specialty):''}${p.grade?' ('+s(p.grade)+')':''}</option>`)
     .join('');
 
   document.getElementById('booking-detail-body').innerHTML = `
@@ -1290,11 +1291,40 @@ function showBookingDetail(id) {
   openModal('booking-detail-modal');
 }
 
+async function notifyProviderOfBooking(providerId, booking, isReassign) {
+  const p = allProviders.find(x => x.id === providerId);
+  if(!p?.email) return;
+  const payMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
+  const details =
+    `👤 العميل: ${booking.patient_name||'—'}<br>` +
+    `📱 الموبايل: ${booking.phone||'—'}<br>` +
+    `⚕️ الخدمة: ${booking.service_type||'—'}${booking.sub_option?(' — '+booking.sub_option):''}<br>` +
+    `📍 المنطقة: ${booking.area||'—'}<br>` +
+    `🏠 العنوان: ${booking.address||'—'}<br>` +
+    `🕐 الميعاد: ${booking.appointment_time||'—'}<br>` +
+    `💳 الدفع: ${payMap[booking.payment_method]||booking.payment_method||'—'}`;
+  try {
+    await emailjs.send('service_tv0w6ov','template_3arzsvv',{
+      to_email: p.email,
+      subject: isReassign ? '🔔 تم تحويل حجز إليك — ملاذ' : '🔔 حجز جديد لك — ملاذ',
+      title: isReassign ? '🔔 تم تحويل حجز إليك!' : '🔔 حجز جديد لك!',
+      title_color: '#2e7d32',
+      message: `أهلاً ${p.name||''}، تم ${isReassign?'تحويل':'تعيين'} حجز جديد إليك. راجع التفاصيل وادخل حسابك للموافقة.`,
+      details,
+      button_text: '✅ فتح حسابي',
+      button_link: 'https://malaaz-plum.vercel.app/provider.html',
+      button_color: '#c9a84c',
+    });
+  } catch(e){ console.warn('notify provider booking error:', e); }
+}
+
 async function assignProviderAndPrice(bookingId) {
   const providerId = document.getElementById('detail-provider-select')?.value || null;
   const price      = parseFloat(document.getElementById('detail-price-input')?.value) || null;
   const { error }  = await sb.from('bookings').update({ provider_id: providerId||null, price }).eq('id', bookingId);
   if(error) { showToast('❌ '+error.message,'error'); return; }
+  const bk = allBookings.find(x => x.id === bookingId);
+  if(providerId && bk) await notifyProviderOfBooking(providerId, bk, false);
   showToast('✅ تم تعيين المقدم والسعر','success');
   closeModal('booking-detail-modal');
   loadBookings();
@@ -1907,6 +1937,8 @@ async function confirmReassign(bookingId) {
     .eq('id', bookingId);
 
   if(error) { showToast('❌ ' + error.message, 'error'); return; }
+  const bk = allBookings.find(x => x.id === bookingId);
+  if(bk) await notifyProviderOfBooking(providerId, bk, true);
   showToast('✅ تم تحويل الحجز للمقدم الجديد', 'success');
   closeModal('booking-detail-modal');
   loadBookings();
