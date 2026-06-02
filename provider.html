@@ -656,6 +656,28 @@ async function doRegister() {
 
   if(provErr) { err.textContent = 'خطأ في إنشاء الملف: ' + provErr.message; err.style.display='block'; return; }
 
+  // إشعار الأدمن بمقدم جديد
+  try {
+    const details =
+      `👤 الاسم: ${name}<br>` +
+      `📱 الموبايل: ${phone}<br>` +
+      `✉️ الإيميل: ${email}<br>` +
+      `⚕️ نوع الخدمة: ${serviceType||'—'}<br>` +
+      `🩺 التخصص: ${specialty||'—'}<br>` +
+      `📍 المناطق: ${areasList.join('، ')||area||'—'}`;
+    await emailjs.send('service_tv0w6ov', 'template_3arzsvv', {
+      to_email:     'malaaz.medical@gmail.com',
+      subject:      `👨‍⚕️ مقدم خدمة جديد سجّل — ${name}`,
+      title:        '👨‍⚕️ مقدم خدمة جديد!',
+      title_color:  '#2e7d32',
+      message:      'مقدم خدمة جديد سجّل وفي انتظار موافقتك. راجع بياناته في لوحة التحكم.',
+      details,
+      button_text:  '✅ مراجعة الطلب',
+      button_link:  'https://malaaz-plum.vercel.app/admin.html',
+      button_color: '#c9a84c',
+    });
+  } catch(e) { console.warn('admin notify error:', e); }
+
   showToast('✅ تم إنشاء الحساب — انتظر موافقة الأدمن');
   ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
   switchLoginTab('login', document.querySelector('.login-tab'));
@@ -848,18 +870,50 @@ function showBookingDetail(id) {
 // ============================================================
 async function sendRejectionEmail(booking) {
   if(!booking.patient_email) return;
+  const details =
+    `⚕️ الخدمة: ${booking.service_type||'—'}<br>` +
+    `📍 المنطقة: ${booking.area||'—'}<br>` +
+    `🕐 الميعاد: ${booking.appointment_time||'—'}`;
   try {
     await emailjs.send('service_tv0w6ov', 'template_3arzsvv', {
-      to_email:         booking.patient_email,
-      patient_name:     booking.patient_name,
-      service_type:     booking.service_type,
-      area:             booking.area,
-      appointment_time: booking.appointment_time,
-      site_link:        'https://malaaz-plum.vercel.app',
+      to_email:     booking.patient_email,
+      subject:      'تحديث بخصوص حجزك مع ملاذ',
+      title:        '⚠️ تعذّر تأكيد حجزك',
+      title_color:  '#c62828',
+      message:      `عزيزي ${booking.patient_name||''}، نعتذر — تعذّر تأكيد حجزك في الوقت المحدد. يمكنك اختيار مقدم آخر أو التواصل معنا.`,
+      details,
+      button_text:  '🔍 اختر مقدم خدمة آخر',
+      button_link:  'https://malaaz-plum.vercel.app',
+      button_color: '#c9a84c',
     });
     console.log('✅ إيميل الرفض أُرسل');
   } catch(e) {
     console.warn('EmailJS rejection error:', e);
+  }
+}
+
+async function sendConfirmationEmail(booking) {
+  if(!booking.patient_email) return;
+  const details =
+    `⚕️ الخدمة: ${booking.service_type||'—'}<br>` +
+    `📍 المنطقة: ${booking.area||'—'}<br>` +
+    `🕐 الميعاد: ${booking.appointment_time||'—'}<br>` +
+    `👨‍⚕️ مقدم الخدمة: ${currentProvider?.name||'سيتم التواصل معك'}`;
+  try {
+    await emailjs.send('service_tv0w6ov', 'template_3arzsvv', {
+      to_email:     booking.patient_email,
+      subject:      '✅ تم تأكيد حجزك مع ملاذ',
+      title:        '✅ تم تأكيد حجزك!',
+      title_color:  '#2e7d32',
+      message:      `أهلاً ${booking.patient_name||''} 💙 تم تأكيد حجزك بنجاح. سيتم التواصل معك لتنسيق الزيارة.`,
+      details,
+      button_text:  '📱 تواصل معنا',
+      button_link:  'https://wa.me/201039091989',
+      button_color: '#25D366',
+    });
+    console.log('✅ إيميل التأكيد أُرسل');
+  } catch(e) {
+    console.warn('EmailJS confirm error:', e);
   }
 }
 
@@ -876,6 +930,11 @@ async function updateBooking(id, status) {
   const b = myBookings.find(x => x.id === id);
   if(b) {
     b.status = status;
+
+    if(status === 'confirmed') {
+      // قبول — إيميل تأكيد للعميل
+      await sendConfirmationEmail(b);
+    }
 
     if(status === 'cancelled') {
       // رفض — إيميل للعميل
