@@ -1241,12 +1241,11 @@ function showBookingDetail(id) {
   const prov = allProviders.find(p => p.id === b.provider_id);
   const provName = prov ? s(prov.name) : '—';
 
-  // build provider options for assignment — مفلتر لنفس نوع الخدمة
+  // build provider options for assignment — مفلتر حسب نوع الخدمة بصرامة
   const sameService = allProviders.filter(p => p.status === 'active' && p.service_type === b.service_type);
-  const provList = sameService.length ? sameService : allProviders.filter(p => p.status === 'active');
-  const provOptions = provList
-    .map(p => `<option value="${p.id}" ${p.id===b.provider_id?'selected':''}>${s(p.name)}${p.specialty?' — '+s(p.specialty):''}${p.grade?' ('+s(p.grade)+')':''}</option>`)
-    .join('');
+  const provOptions = sameService.length
+    ? sameService.map(p => `<option value="${p.id}" ${p.id===b.provider_id?'selected':''}>${s(p.name)}${p.specialty?' — '+s(p.specialty):''}${p.grade?' ('+s(p.grade)+')':''}</option>`).join('')
+    : '<option value="">لا يوجد مقدمون متاحون لهذه الخدمة</option>';
 
   document.getElementById('booking-detail-body').innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
