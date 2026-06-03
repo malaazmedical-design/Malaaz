@@ -2374,38 +2374,6 @@ const INSTAPAY_MSG     = `برجاء تحويل المبلغ إلى حساب/م�
 // ============================================================
 // injectFloatingButtons removed v4
 
-function updatePaymentDisplay(method) {
-  const hint = document.getElementById('instapay-hint');
-  if (!hint) return;
-  if (method === 'instapay' || method === 'wallet') {
-    hint.style.display = 'block';
-    hint.innerHTML = `
-      <div style="font-size:13px;font-weight:700;margin-bottom:6px">
-        ${method === 'instapay' ? '📱 انستا باي' : '💳 محفظة إلكترونية'}
-      </div>
-      <div style="font-size:12px;line-height:1.9;color:rgba(255,255,255,.8)">
-        برجاء تحويل المبلغ إلى حساب/محفظة الشركة الرسمية:<br>
-        <strong style="color:var(--accent);font-size:15px">📱 ${COMPANY_PHONE}</strong><br>
-        وإظهار لقطة الشاشة لمقدم الخدمة عند الوصول.
-      </div>
-      <a href="${COMPANY_WHATSAPP}" target="_blank"
-         style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:#25D366;color:#fff;
-                border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;
-                text-decoration:none;font-family:'Cairo',sans-serif">
-        💬 تواصل واتساب
-      </a>`;
-  } else {
-    hint.style.display = 'none';
-  }
-}
-
-// Override selectPayment
-const _origSelectPayment = window.selectPayment || function(){};
-window.selectPayment = function(el, method) {
-  _origSelectPayment(el, method);
-  updatePaymentDisplay(method);
-};
-
 // ============================================================
 // LEAFLET MAP — خريطة التتبع
 // ============================================================
