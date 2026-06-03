@@ -826,11 +826,15 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
         <div class="pay-opt" onclick="selectPayment(this,'wallet')"><span class="pay-opt-ico">💳</span>محفظة</div>
         <div class="pay-opt" onclick="selectPayment(this,'instapay')"><span class="pay-opt-ico">📱</span>انستا باي</div>
       </div>
-      <div id="instapay-hint" style="display:none;background:rgba(201,168,76,.1);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--accent);margin-bottom:12px">
-        📱 <strong>انستا باي / محفظة إلكترونية:</strong><br>
-        برجاء تحويل المبلغ إلى حساب/محفظة الشركة الرسمية:<br>
-        <strong style="font-size:15px;color:#fff">📱 01039091989</strong><br>
+      <div id="wallet-hint" style="display:none;background:rgba(201,168,76,.1);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--accent);margin-bottom:12px">
+        💳 <strong>محفظة إلكترونية (فودافون كاش):</strong><br>
+        برجاء تحويل المبلغ إلى رقم المحفظة الرسمي:<br>
+        <strong style="font-size:16px;color:#fff;direction:ltr;display:inline-block">01039091989</strong><br>
         وإظهار لقطة الشاشة لمقدم الخدمة عند الوصول.
+      </div>
+      <div id="instapay-hint" style="display:none;background:rgba(201,168,76,.1);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--accent);margin-bottom:12px">
+        📱 <strong>انستا باي (InstaPay):</strong><br>
+        سيتواصل معك فريقنا على واتساب لإتمام التحويل عبر إنستاباي 💬
       </div>
 
       <button onclick="bmSubmit()" id="bm-submit-btn" style="width:100%;background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif">
@@ -1973,8 +1977,10 @@ function selectPayment(el, method) {
   document.querySelectorAll('.pay-opt').forEach(e => e.classList.remove('sel'));
   el.classList.add('sel');
   bmSelectedPayment = method;
-  const hint = document.getElementById('instapay-hint');
-  if (hint) hint.style.display = (method === 'instapay' || method === 'wallet') ? 'block' : 'none';
+  const wHint = document.getElementById('wallet-hint');
+  const iHint = document.getElementById('instapay-hint');
+  if (wHint) wHint.style.display = (method === 'wallet')   ? 'block' : 'none';
+  if (iHint) iHint.style.display = (method === 'instapay') ? 'block' : 'none';
 }
 
 // ============================================================
