@@ -1075,7 +1075,7 @@ async function loadBookings() {
   tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted)">جاري التحميل...</td></tr>';
   const [bRes, pRes] = await Promise.all([
     sb.from('bookings').select('*').order('created_at', {ascending:false}).limit(500),
-    sb.from('providers').select('id,name,email,phone')
+    sb.from('providers').select('*')
   ]);
   allBookings = bRes.data || [];
   if(pRes.data) allProviders = pRes.data;
