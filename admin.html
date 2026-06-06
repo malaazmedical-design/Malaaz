@@ -1217,7 +1217,8 @@ async function updateBookingStatus(id, status) {
   if(status === 'completed') {
     const b = allBookings.find(x => x.id === id);
     if(b?.phone) {
-      const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}`;
+      const pidParam = b.provider_id ? `&pid=${b.provider_id}` : '';
+      const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}${pidParam}`;
       const waMsg = encodeURIComponent(
         `مرحباً ${b.patient_name||''}! 👋\n\n` +
         `شكراً لاختيارك منصة *ملاذ* للرعاية الطبية المنزلية 🏥\n\n` +
