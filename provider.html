@@ -944,7 +944,8 @@ async function updateBooking(id, status) {
     if(status === 'completed') {
       // مكتمل — بعت رسالة تقييم للعميل على واتساب
       if(b.phone) {
-        const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}`;
+        const pidParam = (b.provider_id || currentProvider?.id) ? `&pid=${b.provider_id || currentProvider.id}` : '';
+        const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}${pidParam}`;
         const waMsg = encodeURIComponent(
           `مرحباً ${b.patient_name||''} 👋\n\n` +
           `شكراً لاختيارك منصة *ملاذ* 🏥\n\n` +
