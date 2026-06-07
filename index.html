@@ -644,9 +644,8 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
     <div class="footer-bottom">
       <div class="footer-copy" id="footer-copyright">© 2026 ملاذ. جميع الحقوق محفوظة.</div>
       <div class="footer-socials">
-        <a class="soc-btn" href="#"><i class="fab fa-facebook-f"></i></a>
-        <a class="soc-btn" href="#"><i class="fab fa-instagram"></i></a>
-        <a class="soc-btn" href="#"><i class="fab fa-whatsapp"></i></a>
+        <a class="soc-btn" href="https://www.facebook.com/share/17iBWvQ9JJ/" target="_blank" rel="noopener" aria-label="فيسبوك"><i class="fab fa-facebook-f"></i></a>
+        <a class="soc-btn" id="footer-whatsapp" href="https://wa.me/201039091989" target="_blank" rel="noopener" aria-label="واتساب"><i class="fab fa-whatsapp"></i></a>
       </div>
     </div>
   </footer>
@@ -1025,9 +1024,18 @@ async function loadHomeServices() {
 async function loadHomeDoctors() {
   const grid = document.getElementById('home-doctors-grid');
   if (!grid) return;
-  const { data } = await sb.from('providers').select('*').eq('status','active').eq('is_available',true).order('rating',{ascending:false}).limit(3);
-  const docs = data?.length ? data : [];
+  const { data } = await sb.from('providers').select('*').eq('status','active').eq('is_available',true).limit(10);
+  let docs = data?.length ? data : [];
   if (!docs.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">لا يوجد مقدمو خدمة متاحون حالياً</div>'; return; }
+  // التقييمات الحقيقية
+  try {
+    const { data: revs } = await sb.from('reviews').select('provider_id,rating').eq('is_approved', true);
+    const map = {};
+    (revs||[]).forEach(r => { if(!r.provider_id) return; if(!map[r.provider_id]) map[r.provider_id]={sum:0,count:0}; map[r.provider_id].sum+=r.rating; map[r.provider_id].count+=1; });
+    docs.forEach(p => { const m=map[p.id]; p.realRating = m?(m.sum/m.count):null; p.reviewCount = m?m.count:0; });
+  } catch(e){}
+  docs.sort((a,b) => (b.realRating||0)-(a.realRating||0) || (b.reviewCount||0)-(a.reviewCount||0));
+  docs = docs.slice(0, 3);
   grid.innerHTML = docs.map((p, i) => renderDocCard(p, i)).join('');
 }
 
@@ -1218,8 +1226,26 @@ async function loadServices() {
 // ============================================================
 let allDocs = [];
 async function loadDoctors() {
-  const { data } = await sb.from('providers').select('*').eq('status','active').order('rating',{ascending:false});
+  const { data } = await sb.from('providers').select('*').eq('status','active');
   allDocs = data || [];
+  // جيب التقييمات الحقيقية المعتمدة واحسب المتوسط + العدد لكل مقدم
+  try {
+    const { data: revs } = await sb.from('reviews').select('provider_id,rating').eq('is_approved', true);
+    const map = {};
+    (revs||[]).forEach(r => {
+      if(!r.provider_id) return;
+      if(!map[r.provider_id]) map[r.provider_id] = { sum:0, count:0 };
+      map[r.provider_id].sum += r.rating;
+      map[r.provider_id].count += 1;
+    });
+    allDocs.forEach(p => {
+      const m = map[p.id];
+      p.realRating = m ? (m.sum / m.count) : null;
+      p.reviewCount = m ? m.count : 0;
+    });
+  } catch(e) { console.warn('ratings load error:', e); }
+  // رتّب: الأعلى تقييماً ثم الأكثر مراجعات
+  allDocs.sort((a,b) => (b.realRating||0) - (a.realRating||0) || (b.reviewCount||0) - (a.reviewCount||0));
   renderDocs(allDocs);
   populateDocAreaFilter();
 }
@@ -1230,7 +1256,18 @@ function renderDocCard(p, i) {
     'تمريض منزلي':'<i class="fas fa-user-nurse"></i>',
     'أشعة منزلية':'<i class="fas fa-x-ray"></i>'
   };
-  const stars = '★'.repeat(Math.round(p.rating||5)) + '☆'.repeat(5 - Math.round(p.rating||5));
+  // التقييم الحقيقي من مراجعات العملاء
+  let starsHtml;
+  if(p.reviewCount > 0) {
+    const r = p.realRating;
+    const full = Math.floor(r);
+    const half = (r - full) >= 0.5;
+    starsHtml = '★'.repeat(full) + (half?'⯨':'') + '☆'.repeat(5 - full - (half?1:0));
+    starsHtml = `${starsHtml} <span style="color:var(--muted);font-size:12px">${r.toFixed(1)} (${p.reviewCount} تقييم)</span>`;
+  } else {
+    starsHtml = '<span style="color:var(--muted);font-size:13px">⭐ مقدم جديد</span>';
+  }
+  const stars = starsHtml;
   // التخصص مع الدرجة
   const specText = p.grade
     ? `${sanitize(p.grade)} ${sanitize(p.specialty || (p.service_type==='تمريض منزلي'?'تمريض':p.service_type==='أشعة منزلية'?'أشعة':''))}`
@@ -1343,7 +1380,9 @@ async function viewProviderProfile(providerId) {
     .eq('provider_id', providerId)
     .limit(5);
 
-  const stars = '★'.repeat(Math.round(provider.rating || 5)) + '☆'.repeat(5 - Math.round(provider.rating || 5));
+  const stars = provider.reviewCount > 0
+    ? `${'★'.repeat(Math.round(provider.realRating))}${'☆'.repeat(5 - Math.round(provider.realRating))} <span style="font-size:12px;color:var(--muted)">${provider.realRating.toFixed(1)} (${provider.reviewCount} تقييم)</span>`
+    : '<span style="color:var(--muted);font-size:13px">⭐ مقدم جديد</span>';
   const gradeLabel = provider.grade ? `<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px">${sanitize(provider.grade)}</span>` : '';
   const specText = sanitize(provider.specialty || (provider.service_type==='تمريض منزلي'?'أخصائي تمريض':provider.service_type==='أشعة منزلية'?'مركز أشعة':provider.service_type||''));
 
@@ -2058,14 +2097,17 @@ async function openProviderBooking(provData) {
       </button></div>`;
   }
 
-  const stars = '★'.repeat(Math.round(provider.rating||5)) + '☆'.repeat(5-Math.round(provider.rating||5));
+  const ratingDisplay = provider.reviewCount > 0
+    ? `${'★'.repeat(Math.round(provider.realRating))}${'☆'.repeat(5-Math.round(provider.realRating))} <span style="font-size:11px;color:rgba(255,255,255,.3)">${provider.realRating.toFixed(1)} (${provider.reviewCount})</span>`
+    : '<span style="font-size:12px;color:rgba(255,255,255,.4)">⭐ مقدم جديد</span>';
+  const stars = ratingDisplay;
   document.getElementById('prov-booking-content').innerHTML = `
     <div style="background:var(--dark2);padding:20px;border-radius:20px 20px 0 0;margin-bottom:0">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
           <div style="font-size:18px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif">${sanitize(provider.name)}</div>
           <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:3px">${sanitize(provider.specialty||provider.service_type||'')} ${provider.grade?'· '+sanitize(provider.grade):''}</div>
-          <div style="color:var(--accent);font-size:13px;margin-top:5px">${stars} <span style="font-size:11px;color:rgba(255,255,255,.3)">${provider.rating||5}/5</span></div>
+          <div style="color:var(--accent);font-size:13px;margin-top:5px">${stars}</div>
         </div>
         <button onclick="document.getElementById('provider-booking-modal').classList.remove('open');document.body.style.overflow=''"
           style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">×</button>
