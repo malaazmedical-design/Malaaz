@@ -868,8 +868,18 @@ function showBookingDetail(id) {
 // ============================================================
 // EMAILJS — إشعار العميل بالرفض
 // ============================================================
+// لو العميل عنده تطبيق ملاذ — الإشعار بيوصله push من السيرفر، مفيش داعي للإيميل
+async function clientHasApp(phone) {
+  if(!phone) return false;
+  try {
+    const { data } = await sb.rpc('has_push_token', { p_phone: phone });
+    return data === true;
+  } catch(e) { return false; }
+}
+
 async function sendRejectionEmail(booking) {
   if(!booking.patient_email) return;
+  if(await clientHasApp(booking.phone)) return;
   const details =
     `⚕️ الخدمة: ${booking.service_type||'—'}<br>` +
     `📍 المنطقة: ${booking.area||'—'}<br>` +
@@ -894,6 +904,7 @@ async function sendRejectionEmail(booking) {
 
 async function sendConfirmationEmail(booking) {
   if(!booking.patient_email) return;
+  if(await clientHasApp(booking.phone)) return;
   const details =
     `⚕️ الخدمة: ${booking.service_type||'—'}<br>` +
     `📍 المنطقة: ${booking.area||'—'}<br>` +
