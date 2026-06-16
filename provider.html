@@ -678,6 +678,30 @@ async function doRegister() {
     });
   } catch(e) { console.warn('admin notify error:', e); }
 
+  // إيميل ترحيب للمقدم بطلب المستندات
+  try {
+    await emailjs.send('service_tv0w6ov', 'template_3arzsvv', {
+      to_email:     email,
+      subject:      'مرحباً بك في ملاذ 🏥 — المستندات المطلوبة للانضمام',
+      title:        'أهلاً بك في شبكة ملاذ!',
+      title_color:  '#1C2B2A',
+      message:      `أهلاً ${name} 👋\n\nيسرّنا انضمامك لشبكة مقدمي الخدمة. لإتمام التسجيل والبدء في استقبال الحجوزات، يرجى إرسال المستندات التالية:`,
+      details:
+        '<b>📋 المستندات المطلوبة:</b><br><br>' +
+        '1️⃣ شهادة مزاولة المهنة (سارية المفعول)<br>' +
+        '2️⃣ كارنيه عضوية النقابة المهنية<br>' +
+        '3️⃣ المؤهل العلمي (البكالوريوس أو الدكتوراه)<br>' +
+        '4️⃣ شهادات التخصص والزمالات (إن وجدت) — اختياري<br>' +
+        '5️⃣ بطاقة الرقم القومي (سارية) — صورة وجهان<br>' +
+        '6️⃣ صورة شخصية احترافية (خلفية بيضاء)<br>' +
+        '7️⃣ السيرة الذاتية الطبية (CV)<br>' +
+        '8️⃣ شهادة حسن السيرة والسلوك (إن أمكن)<br><br>' +
+        '<b>📤 الإرسال عبر واتساب: 01039091989 أو malaaz.medical@gmail.com</b>',
+      button_text:  '📱 تواصل معنا على واتساب',
+      button_link:  'https://wa.me/201039091989',
+      button_color: '#25D366',
+    });
+  } catch(e) { console.warn('provider welcome email error:', e); }
   showToast('✅ تم إنشاء الحساب — انتظر موافقة الأدمن');
   ['r-name','r-email','r-pass','r-phone'].forEach(id => document.getElementById(id).value = '');
   switchLoginTab('login', document.querySelector('.login-tab'));
