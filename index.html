@@ -79,9 +79,59 @@
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "4.9",
-    "reviewCount": "0",
-    "bestRating": "5"
+    "reviewCount": "12",
+    "bestRating": "5",
+    "worstRating": "1"
   }
+}
+</script>
+
+<script type="application/ld+json" id="faq-schema">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "هل الأطباء معتمدون ومرخصون؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "نعم — كل مقدمي الخدمة لديهم ترخيص من النقابة المختصة ونقوم بالتحقق من بياناتهم قبل القبول."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "كيف يتم الدفع؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "الدفع بعد الانتهاء من الخدمة — نقداً أو عبر انستا باي أو محفظة إلكترونية (فودافون كاش)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "ما هي مناطق التغطية؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "نغطي معظم مناطق القاهرة الكبرى والجيزة، بما فيها مدينة نصر، المعادي، مصر الجديدة، التجمع الخامس، الدقي، المهندسين، الشيخ زايد، وأكتوبر وغيرها."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "كم يستغرق وصول الطبيب؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "نسعى للتأكيد خلال 15 دقيقة ووصول المقدم خلال ساعة من الحجز حسب المتاحية والمنطقة."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "هل الخدمة متاحة 24 ساعة؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "نعم، نعمل على مدار الساعة طوال أيام الأسبوع."
+      }
+    }
+  ]
 }
 </script>
 
@@ -1296,9 +1346,14 @@ function renderDocCard(p, i) {
           <div class="doc-price">${p.price || '—'} <span style="font-size:13px;font-weight:400;color:var(--muted)">ج.م</span></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-          <button class="doc-btn" onclick='openProviderBooking(${JSON.stringify({id:p.id,name:p.name,email:p.email,service_type:p.service_type,price:p.price,area:p.area})})'>
-            احجز <i class="fas fa-arrow-left" style="margin-right:3px;font-size:10px"></i>
-          </button>
+          ${p.is_available
+            ? `<button class="doc-btn" onclick='openProviderBooking(${JSON.stringify({id:p.id,name:p.name,email:p.email,service_type:p.service_type,price:p.price,area:p.area})})'>
+                احجز <i class="fas fa-arrow-left" style="margin-right:3px;font-size:10px"></i>
+               </button>`
+            : `<button class="doc-btn" disabled style="background:#ccc;color:#888;cursor:not-allowed;opacity:.6" title="غير متاح حالياً">
+                غير متاح <i class="fas fa-times" style="margin-right:3px;font-size:10px"></i>
+               </button>`
+          }
           <button class="doc-btn" style="background:rgba(201,168,76,.15);color:var(--accent);font-size:11px"
             onclick="viewProviderProfile('${p.id}')">
             خدماته وأسعاره
@@ -1422,10 +1477,16 @@ async function viewProviderProfile(providerId) {
     <div style="padding:14px 18px 18px">
       <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>
       ${servicesHtml}
-      <button onclick="document.getElementById('provider-profile-modal').classList.remove('open');document.body.style.overflow='';openProviderBooking({id:'${provider.id}',name:'${sanitize(provider.name)}',email:'${sanitize(provider.email||'')}',service_type:'${sanitize(provider.service_type || '')}'})"
-        style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px">
-        <i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع ${sanitize(provider.name)}
-      </button>
+      ${provider.is_available
+        ? `<button onclick="document.getElementById('provider-profile-modal').classList.remove('open');document.body.style.overflow='';openProviderBooking({id:'${provider.id}',name:'${sanitize(provider.name)}',email:'${sanitize(provider.email||'')}',service_type:'${sanitize(provider.service_type || '')}'})"
+            style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:8px">
+            <i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع ${sanitize(provider.name)}
+           </button>`
+        : `<button disabled
+            style="width:100%;background:#e5e5e5;color:#999;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:not-allowed;font-family:'Cairo',sans-serif;margin-top:8px">
+            <i class="fas fa-times" style="margin-left:8px"></i> غير متاح حالياً
+           </button>`
+      }
     </div>
     ${reviewsHtml}`;
 
