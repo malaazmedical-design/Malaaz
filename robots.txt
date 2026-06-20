@@ -1,6 +1,25 @@
 User-agent: *
 Allow: /
+
+# حماية الصفحات الخاصة
 Disallow: /admin.html
 Disallow: /provider.html
 
+# السماح لـ AI bots بالزحف (مهم للـ GEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+# Sitemap
 Sitemap: https://malaaz-plum.vercel.app/sitemap.xml
