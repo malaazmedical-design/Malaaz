@@ -320,7 +320,7 @@
   #mz-badge{position:absolute;top:-4px;right:-4px;background:#e53935;color:#fff;
     border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;
     display:flex;align-items:center;justify-content:center;border:2px solid #fff;z-index:1}
-  #mz-box{width:345px;max-height:560px;border-radius:22px;overflow:hidden;
+  #mz-box{width:345px;height:560px;border-radius:22px;overflow:hidden;
     display:flex;flex-direction:column;
     box-shadow:0 20px 60px rgba(0,0,0,.3);animation:mzUp .3s ease}
   #mz-head{background:linear-gradient(135deg,#1C2B2A,#2d5a3d);
@@ -336,7 +336,7 @@
   #mz-close{background:rgba(255,255,255,.1);border:none;color:#fff;
     width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:20px;
     display:flex;align-items:center;justify-content:center}
-  #mz-msgs{flex:1;overflow-y:auto;padding:14px 12px;
+  #mz-msgs{flex:1;min-height:0;overflow-y:auto;padding:14px 12px;
     display:flex;flex-direction:column;gap:10px;background:#f5f2ec}
   #mz-msgs::-webkit-scrollbar{width:3px}
   #mz-msgs::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
@@ -362,14 +362,15 @@
   .mz-typing span:nth-child(2){animation:mzT 1.2s .2s infinite}
   .mz-typing span:nth-child(3){animation:mzT 1.2s .4s infinite}
   #mz-quick{padding:8px 12px;border-top:1px solid #ebe7df;
-    display:flex;gap:6px;overflow-x:auto;background:#fff;scrollbar-width:none}
+    display:flex;gap:6px;overflow-x:auto;background:#fff;scrollbar-width:none;
+    flex-shrink:0}
   #mz-quick::-webkit-scrollbar{display:none}
   .mz-qr{background:#f5f2ec;border:1px solid #e0dbd0;border-radius:15px;
     padding:5px 11px;font-size:11px;cursor:pointer;white-space:nowrap;
     color:#2d3b3e;font-family:'Cairo',sans-serif;flex-shrink:0;transition:background .15s}
   .mz-qr:hover{background:#ece8e0}
   #mz-irow{padding:9px 12px;background:#fff;border-top:1px solid #ebe7df;
-    display:flex;gap:8px;align-items:center}
+    display:flex;gap:8px;align-items:center;flex-shrink:0}
   #mz-input{flex:1;border:1px solid #e0dbd0;border-radius:22px;
     padding:9px 15px;font-size:13px;font-family:'Cairo',sans-serif;
     outline:none;background:#f9f7f3;color:#2d3b3e;direction:rtl}
