@@ -1,5 +1,5 @@
 /* ============================================================
-   MIZO CHATBOT WIDGET — ملاذ v2
+   MIZO CHATBOT WIDGET — ملاذ v3
    ضيف في آخر index.html قبل </body>:
    <script src="mizo-widget.js"></script>
    ============================================================ */
@@ -7,18 +7,45 @@
   'use strict';
 
   /* ══════════════════════════════════════════════
-     بيانات الخدمات — بتتحدث من الصفحة تلقائياً
+     بيانات الخدمات والأسعار
   ══════════════════════════════════════════════ */
   const DATA = {
     services: {
-      'كشف منزلي':   { icon:'🩺', min:200, max:800,  desc:'طبيب عام أو متخصص يجي عندك في البيت' },
-      'تمريض منزلي': { icon:'👩‍⚕️', min:150, max:600,  desc:'ممرض/ة معتمد/ة لجميع الاحتياجات التمريضية' },
-      'أشعة منزلية': { icon:'🔬', min:250, max:900,  desc:'أجهزة أشعة وسونار متنقلة في بيتك' },
+      'كشف منزلي': {
+        icon: '🩺',
+        desc: 'طبيب متخصص يجي عندك في البيت',
+        subs: [
+          { name: 'أخصائي',    min: 1000, max: 1400 },
+          { name: 'استشاري',   min: 1300, max: 1700 },
+        ],
+        bookFn: "كشف منزلي",
+      },
+      'تمريض منزلي': {
+        icon: '👩‍⚕️',
+        desc: 'ممرض/ة معتمد/ة لجميع الاحتياجات التمريضية',
+        subs: [
+          { name: 'خدمات سريعة', min: 400,  max: null },
+          { name: 'إقامة ١٢ ساعة', min: 600,  max: null },
+          { name: 'إقامة ٢٤ ساعة', min: 1200, max: null },
+        ],
+        bookFn: "تمريض منزلي",
+      },
+      'أشعة منزلية': {
+        icon: '🔬',
+        desc: 'أجهزة أشعة متنقلة في بيتك',
+        subs: [
+          { name: 'سونار',       min: 1000, max: null },
+          { name: 'دوبلر',       min: 1100, max: null },
+          { name: 'أشعة سينية', min: 500,  max: null },
+          { name: 'إيكو قلب',   min: 1000, max: null },
+        ],
+        bookFn: "أشعة منزلية",
+      },
     },
     contact: {
-      phone:   '01039091989',
-      whatsapp:'01039091989',
-      email:   'malaaz.medical@gmail.com',
+      phone:    '01039091989',
+      whatsapp: '01039091989',
+      email:    'malaaz.medical@gmail.com',
     },
     areas: {
       cairo: ['مدينة نصر','النزهة','هليوبوليس','المعادي','المقطم','الزيتون','شبرا','عين شمس','عباسية','مصر الجديدة','التجمع'],
@@ -26,34 +53,30 @@
     },
   };
 
-  /* — يسحب الأسعار الحقيقية من الصفحة لو اتحملت — */
-  function syncPricesFromPage() {
-    try {
-      // يجرب يقرأ من price cards اللي رسمها loadPricing()
-      document.querySelectorAll('.price-card').forEach(card => {
-        const nameEl  = card.querySelector('.price-card-header h3, [class*="name"], h3, h4');
-        const minEl   = card.querySelector('.price-min');
-        const maxEl   = card.querySelector('.price-max');
-        if (!nameEl) return;
-        const name = nameEl.textContent.trim();
-        if (DATA.services[name] && minEl && maxEl) {
-          DATA.services[name].min = parseInt(minEl.textContent) || DATA.services[name].min;
-          DATA.services[name].max = parseInt(maxEl.textContent) || DATA.services[name].max;
-        }
-      });
-      // يجرب يقرأ الإيميل من footer
-      const emailEl = document.getElementById('footer-email');
-      if (emailEl && emailEl.textContent.includes('@')) {
-        DATA.contact.email = emailEl.textContent.trim();
-      }
-    } catch(e) {}
+  /* ── مساعد: رسم السعر ── */
+  function priceText(sub) {
+    if (sub.max) return `من ${sub.min} لـ ${sub.max} ج.م`;
+    return `يبدأ من ${sub.min} ج.م`;
+  }
+
+  /* ── زر الحجز المباشر ── */
+  function bookBtn(serviceName, label) {
+    return `<button onclick="
+      document.getElementById('mz-box').style.display='none';
+      document.getElementById('mz-btn').style.display='flex';
+      if(typeof openBookingModal==='function') openBookingModal('${serviceName}');
+      else { var s=document.querySelector('[onclick*=\\"احجز\\"]'); if(s) s.click(); }
+    " style="
+      margin-top:10px;padding:9px 20px;border:none;border-radius:20px;cursor:pointer;
+      background:linear-gradient(135deg,#c9a84c,#e8c56a);color:#1e3a2f;
+      font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;width:100%;
+    ">🏥 احجز ${label} الآن</button>`;
   }
 
   /* ══════════════════════════════════════════════
-     ردود ميزو
+     بناء الردود
   ══════════════════════════════════════════════ */
   function buildResponses() {
-    syncPricesFromPage();
     const s = DATA.services;
     const c = DATA.contact;
     const a = DATA.areas;
@@ -68,52 +91,71 @@
         chips: ['🏥 احجز الآن','📞 تواصل معنا'],
       },
 
-      /* ── الخدمات ── */
+      /* ── كل الخدمات ── */
       services: {
-        text: `إحنا بنقدم ٣ خدمات طبية في بيتك:\n\n${Object.entries(s).map(([n,v])=>`${v.icon} <b>${n}</b>\n   ${v.desc}\n   💰 من ${v.min} لـ ${v.max} ج.م`).join('\n\n')}\n\nعايز تعرف أكتر عن خدمة معينة؟`,
-        chips: ['🩺 كشف منزلي','👩‍⚕️ تمريض منزلي','🔬 أشعة منزلية','🏥 احجز الآن'],
+        text: `إحنا بنقدم ٣ خدمات طبية في بيتك:\n\n` +
+          Object.entries(s).map(([n,v]) =>
+            `${v.icon} <b>${n}</b>\n${v.desc}`
+          ).join('\n\n') +
+          `\n\nعايز تعرف أكتر عن خدمة؟`,
+        chips: ['🩺 كشف منزلي','👩‍⚕️ تمريض منزلي','🔬 أشعة منزلية'],
       },
 
       /* ── كشف منزلي ── */
       kashf: {
-        text: `🩺 <b>الكشف المنزلي</b>\n\n${s['كشف منزلي'].desc}\n\n👨‍⚕️ <b>أنواع الكشف:</b>\n• كشف عام\n• كشف متخصص (باطنة، أطفال، قلب، جلدية، عظام، نساء وتوليد، مخ وأعصاب، والمزيد)\n\n💰 <b>الأسعار:</b>\n• طبيب عام: من ${s['كشف منزلي'].min} ج.م\n• طبيب متخصص: من ${Math.round(s['كشف منزلي'].min*1.5)} لـ ${s['كشف منزلي'].max} ج.م\n\n✅ الدفع بعد الخدمة`,
-        chips: ['💰 سعر تخصص معين','🏥 احجز كشف','📍 مناطق التغطية'],
+        text: `🩺 <b>الكشف المنزلي</b>\n\n${s['كشف منزلي'].desc}\n\n` +
+          `👨‍⚕️ <b>أنواع الكشف:</b>\n• كشف عام\n• كشف متخصص (باطنة، أطفال، قلب، جلدية، عظام، نساء وتوليد، مخ وأعصاب)\n\n` +
+          `💰 <b>الأسعار:</b>\n` +
+          s['كشف منزلي'].subs.map(sub => `• ${sub.name}: ${priceText(sub)}`).join('\n') +
+          `\n\n✅ الدفع بعد الخدمة` +
+          bookBtn('كشف منزلي','كشف'),
+        chips: ['💰 سعر الأخصائي','💰 سعر الاستشاري','📍 مناطق التغطية'],
       },
 
       /* ── تمريض منزلي ── */
       nursing: {
-        text: `👩‍⚕️ <b>التمريض المنزلي</b>\n\n${s['تمريض منزلي'].desc}\n\n🏥 <b>الخدمات التمريضية:</b>\n• حقن وأدوية وريدية\n• تغيير ضمادات وجروح\n• قياس ضغط وسكر\n• تركيب كانيولا وسيروم\n• رعاية مرضى الفراش\n• تمريض ما بعد العمليات\n\n💰 <b>الأسعار:</b> من ${s['تمريض منزلي'].min} لـ ${s['تمريض منزلي'].max} ج.م\n\n⏰ متاحين ٢٤ ساعة / ٧ أيام`,
-        chips: ['🏥 احجز تمريض','💰 الأسعار','📞 تواصل معنا'],
+        text: `👩‍⚕️ <b>التمريض المنزلي</b>\n\n${s['تمريض منزلي'].desc}\n\n` +
+          `🏥 <b>الخدمات:</b>\n• حقن وأدوية وريدية\n• تغيير ضمادات وجروح\n• قياس ضغط وسكر\n• تركيب كانيولا وسيروم\n• رعاية مرضى الفراش\n• تمريض ما بعد العمليات\n\n` +
+          `💰 <b>الأسعار:</b>\n` +
+          s['تمريض منزلي'].subs.map(sub => `• ${sub.name}: ${priceText(sub)}`).join('\n') +
+          `\n\n⏰ متاحين ٢٤ ساعة / ٧ أيام` +
+          bookBtn('تمريض منزلي','تمريض'),
+        chips: ['💰 الأسعار','📍 مناطق التغطية'],
       },
 
       /* ── أشعة منزلية ── */
       xray: {
-        text: `🔬 <b>الأشعة المنزلية</b>\n\n${s['أشعة منزلية'].desc}\n\n📸 <b>أنواع الأشعة:</b>\n• سونار (موجات فوق صوتية)\n• أشعة سينية (X-Ray)\n• تخطيط قلب (ECG)\n• تحاليل طبية منزلية\n\n💰 <b>الأسعار:</b> من ${s['أشعة منزلية'].min} لـ ${s['أشعة منزلية'].max} ج.م\n\n📋 التقرير بيوصلك بعد الانتهاء مباشرة`,
-        chips: ['🏥 احجز أشعة','💰 الأسعار','📞 تواصل معنا'],
+        text: `🔬 <b>الأشعة المنزلية</b>\n\n${s['أشعة منزلية'].desc}\n\n` +
+          `📸 <b>الأسعار:</b>\n` +
+          s['أشعة منزلية'].subs.map(sub => `• ${sub.name}: ${priceText(sub)}`).join('\n') +
+          `\n\n📋 التقرير بيوصلك بعد الانتهاء مباشرة` +
+          bookBtn('أشعة منزلية','أشعة'),
+        chips: ['💰 الأسعار','📍 مناطق التغطية'],
       },
 
-      /* ── الأسعار ── */
+      /* ── الأسعار الكاملة ── */
       pricing: {
-        text: `💰 <b>الأسعار الكاملة:</b>\n\n${Object.entries(s).map(([n,v])=>`${v.icon} <b>${n}</b>: ${v.min} – ${v.max} ج.م`).join('\n')}\n\n✅ الحجز مجاني\n✅ الدفع بعد الخدمة\n✅ مفيش رسوم خفية\n\nعايز سعر خدمة معينة؟`,
-        chips: ['🩺 سعر الكشف','👩‍⚕️ سعر التمريض','🔬 سعر الأشعة','🏥 احجز الآن'],
+        text: `💰 <b>الأسعار الكاملة:</b>\n\n` +
+          Object.entries(s).map(([n,v]) =>
+            `${v.icon} <b>${n}:</b>\n` +
+            v.subs.map(sub => `   • ${sub.name}: ${priceText(sub)}`).join('\n')
+          ).join('\n\n') +
+          `\n\n✅ الحجز مجاني — الدفع بعد الخدمة`,
+        chips: ['🩺 كشف منزلي','👩‍⚕️ تمريض منزلي','🔬 أشعة منزلية','🏥 احجز الآن'],
       },
 
-      /* ── سعر الكشف ── */
-      price_kashf: {
-        text: `🩺 <b>أسعار الكشف المنزلي:</b>\n\n• طبيب عام: من ${s['كشف منزلي'].min} ج.م\n• طبيب متخصص (باطنة، أطفال، إلخ): من ${Math.round(s['كشف منزلي'].min*1.5)} لـ ${s['كشف منزلي'].max} ج.م\n\n💡 السعر النهائي بيتحدد حسب التخصص والمنطقة\n✅ الدفع بعد الكشف`,
-        chips: ['🏥 احجز كشف','👩‍⚕️ سعر التمريض','🔬 سعر الأشعة'],
+      /* ── سعر الأخصائي ── */
+      price_specialist: {
+        text: `🩺 <b>سعر الأخصائي:</b>\n\nيبدأ من ${s['كشف منزلي'].subs[0].min} لـ ${s['كشف منزلي'].subs[0].max} ج.م\n\n💡 السعر بيتحدد حسب التخصص والمنطقة` +
+          bookBtn('كشف منزلي','كشف'),
+        chips: ['💰 سعر الاستشاري','📍 مناطق التغطية'],
       },
 
-      /* ── سعر التمريض ── */
-      price_nursing: {
-        text: `👩‍⚕️ <b>أسعار التمريض المنزلي:</b>\n\n• زيارة تمريضية: من ${s['تمريض منزلي'].min} ج.م\n• رعاية يومية/مستمرة: من ${Math.round(s['تمريض منزلي'].min*2)} ج.م\n• أقصى: ${s['تمريض منزلي'].max} ج.م\n\n💡 السعر حسب نوع الخدمة والمدة\n✅ الدفع بعد الخدمة`,
-        chips: ['🏥 احجز تمريض','🩺 سعر الكشف','🔬 سعر الأشعة'],
-      },
-
-      /* ── سعر الأشعة ── */
-      price_xray: {
-        text: `🔬 <b>أسعار الأشعة المنزلية:</b>\n\n• سونار: من ${s['أشعة منزلية'].min} ج.م\n• أشعة سينية: من ${Math.round(s['أشعة منزلية'].min*1.2)} ج.م\n• تخطيط قلب (ECG): من ${Math.round(s['أشعة منزلية'].min*0.9)} ج.م\n• أقصى: ${s['أشعة منزلية'].max} ج.م\n\n💡 السعر حسب نوع الأشعة والمنطقة\n✅ الدفع بعد الخدمة`,
-        chips: ['🏥 احجز أشعة','🩺 سعر الكشف','👩‍⚕️ سعر التمريض'],
+      /* ── سعر الاستشاري ── */
+      price_consultant: {
+        text: `🩺 <b>سعر الاستشاري:</b>\n\nيبدأ من ${s['كشف منزلي'].subs[1].min} لـ ${s['كشف منزلي'].subs[1].max} ج.م\n\n💡 السعر بيتحدد حسب التخصص والمنطقة` +
+          bookBtn('كشف منزلي','كشف'),
+        chips: ['💰 سعر الأخصائي','📍 مناطق التغطية'],
       },
 
       /* ── مناطق التغطية ── */
@@ -124,13 +166,13 @@
 
       /* ── وقت الوصول ── */
       time: {
-        text: `⚡ بنسعى للتأكيد خلال <b>١٥ دقيقة</b>!\n\n🏃 المقدم بيوصلك خلال <b>ساعة تقريباً</b> حسب:\n• المتاحية\n• منطقتك\n• نوع الخدمة\n\n🌙 متاحين <b>٢٤ ساعة / ٧ أيام</b>`,
+        text: `⚡ بنسعى للتأكيد خلال <b>١٥ دقيقة</b>!\n\n🏃 المقدم بيوصلك خلال <b>ساعة تقريباً</b> حسب المتاحية ومنطقتك\n\n🌙 متاحين <b>٢٤ ساعة / ٧ أيام</b>`,
         chips: ['🏥 احجز الآن','📍 مناطق التغطية'],
       },
 
       /* ── الدفع ── */
       payment: {
-        text: `💳 <b>طرق الدفع:</b>\n\n💵 <b>كاش</b> — بعد الخدمة مباشرة\n📱 <b>انستا باي</b> — تحويل فوري\n👛 <b>محفظة ملاذ</b> — رصيدك محفوظ\n\n🎉 <b>الحجز مجاني</b> — مفيش رسوم مقدمة!`,
+        text: `💳 <b>طرق الدفع:</b>\n\n💵 <b>كاش</b> — بعد الخدمة مباشرة\n📱 <b>انستا باي</b> — تحويل فوري\n👛 <b>محفظة ملاذ</b> — رصيدك محفوظ\n\n🎉 الحجز مجاني — مفيش رسوم مقدمة!`,
         chips: ['🏥 احجز الآن','💰 الأسعار'],
       },
 
@@ -148,8 +190,22 @@
 
       /* ── الحجز ── */
       book: {
-        text: `🎉 <b>الحجز سهل جداً:</b>\n\n1️⃣ اضغط "احجز الآن" في الموقع\n2️⃣ اختار الخدمة\n3️⃣ ادخل بياناتك وعنوانك\n4️⃣ اختار الوقت\n5️⃣ خلاص! ✅\n\n💡 الحجز مجاني والدفع بعد الخدمة`,
-        chips: ['💰 الأسعار','📞 تواصل معنا'],
+        text: `🎉 اختار الخدمة اللي عايزها وهنفتحلك الحجز فوراً:`,
+        chips: ['🩺 احجز كشف','👩‍⚕️ احجز تمريض','🔬 احجز أشعة'],
+      },
+
+      /* ── حجز مباشر ── */
+      book_kashf: {
+        text: `🩺 <b>حجز كشف منزلي</b>\n\n${bookBtn('كشف منزلي','كشف')}`,
+        chips: ['💰 الأسعار','📍 مناطق التغطية'],
+      },
+      book_nursing: {
+        text: `👩‍⚕️ <b>حجز تمريض منزلي</b>\n\n${bookBtn('تمريض منزلي','تمريض')}`,
+        chips: ['💰 الأسعار','📍 مناطق التغطية'],
+      },
+      book_xray: {
+        text: `🔬 <b>حجز أشعة منزلية</b>\n\n${bookBtn('أشعة منزلية','أشعة')}`,
+        chips: ['💰 الأسعار','📍 مناطق التغطية'],
       },
 
       fallback: {
@@ -163,62 +219,71 @@
      كشف النية
   ══════════════════════════════════════════════ */
   const CHIP_MAP = {
-    '📋 خدماتنا'       : 'services',
-    '💰 الأسعار'       : 'pricing',
-    '🩺 كشف منزلي'    : 'kashf',
-    '👩‍⚕️ تمريض منزلي': 'nursing',
-    '🔬 أشعة منزلية'  : 'xray',
-    '🩺 سعر الكشف'    : 'price_kashf',
-    '👩‍⚕️ سعر التمريض': 'price_nursing',
-    '🔬 سعر الأشعة'   : 'price_xray',
-    '💰 سعر تخصص معين': 'price_kashf',
-    '📍 مناطق التغطية' : 'areas',
-    '⏱️ وقت الوصول'   : 'time',
-    '💳 طرق الدفع'    : 'payment',
-    '👨‍⚕️ هل الأطباء معتمدون؟': 'doctors',
-    '📞 تواصل معنا'   : 'contact',
-    '🏥 احجز الآن'    : 'book',
-    '🏥 احجز كشف'     : 'book',
-    '🏥 احجز تمريض'   : 'book',
-    '🏥 احجز أشعة'    : 'book',
+    '📋 خدماتنا'           : 'services',
+    '💰 الأسعار'           : 'pricing',
+    '🩺 كشف منزلي'        : 'kashf',
+    '👩‍⚕️ تمريض منزلي'   : 'nursing',
+    '🔬 أشعة منزلية'      : 'xray',
+    '💰 سعر الأخصائي'     : 'price_specialist',
+    '💰 سعر الاستشاري'    : 'price_consultant',
+    '💰 سعر تخصص معين'    : 'price_specialist',
+    '📍 مناطق التغطية'    : 'areas',
+    '⏱️ وقت الوصول'       : 'time',
+    '💳 طرق الدفع'        : 'payment',
+    '📞 تواصل معنا'       : 'contact',
+    '🏥 احجز الآن'        : 'book',
+    '🩺 احجز كشف'         : 'book_kashf',
+    '👩‍⚕️ احجز تمريض'    : 'book_nursing',
+    '🔬 احجز أشعة'        : 'book_xray',
   };
 
   function detectIntent(msg) {
     if (CHIP_MAP[msg]) return CHIP_MAP[msg];
     const m = msg.toLowerCase();
-    const greet = ['أهل','مرحب','هاي','hi ','hello','السلام','صباح','مساء','ازيك','ازيك'];
+
+    const greet = ['أهل','مرحب','هاي','hi ','hello','السلام','صباح','مساء'];
     if (greet.some(g => m.includes(g))) return 'greeting';
-    const thanks = ['شكر','thanks','thank','تمام','ممتاز','حلو','كويس','عظيم'];
+    const thanks = ['شكر','thanks','thank','تمام','ممتاز','حلو','كويس'];
     if (thanks.some(t => m.includes(t))) return 'thanks';
 
     // أسعار محددة
-    if (/سعر.*كشف|كشف.*سعر|كام.*كشف|كشف.*كام/.test(m)) return 'price_kashf';
-    if (/سعر.*تمريض|تمريض.*سعر|كام.*تمريض|تمريض.*كام/.test(m)) return 'price_nursing';
-    if (/سعر.*أشعة|أشعة.*سعر|كام.*أشعة|أشعة.*كام|سعر.*سونار|سونار.*سعر/.test(m)) return 'price_xray';
-    if (/سعر|تكلف|كام|بكام|فلوس|تمن/.test(m)) return 'pricing';
+    if (/استشاري|consultant/.test(m))                          return 'price_consultant';
+    if (/أخصائي|اخصائي|specialist/.test(m))                   return 'price_specialist';
+    if (/سعر.*سونار|سونار.*سعر|كام.*سونار/.test(m))           return 'xray';
+    if (/سعر.*دوبلر|دوبلر/.test(m))                           return 'xray';
+    if (/سعر.*إيكو|إيكو|ايكو/.test(m))                       return 'xray';
+    if (/سعر.*أشعة|أشعة.*سعر|كام.*أشعة/.test(m))            return 'xray';
+    if (/سعر.*تمريض|تمريض.*سعر|كام.*تمريض/.test(m))         return 'nursing';
+    if (/سعر.*كشف|كشف.*سعر|كام.*كشف/.test(m))               return 'kashf';
+    if (/سعر|تكلف|كام|بكام|فلوس|تمن/.test(m))               return 'pricing';
 
     // خدمات محددة
-    if (/كشف|دكتور|طبيب|استشار/.test(m)) return 'kashf';
-    if (/تمريض|ممرض|حقن|كانيول|ضمادة|سيروم|ضغط.*قياس|سكر.*قياس/.test(m)) return 'nursing';
-    if (/أشعة|سونار|xray|x-ray|ecg|تخطيط/.test(m)) return 'xray';
-    if (/خدم|عندكم|إيه|ايه|عندك|بتعمل/.test(m)) return 'services';
+    if (/سونار|دوبلر|إيكو|ايكو|أشعة|xray|ecg|تخطيط/.test(m)) return 'xray';
+    if (/تمريض|ممرض|حقن|كانيول|ضمادة|سيروم|إقامة/.test(m))  return 'nursing';
+    if (/كشف|دكتور|طبيب|استشار|باطنة|أطفال|قلب|جلد|عظام/.test(m)) return 'kashf';
+    if (/خدم|عندكم|إيه|ايه|بتعمل/.test(m))                   return 'services';
 
-    if (/منطق|عنوان|تغطي|قاهر|جيز|فين|وصول.*منطق/.test(m)) return 'areas';
-    if (/وقت|امتى|وصول|ساعة|سريع|متى|بكام وقت/.test(m)) return 'time';
-    if (/دفع|كاش|انستا|محفظة|payment/.test(m)) return 'payment';
-    if (/معتمد|ترخيص|موثوق|كفاءة|جودة/.test(m)) return 'doctors';
-    if (/تواصل|اتصل|موبايل|واتس|تليفون|رقم|ايميل|إيميل/.test(m)) return 'contact';
-    if (/احجز|حجز|book|طلب|عايز.*خدم/.test(m)) return 'book';
+    // احجز مباشر
+    if (/احجز.*كشف|حجز.*كشف/.test(m))    return 'book_kashf';
+    if (/احجز.*تمريض|حجز.*تمريض/.test(m)) return 'book_nursing';
+    if (/احجز.*أشعة|حجز.*أشعة/.test(m))  return 'book_xray';
+    if (/احجز|حجز|book|طلب/.test(m))      return 'book';
+
+    if (/منطق|عنوان|تغطي|قاهر|جيز|فين/.test(m)) return 'areas';
+    if (/وقت|امتى|وصول|ساعة|سريع|متى/.test(m))  return 'time';
+    if (/دفع|كاش|انستا|محفظة/.test(m))           return 'payment';
+    if (/معتمد|ترخيص|موثوق|جودة/.test(m))        return 'doctors';
+    if (/تواصل|اتصل|موبايل|واتس|تليفون|رقم|ايميل/.test(m)) return 'contact';
     return 'fallback';
   }
 
   /* ══════════════════════════════════════════════
-     Quick Replies الشريط
+     Quick Replies
   ══════════════════════════════════════════════ */
   const QUICK = [
-    '📋 خدماتنا','💰 الأسعار','🩺 كشف منزلي',
-    '👩‍⚕️ تمريض منزلي','🔬 أشعة منزلية','📍 مناطق التغطية',
-    '📞 تواصل معنا','🏥 احجز الآن',
+    '📋 خدماتنا','💰 الأسعار',
+    '🩺 كشف منزلي','👩‍⚕️ تمريض منزلي','🔬 أشعة منزلية',
+    '📍 مناطق التغطية','📞 تواصل معنا','🏥 احجز الآن',
   ];
 
   /* ══════════════════════════════════════════════
@@ -231,29 +296,30 @@
     background:linear-gradient(135deg,#1e3a2f,#2d5a3d);
     box-shadow:0 4px 20px rgba(0,0,0,.35);
     display:flex;align-items:center;justify-content:center;
-    transition:transform .2s;animation:mzPulse 2.5s infinite;padding:0;overflow:hidden}
+    transition:transform .2s;animation:mzPulse 2.5s infinite;padding:0;overflow:hidden;position:relative}
   #mz-btn:hover{transform:scale(1.08)}
   #mz-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-  #mz-btn-fallback{font-size:28px;color:#c9a84c;font-family:'Cairo',sans-serif;font-weight:900}
+  #mz-btn-fb{display:none;position:absolute;inset:0;align-items:center;justify-content:center;
+    font-size:26px;color:#c9a84c;font-family:'Cairo',sans-serif;font-weight:900}
   #mz-badge{position:absolute;top:-4px;right:-4px;background:#e53935;color:#fff;
     border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;
-    display:flex;align-items:center;justify-content:center;border:2px solid #fff}
-  #mz-box{width:345px;max-height:550px;border-radius:22px;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;border:2px solid #fff;z-index:1}
+  #mz-box{width:345px;max-height:560px;border-radius:22px;overflow:hidden;
     display:flex;flex-direction:column;
     box-shadow:0 20px 60px rgba(0,0,0,.3);animation:mzUp .3s ease}
-  #mz-head{background:linear-gradient(135deg,#1e3a2f,#2d5a3d);
+  #mz-head{background:linear-gradient(135deg,#1C2B2A,#2d5a3d);
     padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
   #mz-hinfo{display:flex;align-items:center;gap:10px}
   #mz-hava{width:42px;height:42px;border-radius:50%;
-    border:2px solid rgba(201,168,76,.5);overflow:hidden;
+    border:2px solid rgba(201,168,76,.6);overflow:hidden;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08)}
   #mz-hava img{width:100%;height:100%;object-fit:cover}
-  #mz-hname{color:#fff;font-weight:700;font-size:14px}
+  #mz-hname{color:#fff;font-weight:700;font-size:15px}
   #mz-hstatus{color:rgba(255,255,255,.55);font-size:11px;display:flex;align-items:center;gap:4px;margin-top:2px}
   .mz-dot{width:6px;height:6px;border-radius:50%;background:#4caf50;display:inline-block}
   #mz-close{background:rgba(255,255,255,.1);border:none;color:#fff;
     width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:20px;
-    display:flex;align-items:center;justify-content:center;line-height:1}
+    display:flex;align-items:center;justify-content:center}
   #mz-msgs{flex:1;overflow-y:auto;padding:14px 12px;
     display:flex;flex-direction:column;gap:10px;background:#f5f2ec}
   #mz-msgs::-webkit-scrollbar{width:3px}
@@ -261,19 +327,19 @@
   .mz-row{display:flex;flex-direction:column}
   .mz-row.user{align-items:flex-start}
   .mz-row.bot{align-items:flex-end}
-  .mz-bub{max-width:87%;border-radius:16px;padding:9px 13px;font-size:13px;line-height:1.7}
+  .mz-bub{max-width:88%;border-radius:16px;padding:10px 14px;font-size:13px;line-height:1.75}
   .mz-bub.user{background:#fff;color:#2d3b3e;border-radius:16px 16px 4px 16px;
     border:1px solid #e8e4db;box-shadow:0 1px 5px rgba(0,0,0,.06)}
-  .mz-bub.bot{background:linear-gradient(135deg,#1e3a2f,#2d5a3d);
+  .mz-bub.bot{background:linear-gradient(135deg,#1C2B2A,#2a4a3a);
     color:#fff;border-radius:16px 16px 16px 4px}
   .mz-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;justify-content:flex-end}
-  .mz-chip{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.4);
-    border-radius:18px;padding:4px 11px;font-size:11.5px;cursor:pointer;
-    color:#1e3a2f;font-family:'Cairo',sans-serif;font-weight:600;transition:background .15s}
+  .mz-chip{background:rgba(201,168,76,.13);border:1px solid rgba(201,168,76,.45);
+    border-radius:18px;padding:4px 12px;font-size:12px;cursor:pointer;
+    color:#1C2B2A;font-family:'Cairo',sans-serif;font-weight:600;transition:background .15s}
   .mz-chip:hover{background:rgba(201,168,76,.3)}
   .mz-time{font-size:10px;color:#bbb;margin-top:3px;padding:0 3px}
   .mz-typing{display:flex;align-items:center;gap:4px;align-self:flex-end;
-    background:linear-gradient(135deg,#1e3a2f,#2d5a3d);
+    background:linear-gradient(135deg,#1C2B2A,#2a4a3a);
     border-radius:16px 16px 16px 4px;padding:11px 14px}
   .mz-typing span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.7)}
   .mz-typing span:nth-child(1){animation:mzT 1.2s .0s infinite}
@@ -293,32 +359,31 @@
     outline:none;background:#f9f7f3;color:#2d3b3e;direction:rtl}
   #mz-input:focus{border-color:rgba(201,168,76,.6);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
   #mz-send{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
-    background:linear-gradient(135deg,#1e3a2f,#2d5a3d);
+    background:linear-gradient(135deg,#1C2B2A,#2d5a3d);
     color:#c9a84c;font-size:17px;display:flex;align-items:center;justify-content:center;
     flex-shrink:0;transition:transform .15s}
   #mz-send:hover{transform:scale(1.08)}
-  @keyframes mzPulse{0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.3),0 0 0 3px rgba(201,168,76,.4)}
+  @keyframes mzPulse{
+    0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.3),0 0 0 3px rgba(201,168,76,.4)}
     50%{box-shadow:0 4px 20px rgba(0,0,0,.3),0 0 0 8px rgba(201,168,76,.12)}}
   @keyframes mzUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   @keyframes mzT{0%,60%,100%{transform:translateY(0);opacity:.7}30%{transform:translateY(-5px);opacity:1}}
-  @media(max-width:400px){#mz-box{width:calc(100vw - 30px)}}
+  @media(max-width:420px){#mz-box{width:calc(100vw - 28px)}}
   `;
   document.head.appendChild(css);
 
   /* ══════════════════════════════════════════════
      HTML
   ══════════════════════════════════════════════ */
-  const MIZO_IMG = 'mizo.webp'; // ← اسم صورة ميزو اللي هترفعها
-  const imgTag = `<img src="${MIZO_IMG}" alt="ميزو" onerror="this.style.display='none';document.getElementById('mz-btn-fb').style.display='flex'">`;
+  const MIZO_IMG = 'mizo.webp';
 
   const wrap = document.createElement('div');
   wrap.id = 'mz-wrap';
   wrap.innerHTML = `
     <div id="mz-btn" title="تحدث مع ميزو">
-      ${imgTag}
-      <div id="mz-btn-fb" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center">
-        <span id="mz-btn-fallback">M</span>
-      </div>
+      <img src="${MIZO_IMG}" alt="ميزو"
+        onerror="this.style.display='none';document.getElementById('mz-btn-fb').style.display='flex'">
+      <div id="mz-btn-fb">M</div>
       <div id="mz-badge">1</div>
     </div>
     <div id="mz-box" style="display:none">
@@ -347,19 +412,19 @@
   /* ══════════════════════════════════════════════
      اللوجيك
   ══════════════════════════════════════════════ */
-  const btn   = document.getElementById('mz-btn');
-  const box   = document.getElementById('mz-box');
-  const badge = document.getElementById('mz-badge');
-  const msgs  = document.getElementById('mz-msgs');
-  const quick = document.getElementById('mz-quick');
-  const inp   = document.getElementById('mz-input');
-  const send  = document.getElementById('mz-send');
-  const cls   = document.getElementById('mz-close');
+  const btn  = document.getElementById('mz-btn');
+  const box  = document.getElementById('mz-box');
+  const badge= document.getElementById('mz-badge');
+  const msgs = document.getElementById('mz-msgs');
+  const quick= document.getElementById('mz-quick');
+  const inp  = document.getElementById('mz-input');
+  const snd  = document.getElementById('mz-send');
+  const cls  = document.getElementById('mz-close');
 
   function nowTime() {
     return new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
   }
-  function scrollBot() { setTimeout(()=>{ msgs.scrollTop=msgs.scrollHeight; },60); }
+  function scrollBot(){ setTimeout(()=>{ msgs.scrollTop=msgs.scrollHeight; },60); }
 
   function addMsg(from, html, chips) {
     const row = document.createElement('div');
@@ -404,7 +469,7 @@
       const R = buildResponses();
       const r = R[intent] || R.fallback;
       addMsg('bot', r.text, r.chips);
-    }, 700 + Math.random()*400);
+    }, 700 + Math.random()*350);
   }
 
   function send_(txt) {
@@ -430,7 +495,6 @@
     box.style.display = 'flex';
     badge.style.display = 'none';
     if (!msgs.children.length) {
-      // أول فتح — رسالة ترحيب
       setTimeout(() => {
         addMsg('bot',
           'أهلاً بيك! أنا <b>ميزو</b> 👋 سفير ملاذ للرعاية الطبية المنزلية.\n\nعايز تعرف إيه؟',
@@ -438,7 +502,7 @@
         );
       }, 300);
     }
-    setTimeout(() => inp.focus(), 400);
+    setTimeout(()=>inp.focus(),400);
   };
 
   cls.onclick = () => {
@@ -446,10 +510,7 @@
     btn.style.display = 'flex';
   };
 
-  send.onclick = () => send_();
+  snd.onclick = () => send_();
   inp.addEventListener('keydown', e => { if(e.key==='Enter') send_(); });
-
-  /* sync أسعار بعد ما الصفحة تخلص تحميل */
-  window.addEventListener('load', () => { setTimeout(syncPricesFromPage, 2000); });
 
 })();
