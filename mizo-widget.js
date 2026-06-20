@@ -61,16 +61,32 @@
 
   /* ── زر الحجز المباشر ── */
   function bookBtn(serviceName, label) {
-    return `<button onclick="
-      document.getElementById('mz-box').style.display='none';
-      document.getElementById('mz-btn').style.display='flex';
-      if(typeof openBookingModal==='function') openBookingModal('${serviceName}');
-      else { var s=document.querySelector('[onclick*=\\"احجز\\"]'); if(s) s.click(); }
-    " style="
-      margin-top:10px;padding:9px 20px;border:none;border-radius:20px;cursor:pointer;
-      background:linear-gradient(135deg,#c9a84c,#e8c56a);color:#1e3a2f;
-      font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;width:100%;
-    ">🏥 احجز ${label} الآن</button>`;
+    // نرجع placeholder خاص بدل HTML عشان ميتأثرش بـ replace
+    return `[[BTN:${serviceName}:${label}]]`;
+  }
+  
+  function renderBubble(el, html) {
+    // نقسم على البلاسهولدر ونبني كل جزء
+    const parts = html.split(/(\[\[BTN:[^\]]+\]\])/);
+    parts.forEach(part => {
+      const btnMatch = part.match(/\[\[BTN:([^:]+):([^\]]+)\]\]/);
+      if (btnMatch) {
+        const [, svcName, lbl] = btnMatch;
+        const btn = document.createElement('button');
+        btn.textContent = '🏥 احجز ' + lbl + ' الآن';
+        btn.style.cssText = 'display:block;margin-top:10px;padding:9px 20px;border:none;border-radius:20px;cursor:pointer;background:linear-gradient(135deg,#c9a84c,#e8c56a);color:#1e3a2f;font-family:Cairo,sans-serif;font-weight:700;font-size:13px;width:100%;';
+        btn.onclick = function() {
+          document.getElementById('mz-box').style.display = 'none';
+          document.getElementById('mz-btn').style.display = 'flex';
+          if (typeof openBookingModal === 'function') openBookingModal(svcName);
+        };
+        el.appendChild(btn);
+      } else if (part) {
+        const span = document.createElement('span');
+        span.innerHTML = part.replace(/\n/g, '<br>');
+        el.appendChild(span);
+      }
+    });
   }
 
   /* ══════════════════════════════════════════════
@@ -431,7 +447,7 @@
     row.className = `mz-row ${from}`;
     const bub = document.createElement('div');
     bub.className = `mz-bub ${from}`;
-    bub.innerHTML = html.replace(/\n/g,'<br>');
+    renderBubble(bub, html);
     row.appendChild(bub);
     if (chips && chips.length) {
       const cr = document.createElement('div');
