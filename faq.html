@@ -73,8 +73,8 @@
     .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
     .btn-gold{background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;text-decoration:none;transition:opacity .2s}
     .btn-gold:hover{opacity:.9}
-    .btn-outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;text-decoration:none;transition:border-color .2s}
-    .btn-outline:hover{border-color:#fff}
+    .btn-outline{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;text-decoration:none;transition:all .2s}
+    .btn-outline:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.5)}
 
     /* FOOTER */
     footer{background:var(--dark);padding:24px 40px;text-align:center;margin-top:0}
@@ -229,7 +229,7 @@
     <h2>جاهز تحجز؟</h2>
     <p>الحجز مجاني — الدفع بعد الخدمة فقط</p>
     <div class="cta-btns">
-      <a href="/" class="btn-gold">🏥 احجز الآن</a>
+      <a href="/" class="btn-gold" onclick="sessionStorage.setItem('autoBook','1')">🏥 احجز الآن</a>
       <a href="https://wa.me/201039091989" target="_blank" class="btn-outline">💬 واتساب</a>
     </div>
   </div>
