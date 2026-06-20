@@ -3340,6 +3340,14 @@ window.addEventListener('load', async () => {
   } catch(e) {}
 });
 
+// فتح الـ booking modal تلقائياً لو جاي من صفحة FAQ
+window.addEventListener('load', () => {
+  if(sessionStorage.getItem('autoBook') === '1') {
+    sessionStorage.removeItem('autoBook');
+    setTimeout(() => openBookingModal(), 800);
+  }
+});
+
 
 </script>
 
