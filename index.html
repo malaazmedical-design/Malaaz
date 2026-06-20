@@ -35,17 +35,19 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" id="tw-title" content="ملاذ — رعاية طبية منزلية">
 <meta name="twitter:description" id="tw-desc" content="كشف منزلي، تمريض، وأشعة في بيتك. احجز الآن.">
-
-<!-- ===== JSON-LD Schema Markup (MedicalBusiness + LocalBusiness) ===== -->
+<!-- ===== JSON-LD Schema 1: MedicalBusiness + LocalBusiness ===== -->
 <script type="application/ld+json" id="schema-org">
 {
   "@context": "https://schema.org",
   "@type": ["MedicalBusiness", "LocalBusiness"],
   "name": "ملاذ — رعاية طبية منزلية",
   "alternateName": "Malaaz Home Healthcare",
-  "description": "منصة رعاية طبية منزلية متكاملة — كشف منزلي، تمريض منزلي، أشعة منزلية. أطباء معتمدون في القاهرة والجيزة.",
-  "url": "https://malaaz.com",
+  "description": "منصة رعاية طبية منزلية متكاملة — كشف منزلي، تمريض منزلي، أشعة منزلية. أطباء وممرضون معتمدون يصلون إليك في القاهرة والجيزة.",
+  "url": "https://malaaz-plum.vercel.app/",
+  "logo": "https://malaaz-plum.vercel.app/og-image.jpg",
+  "image": "https://malaaz-plum.vercel.app/og-image.jpg",
   "telephone": "+201039091989",
+  "email": "malaaz.medical@gmail.com",
   "address": {
     "@type": "PostalAddress",
     "addressCountry": "EG",
@@ -59,7 +61,15 @@
   },
   "areaServed": [
     {"@type": "City", "name": "القاهرة"},
-    {"@type": "City", "name": "الجيزة"}
+    {"@type": "City", "name": "الجيزة"},
+    {"@type": "AdministrativeArea", "name": "مدينة نصر"},
+    {"@type": "AdministrativeArea", "name": "المعادي"},
+    {"@type": "AdministrativeArea", "name": "مصر الجديدة"},
+    {"@type": "AdministrativeArea", "name": "التجمع الخامس"},
+    {"@type": "AdministrativeArea", "name": "الدقي"},
+    {"@type": "AdministrativeArea", "name": "المهندسين"},
+    {"@type": "AdministrativeArea", "name": "الشيخ زايد"},
+    {"@type": "AdministrativeArea", "name": "أكتوبر"}
   ],
   "openingHoursSpecification": [{
     "@type": "OpeningHoursSpecification",
@@ -67,13 +77,65 @@
     "opens": "00:00",
     "closes": "23:59"
   }],
+  "priceRange": "500 – 1700 ج.م",
+  "currenciesAccepted": "EGP",
+  "paymentAccepted": "Cash, InstaPay",
   "hasOfferCatalog": {
     "@type": "OfferCatalog",
-    "name": "خدمات الرعاية المنزلية",
+    "name": "خدمات الرعاية الطبية المنزلية",
     "itemListElement": [
-      {"@type": "Offer", "itemOffered": {"@type": "MedicalTherapy", "name": "كشف منزلي"}, "priceRange": "200–800 ج.م"},
-      {"@type": "Offer", "itemOffered": {"@type": "MedicalTherapy", "name": "تمريض منزلي"}, "priceRange": "150–600 ج.م"},
-      {"@type": "Offer", "itemOffered": {"@type": "MedicalTherapy", "name": "أشعة منزلية"}, "priceRange": "250–900 ج.م"}
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "MedicalTherapy",
+          "name": "كشف منزلي — أخصائي"
+        },
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "minPrice": "1000",
+          "maxPrice": "1400",
+          "priceCurrency": "EGP"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "MedicalTherapy",
+          "name": "كشف منزلي — استشاري"
+        },
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "minPrice": "1300",
+          "maxPrice": "1700",
+          "priceCurrency": "EGP"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "MedicalTherapy",
+          "name": "تمريض منزلي"
+        },
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "minPrice": "400",
+          "maxPrice": "1200",
+          "priceCurrency": "EGP"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "MedicalTherapy",
+          "name": "أشعة منزلية"
+        },
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "minPrice": "500",
+          "maxPrice": "1100",
+          "priceCurrency": "EGP"
+        }
+      }
     ]
   },
   "aggregateRating": {
@@ -82,10 +144,14 @@
     "reviewCount": "12",
     "bestRating": "5",
     "worstRating": "1"
-  }
+  },
+  "sameAs": [
+    "https://www.facebook.com/share/17iBWvQ9JJ/"
+  ]
 }
 </script>
 
+<!-- ===== JSON-LD Schema 2: FAQPage ===== -->
 <script type="application/ld+json" id="faq-schema">
 {
   "@context": "https://schema.org",
@@ -93,10 +159,42 @@
   "mainEntity": [
     {
       "@type": "Question",
+      "name": "ما هي خدمات ملاذ للرعاية المنزلية؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ملاذ تقدم ٣ خدمات طبية منزلية: كشف منزلي (طبيب أخصائي أو استشاري في بيتك)، تمريض منزلي (ممرض/ة معتمد/ة)، وأشعة منزلية (سونار، دوبلر، أشعة سينية، إيكو قلب). جميع الخدمات متاحة في القاهرة والجيزة."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "كم سعر الكشف المنزلي في القاهرة؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "سعر الكشف المنزلي مع ملاذ: الأخصائي من 1000 إلى 1400 جنيه مصري، والاستشاري من 1300 إلى 1700 جنيه مصري. السعر يشمل زيارة الطبيب للمنزل والكشف الكامل. الدفع بعد الخدمة فقط."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "كم سعر التمريض المنزلي؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "أسعار التمريض المنزلي مع ملاذ: الخدمات السريعة تبدأ من 400 جنيه، إقامة 12 ساعة تبدأ من 600 جنيه، وإقامة 24 ساعة تبدأ من 1200 جنيه مصري."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "كم سعر الأشعة المنزلية والسونار؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "أسعار الأشعة المنزلية مع ملاذ: السونار يبدأ من 1000 جنيه، الدوبلر من 1100 جنيه، الأشعة السينية من 500 جنيه، وإيكو القلب يبدأ من 1000 جنيه مصري."
+      }
+    },
+    {
+      "@type": "Question",
       "name": "هل الأطباء معتمدون ومرخصون؟",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "نعم — كل مقدمي الخدمة لديهم ترخيص من النقابة المختصة ونقوم بالتحقق من بياناتهم قبل القبول."
+        "text": "نعم — كل مقدمي الخدمة في ملاذ لديهم ترخيص من النقابة المختصة ونقوم بالتحقق من بياناتهم قبل القبول. لدينا نظام تقييم شفاف من العملاء."
       }
     },
     {
@@ -104,7 +202,7 @@
       "name": "كيف يتم الدفع؟",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "الدفع بعد الانتهاء من الخدمة — نقداً أو عبر انستا باي أو محفظة إلكترونية (فودافون كاش)."
+        "text": "الدفع بعد الانتهاء من الخدمة فقط — كاش أو عبر انستا باي أو محفظة ملاذ الإلكترونية. الحجز مجاني بالكامل ولا توجد رسوم خفية."
       }
     },
     {
@@ -112,15 +210,15 @@
       "name": "ما هي مناطق التغطية؟",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "نغطي معظم مناطق القاهرة الكبرى والجيزة، بما فيها مدينة نصر، المعادي، مصر الجديدة، التجمع الخامس، الدقي، المهندسين، الشيخ زايد، وأكتوبر وغيرها."
+        "text": "ملاذ تغطي معظم مناطق القاهرة والجيزة: مدينة نصر، النزهة، هليوبوليس، المعادي، المقطم، الزيتون، شبرا، عين شمس، عباسية، مصر الجديدة، التجمع — والدقي، المهندسين، الهرم، فيصل، الشيخ زايد، أكتوبر، إمبابة."
       }
     },
     {
       "@type": "Question",
-      "name": "كم يستغرق وصول الطبيب؟",
+      "name": "كم يستغرق وصول الطبيب أو الممرض؟",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "نسعى للتأكيد خلال 15 دقيقة ووصول المقدم خلال ساعة من الحجز حسب المتاحية والمنطقة."
+        "text": "ملاذ تسعى للتأكيد خلال 15 دقيقة من الحجز، ووصول مقدم الخدمة خلال ساعة تقريباً حسب المتاحية والمنطقة. الخدمة متاحة 24 ساعة / 7 أيام."
       }
     },
     {
@@ -128,7 +226,155 @@
       "name": "هل الخدمة متاحة 24 ساعة؟",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "نعم، نعمل على مدار الساعة طوال أيام الأسبوع."
+        "text": "نعم، ملاذ تعمل على مدار الساعة طوال أيام الأسبوع، بما فيها أيام العطل والجمعة."
+      }
+    }
+  ]
+}
+</script>
+
+<!-- ===== JSON-LD Schema 3: Services ===== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "خدمات ملاذ الطبية المنزلية",
+  "description": "قائمة خدمات الرعاية الطبية المنزلية المتاحة في القاهرة والجيزة",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "item": {
+        "@type": "Service",
+        "name": "كشف منزلي",
+        "description": "زيارة طبيب أخصائي أو استشاري لمنزلك في القاهرة والجيزة. يشمل الباطنة، الأطفال، القلب، الجلدية، العظام، النساء والتوليد، المخ والأعصاب.",
+        "provider": {
+          "@type": "MedicalBusiness",
+          "name": "ملاذ"
+        },
+        "areaServed": ["القاهرة", "الجيزة"],
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "أخصائي",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "1000",
+              "maxPrice": "1400",
+              "priceCurrency": "EGP"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "استشاري",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "1300",
+              "maxPrice": "1700",
+              "priceCurrency": "EGP"
+            }
+          }
+        ],
+        "availableChannel": {
+          "@type": "ServiceChannel",
+          "serviceUrl": "https://malaaz-plum.vercel.app/",
+          "availableLanguage": "Arabic"
+        }
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "item": {
+        "@type": "Service",
+        "name": "تمريض منزلي",
+        "description": "ممرض أو ممرضة معتمدة لجميع الاحتياجات التمريضية في منزلك. يشمل حقن، ضمادات، كانيولا، سيروم، قياس ضغط وسكر، رعاية مرضى الفراش.",
+        "provider": {
+          "@type": "MedicalBusiness",
+          "name": "ملاذ"
+        },
+        "areaServed": ["القاهرة", "الجيزة"],
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "خدمات سريعة",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "400",
+              "priceCurrency": "EGP"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "إقامة 12 ساعة",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "600",
+              "priceCurrency": "EGP"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "إقامة 24 ساعة",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "1200",
+              "priceCurrency": "EGP"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "item": {
+        "@type": "Service",
+        "name": "أشعة منزلية",
+        "description": "أجهزة أشعة وسونار متنقلة في منزلك. يشمل سونار، دوبلر، أشعة سينية، إيكو قلب، تخطيط قلب.",
+        "provider": {
+          "@type": "MedicalBusiness",
+          "name": "ملاذ"
+        },
+        "areaServed": ["القاهرة", "الجيزة"],
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "سونار",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "1000",
+              "priceCurrency": "EGP"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "دوبلر",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "1100",
+              "priceCurrency": "EGP"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "أشعة سينية",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "500",
+              "priceCurrency": "EGP"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "إيكو قلب",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "minPrice": "1000",
+              "priceCurrency": "EGP"
+            }
+          }
+        ]
       }
     }
   ]
