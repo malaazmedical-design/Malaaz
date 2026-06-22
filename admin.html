@@ -2267,6 +2267,106 @@ document.addEventListener('keydown', e => {
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
 });
+
+// ============================================================
+// BLOG POSTS
+// ============================================================
+async function loadBlogPosts() {
+  const body = document.getElementById('blog-body');
+  if(!body) return;
+  body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr>';
+  try {
+    const { data, error } = await sb.from('blog_posts').select('*').order('created_at', { ascending: false });
+    if(error) throw error;
+    if(!data?.length) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">لا توجد مقالات بعد</td></tr>';
+      return;
+    }
+    body.innerHTML = data.map(p => `
+      <tr>
+        <td><b>${p.title}</b></td>
+        <td><span style="background:rgba(201,168,76,.1);color:var(--accent);padding:2px 8px;border-radius:8px;font-size:11px">${p.category||'—'}</span></td>
+        <td><span style="color:${p.status==='published'?'#22c55e':'#f59e0b'}">${p.status==='published'?'✅ منشور':'📝 مسودة'}</span></td>
+        <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('ar-EG') : '—'}</td>
+        <td>${p.read_time || '—'} دقائق</td>
+        <td>
+          <button class="btn" style="padding:5px 12px;font-size:12px;margin-left:6px" onclick='editBlogPost(${JSON.stringify(JSON.stringify(p))})'>تعديل</button>
+          <button class="btn danger" style="padding:5px 12px;font-size:12px" onclick="deleteBlogPost('${p.id}')">حذف</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    body.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--danger)">${e.message}</td></tr>`;
+  }
+}
+
+function openBlogModal(post) {
+  post = post || null;
+  document.getElementById('bm-id').value = post?.id || '';
+  document.getElementById('bm-title').value = post?.title || '';
+  document.getElementById('bm-category').value = post?.category || 'كشف منزلي';
+  document.getElementById('bm-read-time').value = post?.read_time || 5;
+  document.getElementById('bm-summary').value = post?.summary || '';
+  document.getElementById('bm-content').value = post?.content || '';
+  document.getElementById('bm-status').value = post?.status || 'published';
+  document.getElementById('bm-emoji').value = post?.emoji || '📝';
+  document.getElementById('blog-modal-title').textContent = post ? 'تعديل المقال' : 'مقال جديد';
+  document.getElementById('blog-modal').style.display = 'flex';
+}
+
+function closeBlogModal() {
+  document.getElementById('blog-modal').style.display = 'none';
+}
+
+function editBlogPost(jsonStr) {
+  try {
+    const post = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+    openBlogModal(post);
+  } catch(e) { showToast('خطأ في تحميل بيانات المقال', 'error'); }
+}
+
+async function saveBlogPost() {
+  const id       = document.getElementById('bm-id').value;
+  const title    = document.getElementById('bm-title').value.trim();
+  const category = document.getElementById('bm-category').value;
+  const readTime = parseInt(document.getElementById('bm-read-time').value) || 5;
+  const summary  = document.getElementById('bm-summary').value.trim();
+  const content  = document.getElementById('bm-content').value.trim();
+  const status   = document.getElementById('bm-status').value;
+  const emoji    = document.getElementById('bm-emoji').value.trim();
+
+  if(!title || !summary || !content) {
+    showToast('املأ العنوان والوصف والمحتوى', 'error');
+    return;
+  }
+
+  const payload = { title, category, read_time: readTime, summary, content, status, emoji };
+
+  try {
+    if(id) {
+      const { error } = await sb.from('blog_posts').update(payload).eq('id', id);
+      if(error) throw error;
+      showToast('تم تحديث المقال ✅');
+    } else {
+      const { error } = await sb.from('blog_posts').insert(payload);
+      if(error) throw error;
+      showToast('تم نشر المقال ✅');
+    }
+    closeBlogModal();
+    loadBlogPosts();
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function deleteBlogPost(id) {
+  if(!confirm('حذف المقال نهائياً؟')) return;
+  const { error } = await sb.from('blog_posts').delete().eq('id', id);
+  if(error) { showToast(error.message, 'error'); return; }
+  showToast('تم الحذف');
+  loadBlogPosts();
+}
+
 </script>
 <!-- BLOG MODAL -->
 <div class="modal-overlay" id="blog-modal" style="display:none" onclick="if(event.target===this)closeBlogModal()">
