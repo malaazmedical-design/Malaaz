@@ -239,6 +239,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     <div class="nav-item" onclick="showPage('reviews')"><i class="fas fa-star"></i><span>التقييمات</span></div>
     <div class="nav-item" onclick="showPage('site-content')"><i class="fas fa-edit"></i><span>محتوى الموقع</span></div>
     <div class="nav-item" onclick="showPage('testimonials')"><i class="fas fa-quote-right"></i><span>آراء العملاء</span></div>
+    <div class="nav-item" onclick="showPage('blog')"><i class="fas fa-newspaper"></i><span>المقالات</span></div>
     <div class="nav-item" onclick="showPage('settings')"><i class="fas fa-cog"></i><span>الإعدادات</span></div>
   </nav>
   <div class="sidebar-footer">
@@ -606,6 +607,28 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
       <div style="margin-top:16px">
         <button class="btn primary" onclick="saveSettings()"><i class="fas fa-save" style="margin-left:6px"></i> حفظ الإعدادات</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-blog">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">المقالات</div>
+      <button class="btn primary" onclick="openBlogModal()"><i class="fas fa-plus" style="margin-left:6px"></i> مقال جديد</button>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table class="tbl">
+        <thead><tr>
+          <th>العنوان</th>
+          <th>الفئة</th>
+          <th>الحالة</th>
+          <th>تاريخ النشر</th>
+          <th>وقت القراءة</th>
+          <th>إجراء</th>
+        </tr></thead>
+        <tbody id="blog-body"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -1000,7 +1023,8 @@ const pageTitles = {
   'sub-services':'الخدمات الفرعية', 'grade-prices':'أسعار الدرجات الطبية',
   providers:'مقدمو الخدمة', accounting:'المحاسبة والنسب',
   areas:'مناطق التغطية', reviews:'التقييمات',
-  'site-content':'محتوى الموقع', testimonials:'آراء العملاء', settings:'الإعدادات'
+  'site-content':'محتوى الموقع', testimonials:'آراء العملاء', settings:'الإعدادات',
+  blog:'المقالات'
 };
 
 function showPage(id) {
@@ -1018,7 +1042,8 @@ function showPage(id) {
     'sub-services': loadSubServices, 'grade-prices': loadGradePrices,
     providers: loadProviders, accounting: loadAccounting,
     areas: loadAreas, reviews: loadReviews,
-    'site-content': loadSiteContent, testimonials: loadTestimonials
+    'site-content': loadSiteContent, testimonials: loadTestimonials,
+    blog: loadBlogPosts
   };
   if(loaders[id]) loaders[id]();
 }
@@ -2243,5 +2268,61 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
 });
 </script>
+<!-- BLOG MODAL -->
+<div class="modal-overlay" id="blog-modal" style="display:none" onclick="if(event.target===this)closeBlogModal()">
+  <div class="modal" style="max-width:680px;width:95%">
+    <div class="modal-header">
+      <div class="modal-title" id="blog-modal-title">مقال جديد</div>
+      <button class="modal-close" onclick="closeBlogModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="bm-id">
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1">
+          <div class="form-label">عنوان المقال *</div>
+          <input class="form-input" id="bm-title" placeholder="مثال: متى يجب استدعاء طبيب للمنزل؟">
+        </div>
+        <div class="form-group">
+          <div class="form-label">الفئة *</div>
+          <select class="form-input" id="bm-category">
+            <option value="كشف منزلي">🩺 كشف منزلي</option>
+            <option value="تمريض منزلي">👩‍⚕️ تمريض منزلي</option>
+            <option value="أشعة منزلية">🔬 أشعة منزلية</option>
+            <option value="رعاية منزلية">❤️ رعاية منزلية</option>
+            <option value="نصائح طبية">💡 نصائح طبية</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">وقت القراءة (دقائق) *</div>
+          <input class="form-input" type="number" id="bm-read-time" value="5" min="1" max="30">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <div class="form-label">وصف مختصر (للـ SEO) *</div>
+          <textarea class="form-input" id="bm-summary" rows="2" placeholder="وصف مختصر يظهر في نتائج البحث (١٥٠-١٦٠ حرف)"></textarea>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <div class="form-label">محتوى المقال (HTML) *</div>
+          <textarea class="form-input" id="bm-content" rows="10" style="font-family:monospace;font-size:12px" placeholder="اكتب محتوى المقال هنا بـ HTML بسيط...&#10;&#10;مثال:&#10;&lt;p&gt;هذا نص المقال...&lt;/p&gt;&#10;&lt;h2&gt;عنوان فرعي&lt;/h2&gt;&#10;&lt;p&gt;محتوى آخر...&lt;/p&gt;"></textarea>
+        </div>
+        <div class="form-group">
+          <div class="form-label">الحالة</div>
+          <select class="form-input" id="bm-status">
+            <option value="published">منشور</option>
+            <option value="draft">مسودة</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">الإيموجي (يظهر في الكارد)</div>
+          <input class="form-input" id="bm-emoji" placeholder="مثال: 🩺" value="📝">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeBlogModal()">إلغاء</button>
+      <button class="btn primary" onclick="saveBlogPost()"><i class="fas fa-save" style="margin-left:6px"></i> حفظ المقال</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
