@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مقالات ملاذ — رعاية طبية منزلية في القاهرة والجيزة</title>
+  <meta name="description" content="مقالات طبية متخصصة من ملاذ — نصائح صحية ومعلومات عن الرعاية المنزلية في القاهرة والجيزة.">
+  <link rel="canonical" href="https://malaaz-plum.vercel.app/blog.html">
+  <meta property="og:title" content="مقالات ملاذ الطبية">
+  <meta property="og:image" content="https://malaaz-plum.vercel.app/og-image.jpg">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--dark:#1e2c2f;--accent:#c9a84c;--bg:#f5f2ec;--text:#1e2c2f;--muted:#6b7c80;--border:rgba(30,44,47,0.1)}
+    body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl}
+    nav{background:var(--dark);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-logo{color:#fff;font-family:'Tajawal',sans-serif;font-size:20px;font-weight:900;text-decoration:none;display:flex;align-items:center;gap:8px}
+    .nav-logo-dot{width:6px;height:6px;background:var(--accent);border-radius:50%}
+    .nav-links{display:flex;align-items:center;gap:24px}
+    .nav-links a{color:rgba(255,255,255,.6);font-size:13px;text-decoration:none;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--accent)}
+    .nav-cta{background:var(--accent);color:var(--dark);border:none;border-radius:10px;padding:8px 20px;font-size:13px;font-weight:700;text-decoration:none}
+    .hero{background:var(--dark);padding:60px 24px 50px;text-align:center;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);pointer-events:none}
+    .hero-tag{display:inline-block;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:2px;padding:5px 14px;border-radius:20px;margin-bottom:18px}
+    .hero h1{font-family:'Tajawal',sans-serif;font-size:clamp(28px,4vw,44px);font-weight:900;color:#fff;margin-bottom:12px;line-height:1.2}
+    .hero h1 span{color:var(--accent)}
+    .hero p{font-size:15px;color:rgba(255,255,255,.5);max-width:480px;margin:0 auto}
+    .container{max-width:1100px;margin:0 auto;padding:0 24px}
+    .section{padding:50px 0}
+    .section-label{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+    .section-label span{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+    .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    /* Featured */
+    .featured-card{background:var(--dark);border-radius:20px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;min-height:320px;text-decoration:none;transition:transform .25s,box-shadow .25s;cursor:pointer}
+    .featured-card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .feat-img{display:flex;align-items:center;justify-content:center;font-size:72px;background:linear-gradient(135deg,#1e2c2f,#2d5a3d)}
+    .feat-body{padding:36px;display:flex;flex-direction:column;justify-content:center}
+    .feat-tag{display:inline-block;background:rgba(201,168,76,.15);color:var(--accent);font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:10px;margin-bottom:14px}
+    .feat-body h2{font-family:'Tajawal',sans-serif;font-size:24px;font-weight:900;color:#fff;margin-bottom:10px;line-height:1.3}
+    .feat-body p{font-size:13px;color:rgba(255,255,255,.5);line-height:1.8;margin-bottom:20px}
+    .feat-meta{font-size:11px;color:rgba(255,255,255,.3);display:flex;gap:12px}
+    .feat-read{color:var(--accent);font-size:13px;font-weight:700;margin-top:12px;display:inline-block}
+
+    /* Grid */
+    .articles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+    .article-card{background:#fff;border-radius:16px;overflow:hidden;text-decoration:none;border:1px solid var(--border);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;cursor:pointer}
+    .article-card:hover{transform:translateY(-3px);box-shadow:0 10px 36px rgba(0,0,0,.08)}
+    .art-thumb{height:160px;display:flex;align-items:center;justify-content:center;font-size:48px;background:linear-gradient(135deg,var(--bg),#ede9e1);position:relative}
+    .art-tag{position:absolute;top:10px;right:10px;background:var(--dark);color:var(--accent);font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px}
+    .art-body{padding:18px;flex:1;display:flex;flex-direction:column}
+    .art-body h3{font-family:'Tajawal',sans-serif;font-size:16px;font-weight:900;color:var(--text);margin-bottom:7px;line-height:1.4}
+    .art-body p{font-size:13px;color:var(--muted);line-height:1.75;flex:1;margin-bottom:14px}
+    .art-footer{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px}
+    .art-arrow{color:var(--accent);font-weight:700}
+
+    /* Loading */
+    .loading{text-align:center;padding:60px;color:var(--muted)}
+    .loading-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Empty */
+    .empty{text-align:center;padding:60px 24px;color:var(--muted)}
+    .empty-icon{font-size:48px;margin-bottom:12px}
+
+    /* CTA */
+    .cta-box{background:var(--dark);border-radius:20px;padding:44px;text-align:center;margin-bottom:60px}
+    .cta-box h2{font-family:'Tajawal',sans-serif;font-size:24px;font-weight:900;color:#fff;margin-bottom:8px}
+    .cta-box p{color:rgba(255,255,255,.45);font-size:14px;margin-bottom:22px}
+    .cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .btn-gold{background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:12px 26px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif}
+    .btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 26px;font-size:14px;font-weight:600;text-decoration:none;font-family:'Cairo',sans-serif}
+
+    footer{background:var(--dark);padding:22px 40px;text-align:center}
+    footer p{color:rgba(255,255,255,.3);font-size:12px}
+    footer a{color:var(--accent);text-decoration:none}
+
+    @media(max-width:768px){
+      nav{padding:0 16px}
+      .hero{padding:44px 16px 36px}
+      .featured-card{grid-template-columns:1fr}
+      .feat-img{height:160px}
+      .container{padding:0 16px}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">ملاذ <span class="nav-logo-dot"></span></a>
+  <div class="nav-links">
+    <a href="/">الرئيسية</a>
+    <a href="/faq.html">الأسئلة الشائعة</a>
+    <a href="/blog.html" class="active">المقالات</a>
+    <a href="/" class="nav-cta">احجز الآن</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">📚 المدونة الطبية</div>
+  <h1>معلومات طبية <span>تفيدك</span><br>في بيتك</h1>
+  <p>نصائح ومقالات من فريق ملاذ لمساعدتك على اتخاذ قرارات صحية صحيحة</p>
+</div>
+
+<div class="container">
+  <!-- Featured -->
+  <div class="section" style="padding-bottom:20px">
+    <div class="section-label"><span>أحدث المقالات</span></div>
+    <div id="featured-wrap">
+      <div class="loading"><div class="loading-spinner"></div>جاري التحميل...</div>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="section" style="padding-top:20px">
+    <div class="section-label"><span>جميع المقالات</span></div>
+    <div id="grid-wrap">
+      <div class="articles-grid" id="articles-grid"></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <h2>محتاج مساعدة طبية الآن؟</h2>
+    <p>فريق ملاذ جاهز يصلك في بيتك — تأكيد خلال ١٥ دقيقة</p>
+    <div class="cta-btns">
+      <a href="/" class="btn-gold">🏥 احجز الآن</a>
+      <a href="https://wa.me/201039091989" target="_blank" class="btn-ghost">💬 واتساب</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 ملاذ للرعاية الطبية المنزلية · <a href="/">الرئيسية</a> · <a href="/faq.html">الأسئلة الشائعة</a> · <a href="/blog.html">المقالات</a></p>
+</footer>
+
+<script>
+const sb = supabase.createClient(
+  'https://sjaktzqolztzsipjkrts.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqYWt0enFvbHp0enNpcGprcnRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwOTI5MTIsImV4cCI6MjA2MDY2ODkxMn0.XBkCMjQA5dGQgOMhxBxJNBFHoV8gOIGsViXZ3ZiajZI'
+);
+
+function goToPost(id) {
+  window.location.href = '/blog-post.html?id=' + id;
+}
+
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('ar-EG', {year:'numeric', month:'long', day:'numeric'});
+}
+
+async function loadPosts() {
+  try {
+    const { data, error } = await sb
+      .from('blog_posts')
+      .select('*')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false });
+
+    if(error) throw error;
+
+    // Featured — أول مقال
+    const featWrap = document.getElementById('featured-wrap');
+    if(data?.length) {
+      const f = data[0];
+      featWrap.innerHTML = `
+        <div class="featured-card" onclick="goToPost('${f.id}')">
+          <div class="feat-img">${f.emoji || '📝'}</div>
+          <div class="feat-body">
+            <span class="feat-tag">${f.category || 'طبي'}</span>
+            <h2>${f.title}</h2>
+            <p>${f.summary || ''}</p>
+            <div class="feat-meta">
+              <span>📅 ${formatDate(f.created_at)}</span>
+              <span>⏱️ ${f.read_time || 5} دقائق</span>
+            </div>
+            <span class="feat-read">اقرأ المقال ←</span>
+          </div>
+        </div>`;
+    } else {
+      featWrap.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>لا توجد مقالات بعد</p></div>';
+    }
+
+    // Grid — باقي المقالات
+    const grid = document.getElementById('articles-grid');
+    if(data?.length > 1) {
+      grid.innerHTML = data.slice(1).map(p => `
+        <div class="article-card" onclick="goToPost('${p.id}')">
+          <div class="art-thumb">
+            ${p.emoji || '📝'}
+            <span class="art-tag">${p.category || 'طبي'}</span>
+          </div>
+          <div class="art-body">
+            <h3>${p.title}</h3>
+            <p>${p.summary || ''}</p>
+            <div class="art-footer">
+              <span>⏱️ ${p.read_time || 5} دقائق</span>
+              <span class="art-arrow">اقرأ ←</span>
+            </div>
+          </div>
+        </div>`).join('');
+    } else {
+      grid.innerHTML = '<p style="color:var(--muted);font-size:14px">مقالات جديدة قريباً...</p>';
+    }
+
+  } catch(e) {
+    document.getElementById('featured-wrap').innerHTML = `<div class="empty"><p style="color:#ef4444">${e.message}</p></div>`;
+  }
+}
+
+loadPosts();
+</script>
+</body>
+</html>

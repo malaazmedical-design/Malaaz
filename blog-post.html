@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ملاذ — مقال طبي</title>
+  <meta name="description" content="">
+  <link rel="canonical" href="https://malaaz-plum.vercel.app/blog-post.html">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://malaaz-plum.vercel.app/og-image.jpg">
+  <meta property="og:site_name" content="ملاذ للرعاية الطبية المنزلية">
+
+  <script type="application/ld+json" id="article-schema">{}</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--dark:#1e2c2f;--accent:#c9a84c;--bg:#f5f2ec;--text:#1e2c2f;--muted:#6b7c80;--border:rgba(30,44,47,0.1)}
+    body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;line-height:1.8}
+
+    nav{background:var(--dark);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-logo{color:#fff;font-family:'Tajawal',sans-serif;font-size:20px;font-weight:900;text-decoration:none;display:flex;align-items:center;gap:8px}
+    .nav-logo-dot{width:6px;height:6px;background:var(--accent);border-radius:50%}
+    .nav-links{display:flex;align-items:center;gap:24px}
+    .nav-links a{color:rgba(255,255,255,.6);font-size:13px;text-decoration:none;transition:color .2s}
+    .nav-links a:hover{color:var(--accent)}
+    .nav-cta{background:var(--accent);color:var(--dark);border:none;border-radius:10px;padding:8px 20px;font-size:13px;font-weight:700;text-decoration:none}
+
+    /* Loading */
+    .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;color:var(--muted)}
+    .loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Article Hero */
+    .article-hero{background:var(--dark);padding:56px 24px 48px;text-align:center;position:relative;overflow:hidden}
+    .article-hero::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);pointer-events:none}
+    .breadcrumb{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:rgba(255,255,255,.3);margin-bottom:18px;flex-wrap:wrap}
+    .breadcrumb a{color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s}
+    .breadcrumb a:hover{color:var(--accent)}
+    .art-category{display:inline-block;background:rgba(201,168,76,.12);color:var(--accent);font-size:10px;font-weight:700;letter-spacing:1.5px;padding:5px 14px;border-radius:12px;margin-bottom:16px}
+    .article-hero h1{font-family:'Tajawal',sans-serif;font-size:clamp(24px,4vw,40px);font-weight:900;color:#fff;max-width:680px;margin:0 auto 14px;line-height:1.25}
+    .art-meta{display:flex;align-items:center;justify-content:center;gap:14px;font-size:12px;color:rgba(255,255,255,.3);flex-wrap:wrap}
+
+    /* Article Content */
+    .article-wrap{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+
+    /* Content Styles — لتنسيق محتوى المقال */
+    .article-content{font-size:16px;line-height:1.9;color:var(--text)}
+    .article-content p{margin-bottom:18px}
+    .article-content h2{font-family:'Tajawal',sans-serif;font-size:22px;font-weight:900;color:var(--dark);margin:36px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--accent)}
+    .article-content h3{font-family:'Tajawal',sans-serif;font-size:18px;font-weight:900;color:var(--dark);margin:28px 0 12px}
+    .article-content ul,.article-content ol{padding-right:24px;margin-bottom:18px}
+    .article-content li{margin-bottom:8px;font-size:15px;color:var(--text)}
+    .article-content strong,.article-content b{color:var(--dark);font-weight:700}
+    .article-content .tip-box{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:20px;margin:24px 0}
+    .article-content .tip-box h4{color:var(--dark);font-weight:900;margin-bottom:8px}
+    .article-content .warn-box{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);border-radius:14px;padding:20px;margin:24px 0}
+    .article-content .warn-box h4{color:#dc2626;font-weight:900;margin-bottom:8px}
+    .article-content .sign{background:#fff;border-radius:16px;padding:22px;margin-bottom:14px;border:1px solid var(--border);display:flex;gap:16px}
+    .article-content .sign-num{width:40px;height:40px;border-radius:10px;background:var(--dark);color:var(--accent);font-family:'Tajawal',sans-serif;font-size:17px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+    /* CTA */
+    .article-cta{background:var(--dark);border-radius:20px;padding:36px;margin-top:48px;text-align:center}
+    .article-cta h3{font-family:'Tajawal',sans-serif;font-size:22px;font-weight:900;color:#fff;margin-bottom:8px}
+    .article-cta p{color:rgba(255,255,255,.45);font-size:14px;margin-bottom:22px}
+    .cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .btn-gold{background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:12px 26px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;display:inline-block}
+    .btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 26px;font-size:14px;font-weight:600;text-decoration:none;font-family:'Cairo',sans-serif;display:inline-block}
+
+    /* Related */
+    .related{margin-top:48px;padding-top:36px;border-top:1px solid var(--border)}
+    .related h3{font-family:'Tajawal',sans-serif;font-size:17px;font-weight:900;margin-bottom:14px}
+    .related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+    .related-card{background:#fff;border-radius:12px;padding:16px;text-decoration:none;border:1px solid var(--border);transition:box-shadow .2s;display:flex;gap:12px;align-items:center;cursor:pointer}
+    .related-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.07)}
+    .related-card span{font-size:24px}
+    .related-card h4{font-size:13px;font-weight:700;color:var(--text);line-height:1.4}
+    .related-card small{font-size:11px;color:var(--muted)}
+
+    footer{background:var(--dark);padding:22px 40px;text-align:center}
+    footer p{color:rgba(255,255,255,.3);font-size:12px}
+    footer a{color:var(--accent);text-decoration:none}
+
+    @media(max-width:768px){nav{padding:0 16px}.article-hero{padding:40px 16px 36px}.article-wrap{padding:36px 16px 60px}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">ملاذ <span class="nav-logo-dot"></span></a>
+  <div class="nav-links">
+    <a href="/">الرئيسية</a>
+    <a href="/blog.html">المقالات</a>
+    <a href="/" class="nav-cta">احجز الآن</a>
+  </div>
+</nav>
+
+<!-- Loading -->
+<div class="loading" id="loading-state">
+  <div class="loading-spinner"></div>
+  <p>جاري تحميل المقال...</p>
+</div>
+
+<!-- Article -->
+<div id="article-wrap" style="display:none">
+  <div class="article-hero">
+    <div class="breadcrumb">
+      <a href="/">الرئيسية</a> ←
+      <a href="/blog.html">المقالات</a> ←
+      <span id="art-category-bc"></span>
+    </div>
+    <div class="art-category" id="art-category"></div>
+    <h1 id="art-title"></h1>
+    <div class="art-meta">
+      <span id="art-date"></span>
+      <span>·</span>
+      <span id="art-read-time"></span>
+      <span>·</span>
+      <span>✍️ فريق ملاذ الطبي</span>
+    </div>
+  </div>
+
+  <div class="article-wrap">
+    <div class="article-content" id="art-content"></div>
+
+    <div class="article-cta">
+      <h3>محتاج مساعدة طبية الآن؟</h3>
+      <p>فريق ملاذ جاهز يصلك في بيتك — تأكيد خلال ١٥ دقيقة</p>
+      <div class="cta-btns">
+        <a href="https://wa.me/201039091989" target="_blank" class="btn-ghost">💬 واتساب</a>
+        <a href="/" class="btn-gold">🏥 احجز الآن</a>
+      </div>
+    </div>
+
+    <div class="related" id="related-wrap" style="display:none">
+      <h3>مقالات ذات صلة</h3>
+      <div class="related-grid" id="related-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Error -->
+<div id="error-state" style="display:none;text-align:center;padding:80px 24px;color:var(--muted)">
+  <div style="font-size:48px;margin-bottom:16px">😕</div>
+  <p style="font-size:16px;margin-bottom:20px">لم يتم العثور على المقال</p>
+  <a href="/blog.html" class="btn-gold">← العودة للمقالات</a>
+</div>
+
+<footer>
+  <p>© 2026 ملاذ للرعاية الطبية المنزلية · <a href="/">الرئيسية</a> · <a href="/blog.html">المقالات</a> · <a href="/faq.html">الأسئلة الشائعة</a></p>
+</footer>
+
+<script>
+const sb = supabase.createClient(
+  'https://sjaktzqolztzsipjkrts.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqYWt0enFvbHp0enNpcGprcnRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwOTI5MTIsImV4cCI6MjA2MDY2ODkxMn0.XBkCMjQA5dGQgOMhxBxJNBFHoV8gOIGsViXZ3ZiajZI'
+);
+
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('ar-EG', {year:'numeric', month:'long', day:'numeric'});
+}
+
+async function loadPost() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+
+  if(!id) { showError(); return; }
+
+  try {
+    const { data, error } = await sb
+      .from('blog_posts')
+      .select('*')
+      .eq('id', id)
+      .eq('status', 'published')
+      .single();
+
+    if(error || !data) { showError(); return; }
+
+    // حدّث الـ meta tags
+    document.title = data.title + ' — ملاذ';
+    document.querySelector('meta[name="description"]').content = data.summary || '';
+    document.querySelector('link[rel="canonical"]').href = `https://malaaz-plum.vercel.app/blog-post.html?id=${id}`;
+
+    // Article Schema للـ GEO
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": data.title,
+      "description": data.summary,
+      "author": {"@type":"Organization","name":"ملاذ للرعاية الطبية المنزلية"},
+      "publisher": {"@type":"Organization","name":"ملاذ","logo":{"@type":"ImageObject","url":"https://malaaz-plum.vercel.app/og-image.jpg"}},
+      "datePublished": data.created_at,
+      "dateModified": data.updated_at || data.created_at,
+      "mainEntityOfPage": `https://malaaz-plum.vercel.app/blog-post.html?id=${id}`,
+      "image": "https://malaaz-plum.vercel.app/og-image.jpg"
+    };
+    document.getElementById('article-schema').textContent = JSON.stringify(schema);
+
+    // عبّئ المحتوى
+    document.getElementById('art-category').textContent = data.category || 'طبي';
+    document.getElementById('art-category-bc').textContent = data.category || 'طبي';
+    document.getElementById('art-title').textContent = data.title;
+    document.getElementById('art-date').textContent = '📅 ' + formatDate(data.created_at);
+    document.getElementById('art-read-time').textContent = '⏱️ ' + (data.read_time || 5) + ' دقائق قراءة';
+    document.getElementById('art-content').innerHTML = data.content || '';
+
+    // اعرض المقال
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('article-wrap').style.display = 'block';
+
+    // حمّل مقالات ذات صلة
+    loadRelated(id, data.category);
+
+  } catch(e) { showError(); }
+}
+
+async function loadRelated(currentId, category) {
+  try {
+    const { data } = await sb
+      .from('blog_posts')
+      .select('id, title, category, emoji, read_time')
+      .eq('status', 'published')
+      .neq('id', currentId)
+      .limit(3);
+
+    if(!data?.length) return;
+
+    const grid = document.getElementById('related-grid');
+    grid.innerHTML = data.map(p => `
+      <div class="related-card" onclick="window.location.href='/blog-post.html?id=${p.id}'">
+        <span>${p.emoji || '📝'}</span>
+        <div>
+          <h4>${p.title}</h4>
+          <small>⏱️ ${p.read_time || 5} دقائق</small>
+        </div>
+      </div>`).join('');
+
+    document.getElementById('related-wrap').style.display = 'block';
+  } catch(e) {}
+}
+
+function showError() {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-state').style.display = 'block';
+}
+
+loadPost();
+</script>
+</body>
+</html>
