@@ -2797,6 +2797,11 @@ window.addEventListener('load', async () => {
 
   // Realtime
   setupRealtime();
+
+  // فتح فورم الحجز مباشرة إذا جاء الرابط بـ ?openBooking=1
+  if (new URLSearchParams(location.search).get('openBooking') === '1') {
+    openBookingModal();
+  }
 });
 
 window.addEventListener('popstate', () => {
