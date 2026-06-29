@@ -53,6 +53,50 @@
     },
   };
 
+  /* ── جلب الأسعار الحقيقية من قاعدة البيانات (sub_services) ──
+     عشان ميزو يقرا نفس الأسعار اللي على صفحة الحجز على طول،
+     من غير ما نحتاج نحدّث الأرقام يدوياً في الملف ده. */
+  function loadLivePrices() {
+    try {
+      if (typeof sb === 'undefined' || !sb || !sb.from) return;
+      sb.from('sub_services').select('*').eq('is_active', true).then(({ data, error }) => {
+        if (error || !data || !data.length) return;
+
+        const byService = {};
+        data.forEach(r => { (byService[r.service_name] = byService[r.service_name] || []).push(r); });
+
+        // كشف منزلي: أخصائي / استشاري — مجمّعين من كل التخصصات
+        const kashfRows = byService['كشف منزلي'] || [];
+        if (kashfRows.length) {
+          const specMin = kashfRows.map(r => Number(r.price_min_specialist)).filter(n => !isNaN(n));
+          const specMax = kashfRows.map(r => Number(r.price_max_specialist)).filter(n => !isNaN(n));
+          const consMin = kashfRows.map(r => Number(r.price_min_consultant)).filter(n => !isNaN(n));
+          const consMax = kashfRows.map(r => Number(r.price_max_consultant)).filter(n => !isNaN(n));
+          if (specMin.length && specMax.length) {
+            DATA.services['كشف منزلي'].subs[0] = { name: 'أخصائي', min: Math.min(...specMin), max: Math.max(...specMax) };
+          }
+          if (consMin.length && consMax.length) {
+            DATA.services['كشف منزلي'].subs[1] = { name: 'استشاري', min: Math.min(...consMin), max: Math.max(...consMax) };
+          }
+        }
+
+        // تمريض منزلي / أشعة منزلية: كل خدمة بسعرها كما هي في الداتابيز
+        ['تمريض منزلي', 'أشعة منزلية'].forEach(svcName => {
+          const rows = byService[svcName];
+          if (!rows || !rows.length) return;
+          DATA.services[svcName].subs = rows.map(r => ({
+            name: r.name,
+            min: Number(r.price_min) || 0,
+            max: Number(r.price_max) || null,
+          }));
+        });
+      }).catch(() => {});
+    } catch (e) {}
+  }
+  loadLivePrices();
+  // إعادة التحميل لو الإدمن غيّر الأسعار وميزو لسه مفتوح من زمان
+  setInterval(loadLivePrices, 5 * 60 * 1000);
+
   /* ── مساعد: رسم السعر ── */
   function priceText(sub) {
     if (sub.max) return `من ${sub.min} لـ ${sub.max} ج.م`;
