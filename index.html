@@ -1147,6 +1147,20 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
         <div class="bm-success-ico">🎉</div>
         <div class="bm-success-title">تم الحجز بنجاح!</div>
         <div class="bm-success-sub">فريقنا سيتواصل معك خلال 15 دقيقة لتأكيد الموعد<br><span id="bm-booking-ref" style="color:var(--accent);font-weight:700"></span></div>
+
+        <!-- حالة البحث عن أقرب مقدم خدمة (حجز عام فقط) -->
+        <div id="bm-waiting-box" style="display:none;margin-top:18px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:18px;text-align:center">
+          <div id="bm-waiting-pending">
+            <div style="width:28px;height:28px;border:3px solid rgba(201,168,76,.25);border-top-color:var(--accent);border-radius:50%;animation:bmspin .8s linear infinite;margin:0 auto 10px"></div>
+            <div style="font-size:13px;color:var(--dark)">⏳ بنبحث لك عن أقرب مقدم خدمة متاح...</div>
+          </div>
+          <div id="bm-waiting-confirmed" style="display:none">
+            <div style="font-size:14px;font-weight:900;color:var(--dark)" id="bm-confirmed-text"></div>
+            <div style="font-size:20px;font-weight:900;color:var(--accent);margin-top:6px" id="bm-confirmed-price"></div>
+          </div>
+        </div>
+        <style>@keyframes bmspin{to{transform:rotate(360deg)}}</style>
+
         <button id="bm-success-btn" onclick="closeBookingModal()" style="margin-top:24px;background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">حسناً، شكراً!</button>
       </div>
     </div>
@@ -2704,6 +2718,11 @@ async function bmSubmit() {
           successBtn2.style.cssText = 'margin-top:16px;background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px 24px;font-size:15px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;width:100%;display:block';
           successBtn2.onclick = () => { window.open(waUrl2, '_blank'); closeBookingModal(); };
         }
+        // متابعة حالة الطلب — هل وافق مقدم خدمة قريب ولا لسه؟
+        if (newBookingId) {
+          document.getElementById('bm-waiting-box').style.display = 'block';
+          pollBookingStatus(newBookingId, phone);
+        }
       }
       if(typeof setupClientRealtime === 'function') setupClientRealtime(phone);
       return;
@@ -2997,6 +3016,35 @@ function closeTrackingMap() {
   if (container) container.style.transform = 'translateY(100%)';
   if (bd) bd.style.display = 'none';
   if (trackingInterval) { clearInterval(trackingInterval); trackingInterval = null; }
+}
+
+// ============================================================
+// متابعة حالة الحجز العام — لحد ما مقدم خدمة قريب يوافق
+// ============================================================
+function pollBookingStatus(bookingId, phone) {
+  let tries = 0;
+  const maxTries = 36; // 36 × 5s = 3 دقايق
+  const interval = setInterval(async () => {
+    tries++;
+    try {
+      const { data } = await sb.rpc('get_booking_status', { p_booking_id: bookingId, p_phone: phone });
+      if (data?.found && data.provider) {
+        clearInterval(interval);
+        document.getElementById('bm-waiting-pending').style.display = 'none';
+        const box = document.getElementById('bm-waiting-confirmed');
+        box.style.display = 'block';
+        document.getElementById('bm-confirmed-text').textContent =
+          `✅ مقدم الخدمة ${data.provider.name || ''} وافق على طلبك!`;
+        document.getElementById('bm-confirmed-price').textContent =
+          data.provider.price ? `${data.provider.price} ج.م` : '';
+      } else if (data?.found && data.status === 'cancelled') {
+        clearInterval(interval);
+        document.getElementById('bm-waiting-pending').innerHTML =
+          '<div style="font-size:13px;color:#dc2626">⚠️ تعذّر توفير مقدم خدمة الآن — سيتواصل فريقنا معك</div>';
+      }
+    } catch(e) {}
+    if (tries >= maxTries) clearInterval(interval);
+  }, 5000);
 }
 
 // ============================================================
