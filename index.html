@@ -3022,10 +3022,8 @@ function closeTrackingMap() {
 // متابعة حالة الحجز العام — لحد ما مقدم خدمة قريب يوافق
 // ============================================================
 function pollBookingStatus(bookingId, phone) {
-  let tries = 0;
-  const maxTries = 36; // 36 × 5s = 3 دقايق
+  // يفضل يستمر للأبد لغاية ما نوفر مقدم خدمة — مفيش رسالة فشل تظهر للعميل أبداً
   const interval = setInterval(async () => {
-    tries++;
     try {
       const { data } = await sb.rpc('get_booking_status', { p_booking_id: bookingId, p_phone: phone });
       if (data?.found && data.provider) {
@@ -3037,13 +3035,9 @@ function pollBookingStatus(bookingId, phone) {
           `✅ مقدم الخدمة ${data.provider.name || ''} وافق على طلبك!`;
         document.getElementById('bm-confirmed-price').textContent =
           data.provider.price ? `${data.provider.price} ج.م` : '';
-      } else if (data?.found && data.status === 'cancelled') {
-        clearInterval(interval);
-        document.getElementById('bm-waiting-pending').innerHTML =
-          '<div style="font-size:13px;color:#dc2626">⚠️ تعذّر توفير مقدم خدمة الآن — سيتواصل فريقنا معك</div>';
       }
+      // لو status == cancelled أو لسه pending: نسيب رسالة "جاري توفير مقدم خدمة" ظاهرة وما نوقفش المحاولة
     } catch(e) {}
-    if (tries >= maxTries) clearInterval(interval);
   }, 5000);
 }
 

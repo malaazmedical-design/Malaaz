@@ -2208,6 +2208,26 @@ function setupRealtime() {
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'providers'},(payload) => {
       showToast('👨‍⚕️ مقدم خدمة جديد: '+(payload.new?.name||''));
     }).subscribe();
+
+  sb.channel('admin-alerts')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'admin_alerts'},(payload) => {
+      showAdminAlert(payload.new);
+    }).subscribe();
+}
+
+// تنبيهات تصعيد الحجوزات (لو محدش وافق بعد 10/20 دقيقة)
+function showAdminAlert(alert) {
+  try { new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=').play(); } catch(e) {}
+  const box = document.createElement('div');
+  box.style.position = 'fixed'; box.style.top = '16px'; box.style.right = '16px';
+  box.style.zIndex = 99999; box.style.maxWidth = '320px';
+  box.style.background = alert.level >= 2 ? '#b91c1c' : '#c2410c';
+  box.style.color = '#fff'; box.style.padding = '14px 16px'; box.style.borderRadius = '12px';
+  box.style.boxShadow = '0 8px 24px rgba(0,0,0,.3)'; box.style.fontSize = '13px'; box.style.fontWeight = '600';
+  box.innerHTML = `<div style="margin-bottom:8px">${alert.level >= 2 ? '🚨' : '⚠️'} ${alert.message}</div>
+    <a href="${alert.whatsapp_link}" target="_blank" style="display:inline-block;background:#22c55e;color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:12px">إرسال واتساب الآن</a>
+    <button onclick="this.closest('div').parentElement.remove()" style="margin-right:8px;background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">إغلاق</button>`;
+  document.body.appendChild(box);
 }
 
 // ============================================================
