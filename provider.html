@@ -769,8 +769,22 @@ function saveAll() {
 // ============================================================
 async function toggleAvailability(val) {
   if(!currentProvider) return;
-  await sb.from('providers').update({is_available: val}).eq('id', currentProvider.id);
-  currentProvider.is_available = val;
+  const payload = { is_available: val };
+
+  // عند التفعيل — نسجل موقع مقدم الخدمة الحالي عشان نظام أقرب مقدم خدمة
+  if(val && navigator.geolocation) {
+    try {
+      const pos = await new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy:true, timeout:10000, maximumAge:30000 })
+      );
+      payload.lat = pos.coords.latitude;
+      payload.lng = pos.coords.longitude;
+      payload.location_updated_at = new Date().toISOString();
+    } catch(e) {}
+  }
+
+  await sb.from('providers').update(payload).eq('id', currentProvider.id);
+  Object.assign(currentProvider, payload);
   showToast(val ? '🟢 أنت متاح الآن للحجز' : '⚫ تم إيقاف التوفر مؤقتاً');
   updateOverviewStatus();
 }

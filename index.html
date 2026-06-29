@@ -2618,15 +2618,25 @@ async function bmSubmit() {
       }
     } catch(e) {}
 
-    // ✅ FIX: الحقول دي اتحذفت لأنها مش موجودة في جدول bookings في Supabase
-    // لو أضفتها في الـ DB، شيل الـ // من قبل كل سطر:
+    // ✅ FIX: specialty_level و family_member_id لسه مش موجودين في جدول bookings
+    // لو أضفتهم في الـ DB، شيل الـ // من قبل السطرين:
     // if (bmSelectedGrade)        payload.specialty_level   = bmSelectedGrade;
     // if (bmSelectedFamilyMember) payload.family_member_id  = bmSelectedFamilyMember;
-    // if (bmClientLat) {
-    //   payload.client_latitude      = bmClientLat;
-    //   payload.client_longitude     = bmClientLon;
-    //   payload.client_location_text = `GPS: ${bmClientLat.toFixed(5)}, ${bmClientLon.toFixed(5)}`;
-    // }
+    if (bmClientLat && bmClientLon) {
+      payload.lat = bmClientLat;
+      payload.lng = bmClientLon;
+    } else {
+      // العميل كتب العنوان يدوي بدون GPS — نحاول نحوّله لـ lat/lng عن طريق Geocoding
+      try {
+        const { data: geo } = await sb.functions.invoke('geocode', {
+          body: { address: `${area} ${address}` }
+        });
+        if (geo?.lat && geo?.lng) {
+          payload.lat = geo.lat;
+          payload.lng = geo.lng;
+        }
+      } catch(e) {}
+    }
 
     // ✅ insert بدون select (القراءة مقفولة للـ anon لأسباب أمنية)
     const { error } = await sb.from('bookings').insert([payload]);
