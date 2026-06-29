@@ -2592,8 +2592,10 @@ async function bmSubmit() {
   btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left:8px"></i> جاري الإرسال...';
 
   try {
-    // بناء الـ payload
+    // بناء الـ payload — نولّد id من المتصفح عشان نقدر نبث الطلب على أقرب مقدمين بعد الحفظ مباشرة
+    const newBookingId = (crypto.randomUUID ? crypto.randomUUID() : null);
     const payload = {
+      ...(newBookingId ? { id: newBookingId } : {}),
       patient_name:     name,
       phone,
       area,
@@ -2670,7 +2672,10 @@ async function bmSubmit() {
         trackBookingConversion(bmSelectedService, bmSelectedPrice, !!bmSelectedProvider);
         showToast('✅ تم الحجز — سيصلك تأكيد من مقدم الخدمة!');
       } else {
-        // حجز عام — واتساب للأدمن
+        // حجز عام بدون مقدم محدد — نبث الطلب على أقرب المقدمين المتاحين
+        if (newBookingId && payload.lat && payload.lng) {
+          try { await sb.rpc('create_booking_offers', { p_booking_id: newBookingId }); } catch(e) {}
+        }
         // + إشعار الأدمن بالإيميل
         await notifyAdminNewBooking({
           patient_name: name, phone, area, address, patient_email: email,

@@ -506,6 +506,15 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- OFFER POPUP -->
+<div id="offer-popup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;align-items:center;justify-content:center;padding:20px">
+  <style>
+    .offer-card{background:#fff;border-radius:16px;padding:24px;max-width:340px;width:100%;text-align:center}
+    .offer-card h3{font-family:'Tajawal',sans-serif;font-weight:900;margin-bottom:10px;color:var(--dark,#1e2c2f)}
+    .offer-card p{font-size:14px;color:var(--muted,#6b7c80);margin-bottom:4px}
+  </style>
+</div>
+
 <script>
 // ============================================================
 // SUPABASE
@@ -1339,6 +1348,65 @@ function setupProviderRealtime() {
       document.getElementById('pov-all').textContent     = myBookings.length;
       document.getElementById('pov-pending').textContent = myBookings.filter(b=>b.status==='pending').length;
     }).subscribe();
+
+  // عروض الطلبات السريعة القريبة — أول واحد يوافق يكسب الطلب
+  sb.channel('prov-offers-' + currentProvider.id)
+    .on('postgres_changes', {
+      event:  'INSERT',
+      schema: 'public',
+      table:  'booking_offers',
+      filter: `provider_id=eq.${currentProvider.id}`
+    }, (payload) => {
+      showIncomingOffer(payload.new);
+    }).subscribe();
+}
+
+// ============================================================
+// عرض الطلب السريع (نافذة قبول/رفض)
+// ============================================================
+async function showIncomingOffer(offer) {
+  if(!currentProvider.is_available) return;
+
+  const { data: details } = await sb.rpc('get_offer_details', { p_offer_id: offer.id });
+  if(!details) return; // اتاخد قبل ما توصل أو مش متاحة ليك
+
+  const box = document.getElementById('offer-popup');
+  if(!box) return;
+
+  const distText = details.distance_km ? `📍 على بعد ${details.distance_km.toFixed(1)} كم منك` : '';
+  box.innerHTML = `
+    <div class="offer-card">
+      <h3>🔔 طلب جديد قريب منك</h3>
+      <p>⚕️ ${san(details.service_type||'')} ${details.sub_option ? '— '+san(details.sub_option) : ''}</p>
+      <p>🏘️ ${san(details.area||'')}</p>
+      <p>${distText}</p>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onclick="respondToOffer('${offer.id}', true)" style="flex:1;background:#22c55e;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer">✅ قبول</button>
+        <button onclick="respondToOffer('${offer.id}', false)" style="flex:1;background:#ef4444;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer">✖ رفض</button>
+      </div>
+    </div>`;
+  box.style.display = 'flex';
+
+  // إخفاء تلقائي بعد دقيقة لو ماحصل رد
+  clearTimeout(window._offerTimeout);
+  window._offerTimeout = setTimeout(() => { box.style.display = 'none'; }, 60000);
+}
+
+async function respondToOffer(offerId, accept) {
+  const box = document.getElementById('offer-popup');
+  if(box) box.style.display = 'none';
+
+  if(accept) {
+    const { data, error } = await sb.rpc('accept_booking_offer', { p_offer_id: offerId });
+    if(error || !data?.success) {
+      showToast(data?.reason === 'already_taken' ? '⚠️ الطلب اتأخد من مقدم خدمة تاني' : '⚠️ تعذر قبول الطلب', 'error');
+      return;
+    }
+    showToast('✅ تم قبول الطلب — اتأكد منه في صفحة الحجوزات', 'success');
+    loadOverview();
+  } else {
+    await sb.rpc('decline_booking_offer', { p_offer_id: offerId });
+  }
 }
 
 // ============================================================
