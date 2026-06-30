@@ -2876,6 +2876,7 @@ let providerMarker = null;
 let clientMarker = null;
 let trackingInterval = null;
 let currentTrackingBookingId = null;
+let trackingChannel = null;
 
 function loadLeaflet(cb) {
   if (window.L) { cb(); return; }
@@ -2960,29 +2961,32 @@ function showTrackingMap(bookingId, clientLat, clientLon) {
 }
 
 async function startProviderTracking(bookingId) {
-  await fetchAndUpdateProviderMarker(bookingId);
-  // تحديث كل 10 ثوانٍ
+  const providerId = await fetchAndUpdateProviderMarker(bookingId);
+  // تحديث كل 10 ثوانٍ كـ fallback
   trackingInterval = setInterval(() => fetchAndUpdateProviderMarker(bookingId), 10000);
 
-  // Realtime أسرع
-  sb.channel('client-track-' + bookingId)
-    .on('postgres_changes', {
-      event: 'UPDATE', schema: 'public', table: 'providers'
-    }, (payload) => {
-      const p = payload.new;
-      if (p.latitude && p.longitude) updateProviderMarker(p.latitude, p.longitude, p.name);
-    }).subscribe();
+  // Realtime أسرع — بس بعد ما نعرف هوية المقدم عشان نفلتر صح
+  if (providerId) {
+    trackingChannel = sb.channel('client-track-' + bookingId)
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'providers', filter: `id=eq.${providerId}`
+      }, (payload) => {
+        const p = payload.new;
+        if (p.lat && p.lng) updateProviderMarker(p.lat, p.lng, p.name);
+      }).subscribe();
+  }
 }
 
 async function fetchAndUpdateProviderMarker(bookingId) {
   const { data } = await sb.rpc('get_booking_provider_location', { p_booking_id: bookingId });
-  if (!data?.found || !data.latitude) return;
+  if (!data?.found || !data.latitude) return null;
   updateProviderMarker(data.latitude, data.longitude, data.provider_name);
   const statusEl = document.getElementById('tracking-status');
   if (statusEl && data.updated_at) {
     const ago = Math.round((Date.now() - new Date(data.updated_at)) / 1000);
     statusEl.textContent = `آخر تحديث: منذ ${ago} ثانية`;
   }
+  return data.provider_id || null;
 }
 
 function updateProviderMarker(lat, lon, name) {
@@ -3016,6 +3020,7 @@ function closeTrackingMap() {
   if (container) container.style.transform = 'translateY(100%)';
   if (bd) bd.style.display = 'none';
   if (trackingInterval) { clearInterval(trackingInterval); trackingInterval = null; }
+  if (trackingChannel) { sb.removeChannel(trackingChannel); trackingChannel = null; }
 }
 
 // ============================================================
