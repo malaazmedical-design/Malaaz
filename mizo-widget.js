@@ -541,9 +541,6 @@
   #mz-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%}
   #mz-btn-fb{display:none;position:absolute;inset:0;align-items:center;justify-content:center;
     font-size:26px;color:#c9a84c;font-family:'Cairo',sans-serif;font-weight:900}
-  #mz-badge{position:absolute;top:-4px;right:-4px;background:#e53935;color:#fff;
-    border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;
-    display:flex;align-items:center;justify-content:center;border:2px solid #fff;z-index:1}
   #mz-box{width:345px;height:560px;border-radius:22px;overflow:hidden;
     display:flex;flex-direction:column;
     box-shadow:0 20px 60px rgba(0,0,0,.3);animation:mzUp .3s ease}
@@ -604,12 +601,28 @@
     color:#c9a84c;font-size:17px;display:flex;align-items:center;justify-content:center;
     flex-shrink:0;transition:transform .15s}
   #mz-send:hover{transform:scale(1.08)}
+  #mz-badge{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#C9A84C,#e8c56a);
+    color:#1C2B2A;border-radius:10px;padding:2px 7px;font-size:9px;font-weight:900;
+    display:flex;align-items:center;justify-content:center;border:2px solid #fff;z-index:1;letter-spacing:.02em}
+  #mz-greet{position:absolute;bottom:78px;left:0;background:#fff;border-radius:16px 16px 4px 16px;
+    padding:11px 14px 11px 32px;box-shadow:0 6px 28px rgba(0,0,0,.18);border:1.5px solid rgba(201,168,76,.3);
+    cursor:pointer;min-width:190px;animation:mzGreetIn .4s cubic-bezier(.34,1.56,.64,1) both}
+  #mz-greet strong{display:block;font-size:13px;font-weight:900;color:#1C2B2A}
+  #mz-greet span{display:block;font-size:11px;color:#7a8a89;margin-top:2px}
+  #mz-greet .mgc{position:absolute;top:7px;left:8px;background:none;border:none;
+    cursor:pointer;font-size:13px;color:#9aada9;padding:0;line-height:1;font-family:'Cairo',sans-serif}
+  .mz-attention{animation:mzAttention 4s ease infinite!important}
+  @keyframes mzAttention{
+    0%,20%,100%{transform:translateY(0)}
+    8%{transform:translateY(-9px)}
+    14%{transform:translateY(-4px)}}
   @keyframes mzPulse{
     0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.3),0 0 0 3px rgba(201,168,76,.4)}
     50%{box-shadow:0 4px 20px rgba(0,0,0,.3),0 0 0 8px rgba(201,168,76,.12)}}
+  @keyframes mzGreetIn{from{opacity:0;transform:translateY(8px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
   @keyframes mzUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   @keyframes mzT{0%,60%,100%{transform:translateY(0);opacity:.7}30%{transform:translateY(-5px);opacity:1}}
-  @media(max-width:420px){#mz-box{width:calc(100vw - 28px)}}
+  @media(max-width:420px){#mz-box{width:calc(100vw - 28px)}#mz-greet{min-width:160px}}
   `;
   document.head.appendChild(css);
 
@@ -621,11 +634,16 @@
   const wrap = document.createElement('div');
   wrap.id = 'mz-wrap';
   wrap.innerHTML = `
+    <div id="mz-greet" style="display:none">
+      <button class="mgc" id="mz-greet-close">✕</button>
+      <strong>👋 أهلاً! محتاج دكتور؟</strong>
+      <span>كلّمني وهلاقهولك دلوقتي</span>
+    </div>
     <div id="mz-btn" title="تحدث مع ميزو">
       <img src="${MIZO_IMG}" alt="ميزو"
         onerror="this.style.display='none';document.getElementById('mz-btn-fb').style.display='flex'">
       <div id="mz-btn-fb">M</div>
-      <div id="mz-badge">1</div>
+      <div id="mz-badge">جديد</div>
     </div>
     <div id="mz-box" style="display:none">
       <div id="mz-head">
@@ -751,8 +769,40 @@
     quick.appendChild(b);
   });
 
+  /* ── فقاعة الترحيب + bounce ── */
+  const greet     = document.getElementById('mz-greet');
+  const greetClose= document.getElementById('mz-greet-close');
+
+  function dismissGreet() {
+    greet.style.display = 'none';
+    btn.classList.remove('mz-attention');
+  }
+
+  // بعد 3 ثواني: اعرض الفقاعة وابدأ الـ bounce
+  setTimeout(() => {
+    if (box.style.display === 'flex') return;   // لو الشات فاتح مسبقاً — متعرضش
+    greet.style.display = 'block';
+    btn.classList.add('mz-attention');
+    // اخفيها تلقائياً بعد 10 ثواني لو لم يتفاعل
+    setTimeout(() => dismissGreet(), 10000);
+  }, 3000);
+
+  // ضغطة على الفقاعة نفسها تفتح الشات
+  greet.addEventListener('click', (e) => {
+    if (e.target === greetClose) return;
+    dismissGreet();
+    btn.click();
+  });
+
+  // زرار الـ X على الفقاعة
+  greetClose.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dismissGreet();
+  });
+
   /* events */
   btn.onclick = () => {
+    dismissGreet();
     btn.style.display = 'none';
     box.style.display = 'flex';
     badge.style.display = 'none';
