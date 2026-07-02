@@ -776,14 +776,34 @@
   function dismissGreet() {
     greet.style.display = 'none';
     btn.classList.remove('mz-attention');
+    if (greetTimer) { clearInterval(greetTimer); greetTimer = null; }
   }
 
-  // بعد 3 ثواني: اعرض الفقاعة وابدأ الـ bounce
-  setTimeout(() => {
-    if (box.style.display === 'flex') return;   // لو الشات فاتح مسبقاً — متعرضش
+  // تظهر ٦ ثواني وتختفي ١٤ ثانية — دورة كل ٢٠ ثانية
+  let greetTimer = null;
+
+  function startGreetCycle() {
+    // العرض الأول بعد 3 ثواني
+    setTimeout(() => {
+      if (box.style.display === 'flex') return;
+      showGreet();
+      greetTimer = setInterval(() => {
+        if (box.style.display === 'flex') return;
+        showGreet();
+      }, 20000);
+    }, 3000);
+  }
+
+  function showGreet() {
     greet.style.display = 'block';
     btn.classList.add('mz-attention');
-  }, 3000);
+    setTimeout(() => {
+      greet.style.display = 'none';
+      btn.classList.remove('mz-attention');
+    }, 6000);
+  }
+
+  startGreetCycle();
 
   // ضغطة على الفقاعة نفسها تفتح الشات
   greet.addEventListener('click', (e) => {
