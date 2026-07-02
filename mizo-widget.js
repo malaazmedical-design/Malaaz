@@ -1,5 +1,5 @@
 /* ============================================================
-   MIZO CHATBOT WIDGET — ملاذ v3
+   MIZO CHATBOT WIDGET — ملاذ v4
    ضيف في آخر index.html قبل </body>:
    <script src="mizo-widget.js"></script>
    ============================================================ */
@@ -103,28 +103,59 @@
     return `يبدأ من ${sub.min} ج.م`;
   }
 
-  /* ── زر الحجز المباشر ── */
+  /* ── زر الحجز العادي (بدون مقدم محدد) ── */
   function bookBtn(serviceName, label) {
-    // نرجع placeholder خاص بدل HTML عشان ميتأثرش بـ replace
     return `[[BTN:${serviceName}:${label}]]`;
   }
-  
+
+  /* ── زر الحجز مع مقدم محدد ── */
+  function providerBookBtn(svcName, provId, label) {
+    return `[[BTN_P:${svcName}:${provId}:${label}]]`;
+  }
+
   function renderBubble(el, html) {
-    // نقسم على البلاسهولدر ونبني كل جزء
-    const parts = html.split(/(\[\[BTN:[^\]]+\]\])/);
+    // نقسم على البلاسهولدرات ونبني كل جزء
+    const parts = html.split(/(\[\[BTN(?:_P)?:[^\]]+\]\])/);
     parts.forEach(part => {
-      const btnMatch = part.match(/\[\[BTN:([^:]+):([^\]]+)\]\]/);
-      if (btnMatch) {
+      const btnPMatch = part.match(/\[\[BTN_P:([^:]+):([^:]+):([^\]]+)\]\]/);
+      const btnMatch  = !btnPMatch && part.match(/\[\[BTN:([^:]+):([^\]]+)\]\]/);
+
+      if (btnPMatch) {
+        // زر حجز مع مقدم محدد
+        const [, svcName, provId, lbl] = btnPMatch;
+        const btn = document.createElement('button');
+        btn.textContent = '🏥 احجز مع ' + lbl;
+        btn.style.cssText = 'display:block;margin-top:8px;padding:9px 16px;border:none;border-radius:20px;cursor:pointer;background:linear-gradient(135deg,#c9a84c,#e8c56a);color:#1e3a2f;font-family:Cairo,sans-serif;font-weight:700;font-size:13px;width:100%;text-align:center;';
+        btn.onclick = function () {
+          document.getElementById('mz-box').style.display = 'none';
+          document.getElementById('mz-btn').style.display = 'flex';
+          if (typeof openBookingModal === 'function') {
+            openBookingModal(svcName);
+            // pre-select المقدم في dropdown الحجز بعد ما المودال يفتح
+            setTimeout(() => {
+              const sel = document.getElementById('bm-provider-select');
+              if (sel && provId) {
+                sel.value = provId;
+                sel.dispatchEvent(new Event('change'));
+              }
+            }, 400);
+          }
+        };
+        el.appendChild(btn);
+
+      } else if (btnMatch) {
+        // زر حجز عادي
         const [, svcName, lbl] = btnMatch;
         const btn = document.createElement('button');
         btn.textContent = '🏥 احجز ' + lbl + ' الآن';
-        btn.style.cssText = 'display:block;margin-top:10px;padding:9px 20px;border:none;border-radius:20px;cursor:pointer;background:linear-gradient(135deg,#c9a84c,#e8c56a);color:#1e3a2f;font-family:Cairo,sans-serif;font-weight:700;font-size:13px;width:100%;';
-        btn.onclick = function() {
+        btn.style.cssText = 'display:block;margin-top:10px;padding:9px 20px;border:none;border-radius:20px;cursor:pointer;background:linear-gradient(135deg,#c9a84c,#e8c56a);color:#1e3a2f;font-family:Cairo,sans-serif;font-weight:700;font-size:13px;width:100%;text-align:center;';
+        btn.onclick = function () {
           document.getElementById('mz-box').style.display = 'none';
           document.getElementById('mz-btn').style.display = 'flex';
           if (typeof openBookingModal === 'function') openBookingModal(svcName);
         };
         el.appendChild(btn);
+
       } else if (part) {
         const span = document.createElement('span');
         span.innerHTML = part.replace(/\n/g, '<br>');
@@ -134,7 +165,142 @@
   }
 
   /* ══════════════════════════════════════════════
-     بناء الردود
+     بحث المقدمين الذكي
+  ══════════════════════════════════════════════ */
+
+  const SPECIALTY_PATTERNS = [
+    { key: 'باطنة',              re: /باطن|جهاز هضمي|هضمي|معدة/ },
+    { key: 'أطفال',              re: /أطفال|اطفال/ },
+    { key: 'قلب',                re: /قلب/ },
+    { key: 'جلدية',              re: /جلد/ },
+    { key: 'عظام',               re: /عظام|عظم|كسر/ },
+    { key: 'نساء وتوليد',       re: /نساء|توليد|حمل/ },
+    { key: 'مخ وأعصاب',         re: /مخ|أعصاب|اعصاب/ },
+    { key: 'جراحة',              re: /جراح/ },
+    { key: 'أنف وأذن وحنجرة',   re: /أنف|أذن|حنجرة/ },
+    { key: 'عيون',               re: /عيون|عين/ },
+    { key: 'صدر وتنفسية',       re: /صدر|رئة|تنفس/ },
+    { key: 'مسالك بولية',       re: /كلى|كلية|بول/ },
+    { key: 'نفسية',              re: /نفس/ },
+  ];
+
+  /* استخراج الكيانات (خدمة + تخصص + منطقة) من رسالة المستخدم */
+  function extractEntities(msg) {
+    const m = msg;
+    const out = { service: null, specialty: null, area: null, rawArea: null };
+
+    // خدمة
+    if (/باطن|أطفال|اطفال|قلب|جلد|عظام|نساء|مخ|أعصاب|اعصاب|جراح|عيون|صدر|كلى|نفس|دكتور|طبيب|استشار/.test(m))
+      out.service = 'كشف منزلي';
+    else if (/سونار|دوبلر|إيكو|ايكو|أشعة/.test(m))
+      out.service = 'أشعة منزلية';
+    else if (/تمريض|ممرض|حقن|كانيول|ضمادة|سيروم/.test(m))
+      out.service = 'تمريض منزلي';
+
+    // تخصص
+    for (const sp of SPECIALTY_PATTERNS) {
+      if (sp.re.test(m)) { out.specialty = sp.key; break; }
+    }
+
+    // منطقة — مطابقة مع قائمة التغطية
+    const knownAreas = [...(DATA.areas.cairo || []), ...(DATA.areas.giza || [])];
+    for (const area of knownAreas) {
+      if (m.includes(area)) { out.area = area; break; }
+    }
+
+    // لو ذُكر مكان بس مش في قائمة التغطية
+    if (!out.area) {
+      const locMatch = m.match(/(?:في\s|ف\s)([؀-ۿ][؀-ۿ\s]{1,18}?)(?:\s*$|،|,|\s(?:دلوقت|عندي|لي|ليا))/);
+      if (locMatch) out.rawArea = locMatch[1].trim();
+    }
+
+    return out;
+  }
+
+  /* query الـ database وإرجاع المقدمين المتاحين */
+  async function doProviderSearch(entities) {
+    try {
+      if (typeof sb === 'undefined' || !sb) return null;
+
+      let q = sb.from('providers')
+        .select('id,name,specialty,grade,service_type,areas,price,is_available,rating')
+        .eq('status', 'active')
+        .eq('is_available', true);
+
+      if (entities.service) q = q.eq('service_type', entities.service);
+
+      const { data, error } = await q;
+      if (error || !data) return null;
+
+      let results = data;
+
+      // فلتر التخصص (exact أولاً، وإلا partial)
+      if (entities.specialty) {
+        const sp = entities.specialty;
+        const exact = results.filter(p => p.specialty && p.specialty.includes(sp));
+        if (exact.length) results = exact;
+      }
+
+      // فلتر المنطقة
+      let noAreaMatch = false;
+      if (entities.area) {
+        const byArea = results.filter(p =>
+          p.areas && p.areas.split(',').map(a => a.trim()).some(a =>
+            a.includes(entities.area) || entities.area.includes(a)
+          )
+        );
+        if (byArea.length) {
+          results = byArea;
+        } else {
+          noAreaMatch = true;
+          // نرجع أقرب بدائل (بدون فلتر منطقة)
+        }
+      }
+
+      return { results: results.slice(0, 4), noAreaMatch };
+    } catch (e) { return null; }
+  }
+
+  /* بناء الرد النصي من نتائج البحث */
+  function buildSearchResponse(searchData, entities) {
+    const { results, noAreaMatch } = searchData;
+    const spLabel   = entities.specialty || '';
+    const areaLabel = entities.area || '';
+    const rawArea   = entities.rawArea || '';
+
+    if (!results.length) {
+      let txt = `😔 مش لقيت ${spLabel || (entities.service || 'مقدم')} متاح`;
+      if (areaLabel) txt += ` في ${areaLabel}`;
+      txt += ` دلوقت.\n\nتواصل معانا وهنلاقيلك أقرب حل:`;
+      return { text: txt, chips: ['📞 تواصل معنا', '🏥 احجز الآن'] };
+    }
+
+    // رأس الرد
+    let header = `🔍 لقيت <b>${results.length}</b> ${results.length === 1 ? 'مقدم' : 'مقدمين'} متاحين`;
+    if (spLabel)   header += ` لـ<b>${spLabel}</b>`;
+    if (areaLabel && !noAreaMatch) header += ` في <b>${areaLabel}</b>`;
+    else if (noAreaMatch) header += `\n⚠️ مفيش في <b>${areaLabel}</b> دلوقت — دي أقرب نتائج متاحة:`;
+    else if (rawArea)     header += `\n⚠️ "<b>${rawArea}</b>" خارج تغطيتنا حالياً — دي النتائج المتاحة:`;
+
+    // كروت المقدمين
+    const cards = results.map(p => {
+      const stars = p.rating ? `⭐ ${Number(p.rating).toFixed(1)}` : '';
+      const grade = p.grade || '';
+      const price = p.price ? `💰 من ${p.price} ج.م` : '';
+      const spec  = p.specialty ? `(${p.specialty})` : '';
+      const info  = [grade, spec, stars, price].filter(Boolean).join(' | ');
+      return `\n\n👨‍⚕️ <b>${p.name}</b>\n${info}` +
+        providerBookBtn(p.service_type, p.id, p.name);
+    }).join('');
+
+    return {
+      text: header + cards,
+      chips: ['📍 مناطق التغطية', '💰 الأسعار', '📞 تواصل معنا'],
+    };
+  }
+
+  /* ══════════════════════════════════════════════
+     بناء الردود الثابتة
   ══════════════════════════════════════════════ */
   function buildResponses() {
     const s = DATA.services;
@@ -276,7 +442,7 @@
   }
 
   /* ══════════════════════════════════════════════
-     كشف النية
+     كشف النية (للردود الثابتة)
   ══════════════════════════════════════════════ */
   const CHIP_MAP = {
     '📋 خدماتنا'           : 'services',
@@ -533,11 +699,32 @@
     }, 700 + Math.random()*350);
   }
 
-  function send_(txt) {
+  async function send_(txt) {
     const msg = (txt || inp.value).trim();
     if (!msg) return;
     inp.value = '';
     addMsg('user', msg);
+
+    // محاولة البحث الذكي أولاً لو في خدمة + (تخصص أو منطقة)
+    const entities = extractEntities(msg);
+    const shouldSearch = entities.service && (entities.specialty || entities.area || entities.rawArea);
+
+    if (shouldSearch) {
+      const t = showTyping();
+      try {
+        const searchData = await doProviderSearch(entities);
+        t.remove();
+        if (searchData) {
+          const resp = buildSearchResponse(searchData, entities);
+          addMsg('bot', resp.text, resp.chips);
+          return;
+        }
+      } catch (e) {
+        t.remove();
+      }
+    }
+
+    // fallback على الردود الثابتة
     mizoReply(detectIntent(msg));
   }
 
