@@ -783,8 +783,6 @@
     if (box.style.display === 'flex') return;   // لو الشات فاتح مسبقاً — متعرضش
     greet.style.display = 'block';
     btn.classList.add('mz-attention');
-    // اخفيها تلقائياً بعد 10 ثواني لو لم يتفاعل
-    setTimeout(() => dismissGreet(), 10000);
   }, 3000);
 
   // ضغطة على الفقاعة نفسها تفتح الشات
