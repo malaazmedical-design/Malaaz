@@ -6,6 +6,9 @@
 (function () {
   'use strict';
 
+  /* cache مؤقت لبيانات المقدمين من نتائج البحث */
+  const mizoProvCache = {};
+
   /* ══════════════════════════════════════════════
      بيانات الخدمات والأسعار
   ══════════════════════════════════════════════ */
@@ -142,15 +145,8 @@
           document.getElementById('mz-box').style.display = 'none';
           document.getElementById('mz-btn').style.display = 'flex';
           if (typeof openBookingModal === 'function') {
-            openBookingModal(svcName);
-            // pre-select المقدم في dropdown الحجز بعد ما المودال يفتح
-            setTimeout(() => {
-              const sel = document.getElementById('bm-provider-select');
-              if (sel && provId) {
-                sel.value = provId;
-                sel.dispatchEvent(new Event('change'));
-              }
-            }, 400);
+            const provObj = mizoProvCache[provId] || { id: provId, name: lbl };
+            openBookingModal(svcName, '', provObj);
           }
         };
         el.appendChild(btn);
@@ -296,6 +292,7 @@
 
     // كروت المقدمين
     const cards = results.map(p => {
+      mizoProvCache[p.id] = p;          // احفظ بيانات المقدم للاستخدام عند الحجز
       const stars = p.rating ? `⭐ ${Number(p.rating).toFixed(1)}` : '';
       const grade = p.grade || '';
       const price = p.price ? `💰 من ${p.price} ج.م` : '';
