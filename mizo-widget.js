@@ -145,6 +145,12 @@
           document.getElementById('mz-box').style.display = 'none';
           document.getElementById('mz-btn').style.display = 'flex';
           if (typeof viewProviderProfile === 'function') {
+            // allDocs بيتملى بس لما تزور صفحة المقدمين —
+            // لو المقدم مش موجود فيها، نضيف بياناته من الـ cache
+            if (Array.isArray(window.allDocs) && !window.allDocs.find(p => p.id === provId)) {
+              const cached = mizoProvCache[provId];
+              if (cached) window.allDocs.push(cached);
+            }
             viewProviderProfile(provId);
           }
         };
