@@ -145,11 +145,11 @@
           document.getElementById('mz-box').style.display = 'none';
           document.getElementById('mz-btn').style.display = 'flex';
           if (typeof viewProviderProfile === 'function') {
-            // allDocs بيتملى بس لما تزور صفحة المقدمين —
-            // لو المقدم مش موجود فيها، نضيف بياناته من الـ cache
-            if (Array.isArray(window.allDocs) && !window.allDocs.find(p => p.id === provId)) {
+            // allDocs معلنة بـ let في index.html — مش على window
+            // نستخدم typeof عشان نوصلها بأمان من الـ widget
+            if (typeof allDocs !== 'undefined' && Array.isArray(allDocs) && !allDocs.find(p => p.id === provId)) {
               const cached = mizoProvCache[provId];
-              if (cached) window.allDocs.push(cached);
+              if (cached) allDocs.push(cached);
             }
             viewProviderProfile(provId);
           }
