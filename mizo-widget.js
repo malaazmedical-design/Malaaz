@@ -144,9 +144,8 @@
         btn.onclick = function () {
           document.getElementById('mz-box').style.display = 'none';
           document.getElementById('mz-btn').style.display = 'flex';
-          if (typeof openBookingModal === 'function') {
-            const provObj = mizoProvCache[provId] || { id: provId, name: lbl };
-            openBookingModal(svcName, '', provObj);
+          if (typeof viewProviderProfile === 'function') {
+            viewProviderProfile(provId);
           }
         };
         el.appendChild(btn);
