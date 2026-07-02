@@ -597,6 +597,8 @@ h1 span.accent{color:var(--accent);}
 .area-tag{display:inline-flex;align-items:center;gap:5px;background:var(--bg);color:var(--text);border:1px solid transparent;border-radius:20px;font-size:12.5px;padding:7px 14px;font-weight:600;transition:all .2s;cursor:default;}
 .area-tag::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;}
 .area-tag:hover{background:#fff;border-color:var(--accent);color:var(--dark);transform:translateY(-1px);box-shadow:0 4px 10px rgba(201,168,76,.15);}
+.area-more-btn{display:inline-flex;align-items:center;padding:7px 14px;border:1px solid rgba(201,168,76,.5);border-radius:20px;background:transparent;color:var(--accent);font-family:'Cairo',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .2s;margin:0;}
+.area-more-btn:hover{background:rgba(201,168,76,.1);}
 
 /* FAQ */
 .faq-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;margin-bottom:10px;}
@@ -1460,15 +1462,22 @@ async function loadAreas() {
   if (!data) return;
   const cairo = data.filter(a => a.city === 'القاهرة');
   const giza  = data.filter(a => a.city === 'الجيزة');
-  const tagHtml = list => list.map(a => `<span class="area-tag">${sanitize(a.name)}</span>`).join('');
-  const cEl = document.getElementById('lp-areas-cairo');
-  const gEl = document.getElementById('lp-areas-giza');
-  if (cEl) cEl.innerHTML = cairo.length ? tagHtml(cairo) : '<span style="color:var(--muted)">لا توجد مناطق</span>';
-  if (gEl) gEl.innerHTML = giza.length  ? tagHtml(giza)  : '<span style="color:var(--muted)">لا توجد مناطق</span>';
-  const cCount = document.getElementById('lp-count-cairo');
-  const gCount = document.getElementById('lp-count-giza');
-  if(cCount) cCount.textContent = `${cairo.length} منطقة تغطية`;
-  if(gCount) gCount.textContent = `${giza.length} منطقة تغطية`;
+  function renderAreaGroup(list, el, countEl) {
+    if (!el) return;
+    if (!list.length) { el.innerHTML = '<span style="color:var(--muted)">لا توجد مناطق</span>'; return; }
+    const SHOW = 5;
+    const vis  = list.slice(0, SHOW);
+    const rest = list.slice(SHOW);
+    let html = vis.map(a => `<span class="area-tag">${sanitize(a.name)}</span>`).join('');
+    if (rest.length) {
+      html += rest.map(a => `<span class="area-tag area-tag-extra" style="display:none">${sanitize(a.name)}</span>`).join('');
+      html += `<button class="area-more-btn" onclick="toggleAreas(this,${rest.length})">+ عرض المزيد (${rest.length}) ▼</button>`;
+    }
+    el.innerHTML = html;
+    if (countEl) countEl.textContent = `${list.length} منطقة تغطية`;
+  }
+  renderAreaGroup(cairo, document.getElementById('lp-areas-cairo'), document.getElementById('lp-count-cairo'));
+  renderAreaGroup(giza,  document.getElementById('lp-areas-giza'),  document.getElementById('lp-count-giza'));
 
   // ملء مناطق الـ booking modal
   const areaSelect = document.getElementById('bm-area');
@@ -1481,6 +1490,15 @@ async function loadAreas() {
       areaSelect.appendChild(opt);
     });
   }
+}
+
+function toggleAreas(btn, extraCount) {
+  const parent   = btn.closest('.coverage-areas');
+  const extras   = parent.querySelectorAll('.area-tag-extra');
+  const expanded = btn.dataset.open === '1';
+  extras.forEach(el => el.style.display = expanded ? 'none' : 'inline-flex');
+  btn.dataset.open  = expanded ? '0' : '1';
+  btn.textContent   = expanded ? `+ عرض المزيد (${extraCount}) ▼` : 'عرض أقل ▲';
 }
 
 // ============================================================
