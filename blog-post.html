@@ -67,6 +67,15 @@
     .btn-gold{background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:12px 26px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif;display:inline-block}
     .btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 26px;font-size:14px;font-weight:600;text-decoration:none;font-family:'Cairo',sans-serif;display:inline-block}
 
+    /* Share */
+    .share-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:36px 0;padding:20px 24px;background:#fff;border-radius:16px;border:1px solid var(--border)}
+    .share-label{font-size:13px;font-weight:700;color:var(--muted);margin-left:auto}
+    .share-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;border:none;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:opacity .15s}
+    .share-btn:hover{opacity:.85}
+    .share-fb{background:#1877f2;color:#fff}
+    .share-wa{background:#25d366;color:#fff}
+    .share-copy{background:var(--bg);color:var(--text);border:1px solid var(--border)}
+
     /* Related */
     .related{margin-top:48px;padding-top:36px;border-top:1px solid var(--border)}
     .related h3{font-family:'Tajawal',sans-serif;font-size:17px;font-weight:900;margin-bottom:14px}
@@ -122,6 +131,21 @@
 
   <div class="article-wrap">
     <div class="article-content" id="art-content"></div>
+
+    <div class="share-bar" id="share-bar" style="display:none">
+      <span class="share-label">شارك المقال:</span>
+      <a id="share-fb" class="share-btn share-fb" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+        فيسبوك
+      </a>
+      <a id="share-wa" class="share-btn share-wa" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.124 1.534 5.854L.057 23.215a.75.75 0 00.92.92l5.322-1.48A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.952 9.952 0 01-5.058-1.37l-.363-.215-3.76 1.046 1.04-3.796-.234-.38A9.99 9.99 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        واتساب
+      </a>
+      <button id="share-copy" class="share-btn share-copy" onclick="copyLink()">
+        🔗 نسخ الرابط
+      </button>
+    </div>
 
     <div class="article-cta">
       <h3>محتاج مساعدة طبية الآن؟</h3>
@@ -208,6 +232,13 @@ async function loadPost() {
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('article-wrap').style.display = 'block';
 
+    // أزرار المشاركة
+    const pageUrl  = encodeURIComponent(window.location.href);
+    const pageText = encodeURIComponent('📖 ' + data.title + '\n' + window.location.href);
+    document.getElementById('share-fb').href   = 'https://www.facebook.com/sharer/sharer.php?u=' + pageUrl;
+    document.getElementById('share-wa').href   = 'https://wa.me/?text=' + pageText;
+    document.getElementById('share-bar').style.display = 'flex';
+
     // حمّل مقالات ذات صلة
     loadRelated(id, data.category);
 
@@ -242,6 +273,14 @@ async function loadRelated(currentId, category) {
 function showError() {
   document.getElementById('loading-state').style.display = 'none';
   document.getElementById('error-state').style.display = 'block';
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    const btn = document.getElementById('share-copy');
+    btn.textContent = '✅ تم النسخ!';
+    setTimeout(() => { btn.textContent = '🔗 نسخ الرابط'; }, 2000);
+  });
 }
 
 loadPost();

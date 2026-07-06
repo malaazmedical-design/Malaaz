@@ -56,6 +56,8 @@
     .art-body p{font-size:13px;color:var(--muted);line-height:1.75;flex:1;margin-bottom:14px}
     .art-footer{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px}
     .art-arrow{color:var(--accent);font-weight:700}
+    .art-share{background:none;border:none;cursor:pointer;font-size:15px;padding:3px 6px;border-radius:7px;color:var(--muted);transition:background .15s;font-family:'Cairo',sans-serif}
+    .art-share:hover{background:rgba(0,0,0,.05)}
 
     /* Loading */
     .loading{text-align:center;padding:60px;color:var(--muted)}
@@ -197,7 +199,10 @@ async function loadPosts() {
             <p>${p.summary || ''}</p>
             <div class="art-footer">
               <span>⏱️ ${p.read_time || 5} دقائق</span>
-              <span class="art-arrow">اقرأ ←</span>
+              <div style="display:flex;align-items:center;gap:6px">
+                <button class="art-share" onclick="event.stopPropagation();sharePost('${p.id}','${p.title.replace(/'/g,"\\'")}')">🔗</button>
+                <span class="art-arrow">اقرأ ←</span>
+              </div>
             </div>
           </div>
         </div>`).join('');
@@ -207,6 +212,17 @@ async function loadPosts() {
 
   } catch(e) {
     document.getElementById('featured-wrap').innerHTML = `<div class="empty"><p style="color:#ef4444">${e.message}</p></div>`;
+  }
+}
+
+function sharePost(id, title) {
+  const url  = window.location.origin + '/blog-post.html?id=' + id;
+  const text = '📖 ' + title + '\n' + url;
+  if (navigator.share) {
+    navigator.share({ title, url });
+  } else {
+    const wa = 'https://wa.me/?text=' + encodeURIComponent(text);
+    window.open(wa, '_blank');
   }
 }
 
