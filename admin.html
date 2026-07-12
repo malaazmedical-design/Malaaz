@@ -2489,7 +2489,7 @@ async function sendBroadcast() {
   try {
     const res  = await fetch('https://omsictbrqlsohrmxeuym.supabase.co/functions/v1/broadcast-push', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': SUPABASE_KEY },
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': 'malaaz-broadcast-2026' },
       body: JSON.stringify({ title, body, target }),
     });
     const data = await res.json();
