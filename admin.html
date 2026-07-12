@@ -240,6 +240,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     <div class="nav-item" onclick="showPage('site-content')"><i class="fas fa-edit"></i><span>محتوى الموقع</span></div>
     <div class="nav-item" onclick="showPage('testimonials')"><i class="fas fa-quote-right"></i><span>آراء العملاء</span></div>
     <div class="nav-item" onclick="showPage('blog')"><i class="fas fa-newspaper"></i><span>المقالات</span></div>
+    <div class="nav-item" onclick="showPage('notifications')"><i class="fas fa-bell"></i><span>الإشعارات</span></div>
     <div class="nav-item" onclick="showPage('settings')"><i class="fas fa-cog"></i><span>الإعدادات</span></div>
   </nav>
   <div class="sidebar-footer">
@@ -633,6 +634,81 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
   </div>
 </div>
 
+<!-- ======= NOTIFICATIONS PAGE ======= -->
+<div class="page" id="page-notifications">
+
+  <!-- Service Role Key (مرة واحدة بس) -->
+  <div class="card" style="border-right:4px solid #C9A84C">
+    <div class="card-header">
+      <div>
+        <div class="card-title">مفتاح الخدمة <span style="font-size:11px;color:var(--muted);font-weight:400">(مطلوب مرة واحدة فقط)</span></div>
+        <div class="card-sub">Service Role Key من Supabase → Project Settings → API</div>
+      </div>
+    </div>
+    <div class="card-body" style="display:flex;gap:10px;align-items:center">
+      <input id="svc-key-input" type="password" class="form-input" style="flex:1;font-family:monospace;font-size:12px"
+        placeholder="eyJhbGci..." value="">
+      <button class="btn primary" onclick="saveSvcKey()"><i class="fas fa-save" style="margin-left:6px"></i>حفظ</button>
+      <span id="svc-key-status" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+  </div>
+
+  <!-- Broadcast Form -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title"><i class="fas fa-broadcast-tower" style="margin-left:8px;color:#C9A84C"></i>إرسال إشعار جماعي</div>
+        <div class="card-sub">بيوصل لكل الأجهزة المنزّل عليها التطبيق</div>
+      </div>
+    </div>
+    <div class="card-body" style="max-width:600px">
+      <div style="margin-bottom:16px">
+        <label style="display:block;margin-bottom:6px;font-weight:600;font-size:13px">المستلمون</label>
+        <select id="notif-target" class="form-input">
+          <option value="all">الكل (عملاء + مزودين)</option>
+          <option value="clients">العملاء فقط</option>
+          <option value="providers">مزودو الخدمة فقط</option>
+        </select>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;margin-bottom:6px;font-weight:600;font-size:13px">العنوان</label>
+        <input id="notif-title" class="form-input" placeholder="مثال: عرض خاص 🎉" maxlength="80">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="display:block;margin-bottom:6px;font-weight:600;font-size:13px">نص الإشعار</label>
+        <textarea id="notif-body" class="form-input" rows="3" placeholder="مثال: خصم 20% على جميع الخدمات النهارده فقط..." maxlength="200" style="resize:vertical"></textarea>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">الحد الأقصى 200 حرف</div>
+      </div>
+
+      <!-- Preview -->
+      <div id="notif-preview" style="display:none;background:var(--bg2);border-radius:12px;padding:14px;margin-bottom:20px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">معاينة الإشعار</div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="font-size:28px">📱</div>
+          <div>
+            <div id="preview-title" style="font-weight:700;font-size:14px"></div>
+            <div id="preview-body" style="font-size:13px;color:var(--muted);margin-top:2px"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn primary" onclick="sendBroadcast()" id="send-notif-btn" style="width:100%;padding:12px;font-size:15px">
+        <i class="fas fa-paper-plane" style="margin-left:8px"></i>إرسال الإشعار
+      </button>
+      <div id="notif-result" style="margin-top:14px;font-size:13px;text-align:center"></div>
+    </div>
+  </div>
+
+  <!-- History placeholder -->
+  <div class="card" style="opacity:.5">
+    <div class="card-header">
+      <div class="card-title">سجل الإشعارات المرسلة</div>
+    </div>
+    <div class="card-body" style="color:var(--muted);font-size:13px">قريباً — سيظهر هنا تاريخ كل الإشعارات الجماعية المرسلة.</div>
+  </div>
+
+</div>
+
 </div><!-- /content -->
 </main>
 </div><!-- /admin-app -->
@@ -1024,7 +1100,8 @@ const pageTitles = {
   providers:'مقدمو الخدمة', accounting:'المحاسبة والنسب',
   areas:'مناطق التغطية', reviews:'التقييمات',
   'site-content':'محتوى الموقع', testimonials:'آراء العملاء', settings:'الإعدادات',
-  blog:'المقالات'
+  blog:'المقالات',
+  notifications:'الإشعارات'
 };
 
 function showPage(id) {
@@ -2385,6 +2462,90 @@ async function deleteBlogPost(id) {
   if(error) { showToast(error.message, 'error'); return; }
   showToast('تم الحذف');
   loadBlogPosts();
+}
+
+// ============================================================
+// BROADCAST NOTIFICATIONS
+// ============================================================
+const SVC_KEY_LS = 'malaaz_svc_key';
+
+(function initNotifPage() {
+  const saved = localStorage.getItem(SVC_KEY_LS);
+  if (saved) {
+    const el = document.getElementById('svc-key-input');
+    if (el) { el.value = saved; updateSvcKeyStatus(true); }
+  }
+  // live preview
+  ['notif-title','notif-body'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updateNotifPreview);
+  });
+})();
+
+function saveSvcKey() {
+  const val = document.getElementById('svc-key-input').value.trim();
+  if (!val) { showToast('أدخل المفتاح أولاً', 'error'); return; }
+  localStorage.setItem(SVC_KEY_LS, val);
+  updateSvcKeyStatus(true);
+  showToast('تم حفظ المفتاح ✅');
+}
+
+function updateSvcKeyStatus(saved) {
+  const el = document.getElementById('svc-key-status');
+  if (el) el.textContent = saved ? '✅ محفوظ' : '';
+}
+
+function updateNotifPreview() {
+  const title = document.getElementById('notif-title').value.trim();
+  const body  = document.getElementById('notif-body').value.trim();
+  const preview = document.getElementById('notif-preview');
+  if (title || body) {
+    document.getElementById('preview-title').textContent = title || '(بدون عنوان)';
+    document.getElementById('preview-body').textContent  = body  || '(بدون نص)';
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+async function sendBroadcast() {
+  const svcKey = localStorage.getItem(SVC_KEY_LS);
+  if (!svcKey) { showToast('أدخل Service Role Key أولاً', 'error'); return; }
+
+  const title  = document.getElementById('notif-title').value.trim();
+  const body   = document.getElementById('notif-body').value.trim();
+  const target = document.getElementById('notif-target').value;
+
+  if (!title) { showToast('أدخل عنوان الإشعار', 'error'); return; }
+  if (!body)  { showToast('أدخل نص الإشعار', 'error'); return; }
+
+  if (!confirm(`إرسال إشعار لـ "${target === 'all' ? 'الكل' : target === 'clients' ? 'العملاء' : 'المزودين'}"؟`)) return;
+
+  const btn    = document.getElementById('send-notif-btn');
+  const result = document.getElementById('notif-result');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left:8px"></i>جاري الإرسال...';
+  result.textContent = '';
+
+  try {
+    const res  = await fetch('https://omsictbrqlsohrmxeuym.supabase.co/functions/v1/broadcast-push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': svcKey },
+      body: JSON.stringify({ title, body, target }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'فشل الإرسال');
+    result.innerHTML = `<span style="color:#2ecc71;font-weight:700">✅ تم الإرسال</span> — وصل لـ <strong>${data.sent}</strong> جهاز${data.failed ? ` | فشل: ${data.failed}` : ''}`;
+    showToast(`تم الإرسال لـ ${data.sent} جهاز ✅`);
+    document.getElementById('notif-title').value = '';
+    document.getElementById('notif-body').value  = '';
+    document.getElementById('notif-preview').style.display = 'none';
+  } catch(e) {
+    result.innerHTML = `<span style="color:#e74c3c">❌ ${e.message}</span>`;
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-left:8px"></i>إرسال الإشعار';
+  }
 }
 
 </script>
