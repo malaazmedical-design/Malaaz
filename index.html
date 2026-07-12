@@ -1808,47 +1808,63 @@ async function viewProviderProfile(providerId) {
   const provider = allDocs.find(p => p.id === providerId);
   if (!provider) return;
 
-  // جيب خدمات المقدم من Function الـ DB
-  const { data: provSvcs, error } = await sb.rpc('get_provider_services_with_prices', {
-    p_provider_id: providerId
-  });
+  // جيب خدمات المقدم مباشرة من provider_services + sub_services
+  const { data: provSvcsRaw } = await sb
+    .from('provider_services')
+    .select('sub_service_id, custom_price, sub_services(name, service_name, duration, price_min, price_min_specialist, price_min_consultant)')
+    .eq('provider_id', providerId)
+    .eq('is_active', true);
 
-  // بناء HTML الملف الشخصي
+  const isConsultant = (provider.grade || '') === 'استشاري';
+  const provSvcs = (provSvcsRaw || []).map(ps => {
+    const sub = ps.sub_services;
+    if (!sub) return null;
+    const tierPrice = isConsultant ? sub.price_min_consultant : sub.price_min_specialist;
+    return {
+      sub_name:     sub.name,
+      service_name: sub.service_name,
+      duration:     sub.duration,
+      price:        ps.custom_price ?? tierPrice ?? sub.price_min,
+    };
+  }).filter(Boolean);
+
+  // بناء HTML الخدمات
   let servicesHtml = '';
-  if (provSvcs?.length) {
-    // تجميع حسب service_name
+  if (provSvcs.length) {
     const grouped = {};
     provSvcs.forEach(ps => {
       const key = ps.service_name || 'خدمات';
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(ps);
     });
-
     const svcIcons = {'كشف منزلي':'🩺','تمريض منزلي':'👩‍⚕️','أشعة منزلية':'🔬'};
     Object.entries(grouped).forEach(([svcName, subs]) => {
       servicesHtml += `
-        <div style="margin-bottom:16px">
-          <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:10px;display:flex;align-items:center;gap:6px">
-            <span>${svcIcons[svcName] || '🔧'}</span> ${sanitize(svcName)}
+        <div style="margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.3px">
+            ${svcIcons[svcName] || '🔧'} ${sanitize(svcName)}
           </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;flex-direction:column;gap:8px">
             ${subs.map(ps => `
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px;cursor:pointer"
-                onclick="openBookingModal('${sanitize(svcName)}','${sanitize(ps.sub_name)}')">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg);border-radius:12px;cursor:pointer;border:1.5px solid var(--border);transition:border .2s"
+                onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'"
+                onclick="document.getElementById('provider-profile-modal').classList.remove('open');document.body.style.overflow='';openProviderBooking({id:'${provider.id}',name:'${sanitize(provider.name)}',email:'${sanitize(provider.email||'')}',service_type:'${sanitize(provider.service_type||'')}',sub:'${sanitize(ps.sub_name)}'})">
                 <div>
-                  <div style="font-size:13px;font-weight:700">${sanitize(ps.sub_name)}</div>
-                  ${ps.duration ? `<div style="font-size:11px;color:var(--muted)">⏱ ${sanitize(ps.duration)}</div>` : ''}
+                  <div style="font-size:14px;font-weight:700;color:var(--text)">${sanitize(ps.sub_name)}</div>
+                  ${ps.duration ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">⏱ ${sanitize(ps.duration)}</div>` : ''}
                 </div>
-                <div style="text-align:left">
-                  <div style="font-size:16px;font-weight:900;color:var(--dark)">${ps.custom_price || ps.price_min || '—'} <span style="font-size:11px;color:var(--muted)">ج.م</span></div>
-                  ${ps.price_min ? `<div style="font-size:10px;color:var(--muted)">نطاق: ${ps.price_min}–${ps.price_max}</div>` : ''}
+                <div style="text-align:left;flex-shrink:0">
+                  <div style="font-size:17px;font-weight:900;color:var(--dark)">${ps.price || '—'}<span style="font-size:11px;font-weight:400;color:var(--muted)"> ج.م</span></div>
                 </div>
               </div>`).join('')}
           </div>
         </div>`;
     });
   } else {
-    servicesHtml = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">لم يحدد هذا المقدم خدماته الفرعية بعد</div>`;
+    servicesHtml = `<div style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px">
+      <div style="font-size:28px;margin-bottom:8px">📋</div>
+      لم يحدد هذا المقدم خدماته بعد — يمكنك الحجز المباشر معه
+    </div>`;
   }
 
   // إنشاء modal الملف الشخصي
@@ -1910,6 +1926,17 @@ async function viewProviderProfile(providerId) {
         ${provider.experience ? `<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">${sanitize(String(provider.experience))} سنة خبرة</span>` : ''}
       </div>
       ${provider.bio ? `<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.7">${sanitize(provider.bio)}</div>` : ''}
+      ${provider.phone ? `
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <a href="https://wa.me/${sanitize(provider.phone.replace(/\D/g,''))}" target="_blank" rel="noopener"
+          style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif">
+          <i class="fab fa-whatsapp" style="font-size:16px"></i> واتساب
+        </a>
+        <a href="tel:${sanitize(provider.phone)}"
+          style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif">
+          <i class="fas fa-phone" style="font-size:14px"></i> اتصال
+        </a>
+      </div>` : ''}
     </div>
     <div style="padding:14px 18px 18px">
       <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>
