@@ -637,22 +637,6 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 <!-- ======= NOTIFICATIONS PAGE ======= -->
 <div class="page" id="page-notifications">
 
-  <!-- Service Role Key (مرة واحدة بس) -->
-  <div class="card" style="border-right:4px solid #C9A84C">
-    <div class="card-header">
-      <div>
-        <div class="card-title">مفتاح الخدمة <span style="font-size:11px;color:var(--muted);font-weight:400">(مطلوب مرة واحدة فقط)</span></div>
-        <div class="card-sub">Service Role Key من Supabase → Project Settings → API</div>
-      </div>
-    </div>
-    <div class="card-body" style="display:flex;gap:10px;align-items:center">
-      <input id="svc-key-input" type="password" class="form-input" style="flex:1;font-family:monospace;font-size:12px"
-        placeholder="eyJhbGci..." value="">
-      <button class="btn primary" onclick="saveSvcKey()"><i class="fas fa-save" style="margin-left:6px"></i>حفظ</button>
-      <span id="svc-key-status" style="font-size:12px;color:var(--muted)"></span>
-    </div>
-  </div>
-
   <!-- Broadcast Form -->
   <div class="card">
     <div class="card-header">
@@ -2467,32 +2451,11 @@ async function deleteBlogPost(id) {
 // ============================================================
 // BROADCAST NOTIFICATIONS
 // ============================================================
-const SVC_KEY_LS = 'malaaz_svc_key';
-
 (function initNotifPage() {
-  const saved = localStorage.getItem(SVC_KEY_LS);
-  if (saved) {
-    const el = document.getElementById('svc-key-input');
-    if (el) { el.value = saved; updateSvcKeyStatus(true); }
-  }
-  // live preview
   ['notif-title','notif-body'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', updateNotifPreview);
   });
 })();
-
-function saveSvcKey() {
-  const val = document.getElementById('svc-key-input').value.trim();
-  if (!val) { showToast('أدخل المفتاح أولاً', 'error'); return; }
-  localStorage.setItem(SVC_KEY_LS, val);
-  updateSvcKeyStatus(true);
-  showToast('تم حفظ المفتاح ✅');
-}
-
-function updateSvcKeyStatus(saved) {
-  const el = document.getElementById('svc-key-status');
-  if (el) el.textContent = saved ? '✅ محفوظ' : '';
-}
 
 function updateNotifPreview() {
   const title = document.getElementById('notif-title').value.trim();
@@ -2508,9 +2471,6 @@ function updateNotifPreview() {
 }
 
 async function sendBroadcast() {
-  const svcKey = localStorage.getItem(SVC_KEY_LS);
-  if (!svcKey) { showToast('أدخل Service Role Key أولاً', 'error'); return; }
-
   const title  = document.getElementById('notif-title').value.trim();
   const body   = document.getElementById('notif-body').value.trim();
   const target = document.getElementById('notif-target').value;
@@ -2529,7 +2489,7 @@ async function sendBroadcast() {
   try {
     const res  = await fetch('https://omsictbrqlsohrmxeuym.supabase.co/functions/v1/broadcast-push', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': svcKey },
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': SUPABASE_KEY },
       body: JSON.stringify({ title, body, target }),
     });
     const data = await res.json();
