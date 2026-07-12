@@ -1926,17 +1926,16 @@ async function viewProviderProfile(providerId) {
         ${provider.experience ? `<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">${sanitize(String(provider.experience))} سنة خبرة</span>` : ''}
       </div>
       ${provider.bio ? `<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.7">${sanitize(provider.bio)}</div>` : ''}
-      ${provider.phone ? `
       <div style="display:flex;gap:8px;margin-top:14px">
-        <a href="https://wa.me/${sanitize(provider.phone.replace(/\D/g,''))}" target="_blank" rel="noopener"
+        <a href="https://wa.me/201039091989?text=${encodeURIComponent(`مرحباً، عندي استفسار عن مقدم الخدمة: ${provider.name}`)}" target="_blank" rel="noopener"
           style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif">
           <i class="fab fa-whatsapp" style="font-size:16px"></i> واتساب
         </a>
-        <a href="tel:${sanitize(provider.phone)}"
+        <a href="tel:01039091989"
           style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Cairo',sans-serif">
           <i class="fas fa-phone" style="font-size:14px"></i> اتصال
         </a>
-      </div>` : ''}
+      </div>
     </div>
     <div style="padding:14px 18px 18px">
       <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>
