@@ -2556,8 +2556,24 @@ async function openProviderBooking(provData) {
   // جلب الخدمات الفرعية التي يقدمها هذا المقدم وأسعاره الخاصة
   let provSvcs = [];
   try {
-    const { data } = await sb.rpc('get_provider_services_with_prices', { p_provider_id: provider.id });
-    provSvcs = data || [];
+    const { data: psRaw } = await sb
+      .from('provider_services')
+      .select('sub_service_id, custom_price, sub_services(name, service_name, duration, price_min, price_min_specialist, price_min_consultant)')
+      .eq('provider_id', provider.id)
+      .eq('is_active', true);
+    const isConsultant = (provider.grade || '') === 'استشاري';
+    provSvcs = (psRaw || []).map(ps => {
+      const sub = ps.sub_services;
+      if (!sub) return null;
+      const tierPrice = isConsultant ? sub.price_min_consultant : sub.price_min_specialist;
+      return {
+        sub_name:     sub.name,
+        service_name: sub.service_name,
+        duration:     sub.duration,
+        custom_price: ps.custom_price ?? tierPrice ?? sub.price_min,
+        price_min:    sub.price_min,
+      };
+    }).filter(Boolean);
   } catch(e) { provSvcs = []; }
 
   // بناء محتوى الـ modal الخاص بمقدم الخدمة
@@ -2613,11 +2629,13 @@ async function openProviderBooking(provData) {
       </div>`;
     });
   } else {
+    const _pd = JSON.stringify({id:provider.id,name:provider.name,email:provider.email||'',service_type:provider.service_type||'',specialty:provider.specialty||'',grade:provider.grade||''}).replace(/"/g,'&quot;');
     svcHtml = `<div style="text-align:center;padding:20px;color:rgba(255,255,255,.4);font-size:13px">
+      <div style="font-size:24px;margin-bottom:8px">📋</div>
       لم يحدد هذا المقدم خدماته الفرعية بعد<br>
-      <button onclick="openBookingModal('${sanitize(provider.service_type||'')}');document.getElementById('provider-booking-modal').classList.remove('open');document.body.style.overflow=''"
-        style="margin-top:12px;background:var(--accent);color:var(--dark);border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">
-        احجز بشكل عام
+      <button onclick="selectProviderSub('${sanitize(provider.service_type||'')}','حجز مباشر',0,${_pd})"
+        style="margin-top:14px;background:var(--accent);color:var(--dark);border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif">
+        احجز مباشرًا مع ${sanitize(provider.name)}
       </button></div>`;
   }
 
