@@ -1156,7 +1156,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       <div class="bm-section-title">طريقة الدفع</div>
       <div class="payment-options">
         <div class="pay-opt sel" onclick="selectPayment(this,'cash')"><span class="pay-opt-ico">💵</span>كاش</div>
-        <div class="pay-opt" onclick="selectPayment(this,'wallet')"><span class="pay-opt-ico">💳</span>محفظة</div>
+        <div class="pay-opt" onclick="selectPayment(this,'vodafone_cash')"><span class="pay-opt-ico">💳</span>محفظة</div>
         <div class="pay-opt" onclick="selectPayment(this,'instapay')"><span class="pay-opt-ico">📱</span>انستا باي</div>
       </div>
       <div id="wallet-hint" style="display:none;background:rgba(201,168,76,.1);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--accent);margin-bottom:12px">
@@ -2096,7 +2096,7 @@ async function sendMalaazEmail({ to_email, subject, title, title_color, message,
 
 // إشعار الأدمن بحجز جديد (عام أو مباشر)
 async function notifyAdminNewBooking(b) {
-  const payMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
+  const payMap = { cash:'كاش', vodafone_cash:'محفظة إلكترونية', instapay:'انستا باي' };
   const bookingType = b.provider_name ? `حجز مباشر — ${b.provider_name}` : 'حجز عام';
   const details =
     `👤 العميل: ${b.patient_name||'—'}<br>` +
@@ -2129,7 +2129,7 @@ async function sendProviderNotification(bookingData, providerData) {
   }
 
   const dashboardLink = `${window.location.origin}/provider.html`;
-  const paymentMap = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
+  const paymentMap = { cash:'كاش', vodafone_cash:'محفظة إلكترونية', instapay:'انستا باي' };
 
   try {
     const mapsLink = window.bmGoogleMapsLink || 
@@ -2542,7 +2542,7 @@ function selectPayment(el, method) {
   bmSelectedPayment = method;
   const wHint = document.getElementById('wallet-hint');
   const iHint = document.getElementById('instapay-hint');
-  if (wHint) wHint.style.display = (method === 'wallet')   ? 'block' : 'none';
+  if (wHint) wHint.style.display = (method === 'vodafone_cash') ? 'block' : 'none';
   if (iHint) iHint.style.display = (method === 'instapay') ? 'block' : 'none';
 }
 
@@ -2817,7 +2817,7 @@ async function bmSubmit() {
         showToast('✅ تم الحجز بنجاح!');
         const successBtn2 = document.getElementById('bm-success-btn');
         if(successBtn2) {
-          const payMap2 = { cash:'كاش', wallet:'محفظة إلكترونية', instapay:'انستا باي' };
+          const payMap2 = { cash:'كاش', vodafone_cash:'محفظة إلكترونية', instapay:'انستا باي' };
           const mapsLink2 = window.bmGoogleMapsLink ? `\n📍 الموقع على الخريطة: ${window.bmGoogleMapsLink}` : '';
           const gradeText2 = bmSelectedGrade ? ` (${bmSelectedGrade})` : '';
           const waUrl2 = `https://wa.me/201039091989?text=${encodeURIComponent(
