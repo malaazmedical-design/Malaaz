@@ -4,7 +4,7 @@
   <!-- الصفحة الرئيسية -->
   <url>
     <loc>https://malaaz-plum.vercel.app/</loc>
-    <lastmod>2026-06-22</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,7 +12,7 @@
   <!-- الأسئلة الشائعة -->
   <url>
     <loc>https://malaaz-plum.vercel.app/faq.html</loc>
-    <lastmod>2026-06-22</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -20,65 +20,25 @@
   <!-- المقالات -->
   <url>
     <loc>https://malaaz-plum.vercel.app/blog.html</loc>
-    <lastmod>2026-06-22</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- الخدمات -->
+  <!-- سياسة الخصوصية -->
   <url>
-    <loc>https://malaaz-plum.vercel.app/?page=services</loc>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- كشف منزلي -->
-  <url>
-    <loc>https://malaaz-plum.vercel.app/?service=kashf-manzili</loc>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- تمريض منزلي -->
-  <url>
-    <loc>https://malaaz-plum.vercel.app/?service=tamreed-manzili</loc>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- أشعة منزلية -->
-  <url>
-    <loc>https://malaaz-plum.vercel.app/?service=ash3a-manzilia</loc>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- الأطباء -->
-  <url>
-    <loc>https://malaaz-plum.vercel.app/?page=doctors</loc>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- الأسعار -->
-  <url>
-    <loc>https://malaaz-plum.vercel.app/?page=pricing</loc>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://malaaz-plum.vercel.app/privacy.html</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
   </url>
 
   <!-- حذف الحساب -->
   <url>
     <loc>https://malaaz-plum.vercel.app/delete-account.html</loc>
-    <lastmod>2026-07-30</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.3</priority>
   </url>
 
 </urlset>
