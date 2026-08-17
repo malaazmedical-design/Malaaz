@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملاذ — رعاية طبية منزلية</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --dark:#1a2e2b;
+  --accent:#c9a84c;
+  --accent2:#e2c06e;
+  --form-bg:#ffffff;
+  --text:#1a2e2b;
+  --muted:#5a6f6d;
+  --border:#e0dbd0;
+  --input-bg:#f9f7f3;
+}
+html,body{height:100%;font-family:'Cairo',sans-serif;}
+
+/* ===== LAYOUT ===== */
+.wrapper{display:flex;min-height:100vh;flex-direction:row-reverse;}
+
+/* ===== BRAND SIDE ===== */
+.brand{
+  flex:1;background:var(--dark);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 40px;position:relative;overflow:hidden;
+}
+.brand::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 30%,rgba(201,168,76,.13) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 80%,rgba(201,168,76,.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.brand-deco{position:absolute;border-radius:50%;border:1px solid rgba(201,168,76,.12);}
+.deco1{width:320px;height:320px;bottom:-90px;left:-90px;}
+.deco2{width:200px;height:200px;top:-50px;right:-50px;}
+.deco3{width:90px;height:90px;top:38%;left:50px;border-color:rgba(201,168,76,.22);}
+
+/* LOGO */
+.brand-logo{
+  font-family:'Tajawal',sans-serif;
+  font-size:26px;font-weight:900;
+  color:#fff;letter-spacing:-0.5px;
+  margin-bottom:40px;position:relative;z-index:1;
+}
+.brand-logo span{color:var(--accent);}
+
+/* HEADLINE — matches main site style */
+.brand-headline{
+  position:relative;z-index:1;
+  text-align:center;
+  line-height:1.25;
+}
+.brand-headline .line1{
+  font-family:'Tajawal',sans-serif;
+  font-size:38px;font-weight:900;
+  color:#fff;display:block;margin-bottom:4px;
+}
+.brand-headline .line2{
+  font-family:'Tajawal',sans-serif;
+  font-size:40px;font-weight:900;
+  color:var(--accent);display:block;margin-bottom:4px;
+}
+.brand-headline .line3{
+  font-family:'Tajawal',sans-serif;
+  font-size:38px;font-weight:900;
+  color:#fff;display:block;
+}
+
+/* ===== FORM SIDE ===== */
+.form-side{
+  width:520px;min-width:320px;background:var(--form-bg);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:56px 48px;
+}
+.form-title{
+  font-family:'Tajawal',sans-serif;font-size:20px;font-weight:900;
+  color:var(--text);margin-bottom:22px;text-align:center;
+}
+
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:14px;font-weight:700;color:var(--text);margin-bottom:7px;}
+.field input,.field select{
+  width:100%;padding:13px 16px;
+  border:1.5px solid var(--border);border-radius:12px;
+  font-size:15px;font-family:'Cairo',sans-serif;
+  background:var(--input-bg);color:var(--text);
+  outline:none;transition:border-color .2s,box-shadow .2s;
+  appearance:none;-webkit-appearance:none;
+}
+.field input::placeholder{color:#b5bfbe;}
+.field input:focus,.field select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(201,168,76,.12);
+}
+.select-wrap{position:relative;}
+.select-wrap::after{
+  content:'▾';position:absolute;left:16px;top:50%;
+  transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;
+}
+
+#f-sub{display:none;animation:slideDown .2s ease;}
+#f-sub.visible{display:block;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+
+.submit-btn{
+  width:100%;padding:15px;background:var(--accent);
+  color:var(--dark);border:none;border-radius:12px;
+  font-size:17px;font-weight:900;font-family:'Cairo',sans-serif;
+  cursor:pointer;margin-top:8px;
+  transition:background .2s,transform .1s;
+}
+.submit-btn:hover{background:var(--accent2);}
+.submit-btn:active{transform:scale(.98);}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;}
+
+.err{font-size:12px;color:#dc2626;margin-top:5px;display:none;}
+.field.has-error input,.field.has-error select{border-color:#dc2626;}
+.field.has-error .err{display:block;}
+
+/* success */
+.success-box{display:none;text-align:center;padding:24px 0;}
+.success-icon{font-size:48px;margin-bottom:14px;}
+.success-title{font-family:'Tajawal',sans-serif;font-size:22px;font-weight:900;color:var(--text);margin-bottom:10px;}
+.success-sub{font-size:14px;color:var(--muted);line-height:1.8;}
+.wa-link{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:20px;padding:13px;background:#25d366;
+  color:#fff;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none;
+}
+
+/* ===== FLOATING CALL BUTTON ===== */
+.call-fab{
+  position:fixed;
+  bottom:28px;
+  left:28px;
+  z-index:999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+
+/* pulse rings */
+.call-fab::before,.call-fab::after{
+  content:'';
+  position:absolute;
+  width:56px;height:56px;
+  border-radius:50%;
+  background:rgba(201,168,76,.35);
+  animation:pulse 2s ease-out infinite;
+  pointer-events:none;
+}
+.call-fab::after{animation-delay:.6s;}
+
+@keyframes pulse{
+  0%{transform:scale(1);opacity:.8;}
+  100%{transform:scale(2.2);opacity:0;}
+}
+
+.call-btn{
+  width:56px;height:56px;border-radius:50%;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(201,168,76,.5);
+  text-decoration:none;
+  position:relative;z-index:1;
+  transition:transform .2s,box-shadow .2s;
+  animation:ring 3s ease-in-out infinite;
+}
+.call-btn:hover{
+  transform:scale(1.1);
+  box-shadow:0 6px 28px rgba(201,168,76,.7);
+}
+
+@keyframes ring{
+  0%,90%,100%{transform:rotate(0deg);}
+  92%{transform:rotate(-12deg);}
+  94%{transform:rotate(12deg);}
+  96%{transform:rotate(-8deg);}
+  98%{transform:rotate(6deg);}
+}
+
+.call-label{
+  background:var(--dark);color:#fff;
+  font-size:11px;font-weight:700;font-family:'Cairo',sans-serif;
+  padding:4px 10px;border-radius:20px;
+  white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+  opacity:0;
+  transform:translateY(4px);
+  transition:opacity .2s,transform .2s;
+  pointer-events:none;
+}
+.call-fab:hover .call-label{opacity:1;transform:translateY(0);}
+
+/* ===== MOBILE ===== */
+@media(max-width:768px){
+  .wrapper{flex-direction:column;}
+  .brand{padding:32px 24px 36px;order:1;}
+  .brand-headline .line1,.brand-headline .line3{font-size:28px;}
+  .brand-headline .line2{font-size:30px;}
+  .form-side{width:100%;padding:32px 24px 48px;order:2;}
+  .deco1,.deco2,.deco3{display:none;}
+  .call-fab{bottom:20px;left:20px;}
+}
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- ===== BRAND ===== -->
+  <div class="brand">
+    <div class="brand-deco deco1"></div>
+    <div class="brand-deco deco2"></div>
+    <div class="brand-deco deco3"></div>
+
+    <div class="brand-logo">ملاذ <span>·</span> MALAAZ</div>
+
+    <div class="brand-headline">
+      <span class="line1">رعاية طبية منزلية</span>
+      <span class="line2">كشف وتمريض وأشعة</span>
+      <span class="line3">في بيتك</span>
+    </div>
+  </div>
+
+  <!-- ===== FORM ===== -->
+  <div class="form-side">
+    <div id="form-wrapper">
+      <div class="form-title">ادخل بياناتك ونتواصل معك في أسرع وقت</div>
+
+      <form id="booking-form" novalidate>
+
+        <div class="field" id="f-name">
+          <label for="inp-name">الاسم</label>
+          <input type="text" id="inp-name" placeholder="الاسم الكامل">
+          <div class="err">من فضلك ادخل اسمك</div>
+        </div>
+
+        <div class="field" id="f-phone">
+          <label for="inp-phone">رقم الموبايل</label>
+          <input type="tel" id="inp-phone" placeholder="01xxxxxxxxx" inputmode="numeric" maxlength="11">
+          <div class="err">من فضلك ادخل رقم موبايل صحيح</div>
+        </div>
+
+        <div class="field" id="f-service">
+          <label for="inp-service">الخدمة</label>
+          <div class="select-wrap">
+            <select id="inp-service" onchange="onServiceChange(this.value)">
+              <option value="">اختر الخدمة</option>
+              <option value="كشف منزلي">كشف منزلي (زيارة طبيب)</option>
+              <option value="تمريض منزلي">تمريض منزلي</option>
+              <option value="أشعة منزلية">أشعة منزلية</option>
+            </select>
+          </div>
+          <div class="err">من فضلك اختر الخدمة</div>
+        </div>
+
+        <div class="field" id="f-sub">
+          <label for="inp-sub" id="sub-label">التخصص / النوع</label>
+          <div class="select-wrap">
+            <select id="inp-sub">
+              <option value="">جاري التحميل...</option>
+            </select>
+          </div>
+          <div class="err">من فضلك اختر التخصص أو النوع</div>
+        </div>
+
+        <div class="field" id="f-area">
+          <label for="inp-area">المنطقة</label>
+          <div class="select-wrap">
+            <select id="inp-area">
+              <option value="">اختر المنطقة</option>
+            </select>
+          </div>
+          <div class="err">من فضلك اختر منطقتك</div>
+        </div>
+
+        <button type="submit" class="submit-btn">تأكيد</button>
+      </form>
+    </div>
+
+    <div class="success-box" id="success-box">
+      <div class="success-icon">✅</div>
+      <div class="success-title">تم استلام طلبك!</div>
+      <p class="success-sub">فريق ملاذ هيتواصل معك على رقم موبايلك<br>في أقرب وقت لتأكيد الحجز.</p>
+      <a href="https://wa.me/201039091989" target="_blank" class="wa-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.528 5.845L.057 23.43a.5.5 0 00.609.632l5.79-1.517A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.9a9.893 9.893 0 01-5.031-1.373l-.361-.214-3.733.978.997-3.645-.235-.374A9.867 9.867 0 012.1 12C2.1 6.534 6.534 2.1 12 2.1c5.466 0 9.9 4.434 9.9 9.9 0 5.466-4.434 9.9-9.9 9.9z"/></svg>
+        تواصل عبر واتساب
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FLOATING CALL BUTTON ===== -->
+<div class="call-fab">
+  <a href="tel:+201039091989" class="call-btn" aria-label="اتصل بنا">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a2e2b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.05 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+    </svg>
+  </a>
+  <div class="call-label">اتصل بنا</div>
+</div>
+
+<script>
+const URL_BASE = 'https://omsictbrqlsohrmxeuym.supabase.co/rest/v1';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3NTIxMzgsImV4cCI6MjA2MTMyODEzOH0.Vc8R2Nf_0nFOI4U9-P2gGpmLsOG1Q7-lR2BgcflxCjg';
+const H = { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` };
+const subCache = {
+  'تمريض منزلي': {
+    label: 'نوع الخدمة التمريضية',
+    items: [{value:'خدمات سريعة',text:'خدمات سريعة'},{value:'إقامة 12 ساعة',text:'إقامة 12 ساعة'},{value:'إقامة 24 ساعة',text:'إقامة 24 ساعة'}]
+  }
+};
+
+async function onServiceChange(val) {
+  const fSub  = document.getElementById('f-sub');
+  const sel   = document.getElementById('inp-sub');
+  const label = document.getElementById('sub-label');
+  if (!val) { fSub.classList.remove('visible'); return; }
+
+  fSub.classList.add('visible');
+
+  if (subCache[val]) {
+    label.textContent = subCache[val].label;
+    populateSub(sel, subCache[val].items);
+    return;
+  }
+
+  label.textContent = val === 'كشف منزلي' ? 'التخصص الطبي' : 'نوع الأشعة';
+  sel.innerHTML = '<option value="">جاري التحميل...</option>';
+
+  try {
+    let items = [];
+    if (val === 'كشف منزلي') {
+      const r = await fetch(`${URL_BASE}/providers?select=specialty&service_type=eq.كشف منزلي&specialty=not.is.null&order=specialty`, {headers:H});
+      const data = await r.json();
+      const seen = new Set();
+      data.forEach(d => {
+        const raw = (d.specialty||'').trim();
+        if (!raw) return;
+        const norm = raw
+          .replace(/باطنيه|باطنه\b.*/,'باطنة')
+          .replace(/انف واذن وحنجره|أنف وأذن وحنجرة.*/,'أنف وأذن وحنجرة')
+          .replace(/استشاري أمراض مخ وأعصاب|جراحه مخ واعصاب.*/,'مخ وأعصاب')
+          .replace(/قلب وباطنه/,'قلب')
+          .replace(/باطنه وكلى وسكر/,'كلى وسكر')
+          .replace(/كلي$/,'كلى')
+          .replace(/جراحة عامة,طب عام/,'طب عام')
+          .replace(/حميات\..*/,'أطفال وحديثي الولادة')
+          .trim();
+        if (!seen.has(norm)) { seen.add(norm); items.push({value:norm,text:norm}); }
+      });
+      ['باطنة','قلب','أطفال وحديثي الولادة','مخ وأعصاب','أنف وأذن وحنجرة','نساء وتوليد','عظام ومفاصل','جلدية','مسالك بولية','كلى وسكر','طب عام'].forEach(sp => {
+        if (!seen.has(sp)) { seen.add(sp); items.push({value:sp,text:sp}); }
+      });
+      items.sort((a,b) => a.text.localeCompare(b.text,'ar'));
+
+    } else {
+      const r = await fetch(`${URL_BASE}/sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`, {headers:H});
+      const data = await r.json();
+      items = data.map(d => ({value:d.name,text:d.name}));
+    }
+    subCache[val] = {label: label.textContent, items};
+    populateSub(sel, items);
+  } catch(e) { sel.innerHTML = '<option value="">اختر...</option>'; }
+}
+
+function populateSub(sel, items) {
+  sel.innerHTML = '<option value="">اختر...</option>' + items.map(i=>`<option value="${i.value}">${i.text}</option>`).join('');
+}
+
+async function loadAreas() {
+  try {
+    const r = await fetch(`${URL_BASE}/coverage_areas?is_active=eq.true&order=name`, {headers:H});
+    const data = await r.json();
+    if (!data?.length) return;
+    const sel = document.getElementById('inp-area');
+    sel.innerHTML = '<option value="">اختر المنطقة</option>';
+    [['القاهرة', data.filter(a=>a.city==='القاهرة')], ['الجيزة', data.filter(a=>a.city==='الجيزة')]].forEach(([lbl,arr]) => {
+      if (!arr.length) return;
+      const og = document.createElement('optgroup'); og.label = lbl;
+      arr.forEach(a => { const o = document.createElement('option'); o.value=a.name; o.textContent=a.name; og.appendChild(o); });
+      sel.appendChild(og);
+    });
+  } catch(e) {}
+}
+loadAreas();
+
+function setErr(id, show) { document.getElementById(id).classList.toggle('has-error',show); return show; }
+
+document.getElementById('booking-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const name    = document.getElementById('inp-name').value.trim();
+  const phone   = document.getElementById('inp-phone').value.trim();
+  const service = document.getElementById('inp-service').value;
+  const sub     = document.getElementById('inp-sub').value;
+  const area    = document.getElementById('inp-area').value;
+  const subVis  = document.getElementById('f-sub').classList.contains('visible');
+  let bad = false;
+  if (setErr('f-name',   !name))                        bad=true;
+  if (setErr('f-phone',  !/^01[0-9]{9}$/.test(phone))) bad=true;
+  if (setErr('f-service',!service))                     bad=true;
+  if (setErr('f-sub',    subVis && !sub))               bad=true;
+  if (setErr('f-area',   !area))                        bad=true;
+  if (bad) return;
+  const btn = document.querySelector('.submit-btn');
+  btn.textContent='جاري الإرسال...'; btn.disabled=true;
+  try {
+    await fetch(`${URL_BASE}/bookings`, {
+      method:'POST',
+      headers:{...H,'Content-Type':'application/json',Prefer:'return=minimal'},
+      body:JSON.stringify({
+        patient_name: name,
+        phone: phone,
+        area: area,
+        service_type: service,
+        sub_option: sub || null,
+        appointment_time: 'أسرع وقت ممكن',
+        notes: 'طلب من إعلان جوجل',
+        status: 'pending',
+        payment_method: null
+      })
+    });
+  } catch(e) {}
+  document.getElementById('form-wrapper').style.display='none';
+  document.getElementById('success-box').style.display='block';
+});
+</script>
+</body>
+</html>
