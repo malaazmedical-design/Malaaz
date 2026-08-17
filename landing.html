@@ -340,7 +340,7 @@ async function onServiceChange(val) {
   try {
     let items = [];
     if (val === 'كشف منزلي') {
-      const r = await fetch(`${URL_BASE}/providers?select=specialty&service_type=eq.كشف منزلي&specialty=not.is.null&order=specialty`, {headers:H});
+      const r = await fetch(`${URL_BASE}/providers?select=specialty&service_type=eq.${encodeURIComponent('كشف منزلي')}&specialty=not.is.null&order=specialty`, {headers:H});
       const data = await r.json();
       const seen = new Set();
       data.forEach(d => {
@@ -364,7 +364,7 @@ async function onServiceChange(val) {
       items.sort((a,b) => a.text.localeCompare(b.text,'ar'));
 
     } else {
-      const r = await fetch(`${URL_BASE}/sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`, {headers:H});
+      const r = await fetch(`${URL_BASE}/sub_services?select=name&service_name=eq.${encodeURIComponent('أشعة منزلية')}&is_active=eq.true&order=name`, {headers:H});
       const data = await r.json();
       items = data.map(d => ({value:d.name,text:d.name}));
     }
