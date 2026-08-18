@@ -315,6 +315,18 @@ html,body{height:100%;font-family:'Cairo',sans-serif;}
 const URL_BASE = 'https://omsictbrqlsohrmxeuym.supabase.co/rest/v1';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho';
 const H = { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` };
+
+// قراءة UTM params من الـ URL عشان نعرف مصدر الحجز
+function getUtmNotes() {
+  const p = new URLSearchParams(window.location.search);
+  const parts = [];
+  if (p.get('utm_source'))   parts.push('مصدر: '  + p.get('utm_source'));
+  if (p.get('utm_campaign')) parts.push('حملة: '  + p.get('utm_campaign'));
+  if (p.get('utm_content'))  parts.push('إعلان: ' + p.get('utm_content'));
+  if (p.get('utm_term'))     parts.push('كلمة: '  + p.get('utm_term'));
+  return parts.length ? parts.join(' | ') : 'طلب من إعلان جوجل';
+}
+
 const subCache = {
   'تمريض منزلي': {
     label: 'نوع الخدمة التمريضية',
@@ -426,7 +438,7 @@ document.getElementById('booking-form').addEventListener('submit', async functio
         service_type: service,
         sub_option: sub || null,
         appointment_time: 'أسرع وقت ممكن',
-        notes: 'طلب من إعلان جوجل',
+        notes: getUtmNotes(),
         status: 'pending',
         payment_method: null
       })
