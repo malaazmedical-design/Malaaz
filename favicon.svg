@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="90" fill="#1a3a2a"/>
+  <!-- Gold accent bar -->
+  <rect x="60" y="60" width="392" height="8" rx="4" fill="#C9A84C"/>
+  <rect x="60" y="444" width="392" height="8" rx="4" fill="#C9A84C"/>
+  <!-- Arabic word ملاذ -->
+  <text x="256" y="340" font-family="'Segoe UI', 'Noto Naskh Arabic', Arial, sans-serif" font-size="230" font-weight="900" text-anchor="middle" fill="white">ملاذ</text>
+</svg>
