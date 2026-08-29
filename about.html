@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>من نحن — ملاذ للرعاية الطبية المنزلية</title>
+<meta name="description" content="ملاذ منصة طبية منزلية بتربط المرضى بأفضل الأطباء والمتخصصين المعتمدين في القاهرة والجيزة — بسهولة وبأسعار واضحة.">
+<link rel="canonical" href="https://malaaz-plum.vercel.app/about.html">
+<meta property="og:title" content="من نحن — ملاذ للرعاية الطبية المنزلية">
+<meta property="og:description" content="تعرّف على ملاذ — منصة الرعاية الطبية المنزلية في القاهرة والجيزة.">
+<meta property="og:url" content="https://malaaz-plum.vercel.app/about.html">
+<meta property="og:image" content="https://malaaz-plum.vercel.app/og-image.jpg">
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--dark:#1e2c2f;--dark2:#2d3b3e;--teal:#3a4a4e;--accent:#c9a84c;--accent2:#e8c56a;--bg:#f5f2ec;--text:#2d3b3e;--muted:#6b7c80;--border:rgba(58,74,78,0.12)}
+  body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl}
+
+  /* NAV */
+  nav{background:var(--dark);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .nav-logo{color:#fff;font-family:'Tajawal',sans-serif;font-size:22px;font-weight:900;text-decoration:none;letter-spacing:-0.5px}
+  .nav-logo span{color:var(--accent)}
+  .nav-back{color:rgba(255,255,255,.7);font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+  .nav-back:hover{color:var(--accent)}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,var(--dark),var(--teal));padding:70px 40px;text-align:center}
+  .hero-tag{display:inline-block;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:2px;padding:5px 14px;border-radius:20px;margin-bottom:18px;text-transform:uppercase}
+  .hero h1{font-family:'Tajawal',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:900;color:#fff;margin-bottom:14px;line-height:1.2}
+  .hero h1 span{color:var(--accent)}
+  .hero p{font-size:16px;color:rgba(255,255,255,.65);max-width:540px;margin:0 auto;line-height:1.9}
+
+  /* CONTAINER */
+  .container{max-width:860px;margin:0 auto;padding:60px 24px 80px}
+
+  /* SECTION TITLE */
+  .sec-title{font-family:'Tajawal',sans-serif;font-size:22px;font-weight:900;color:var(--dark);margin:50px 0 20px;padding-bottom:12px;border-bottom:2px solid var(--accent);display:flex;align-items:center;gap:10px}
+  .sec-title:first-child{margin-top:0}
+
+  /* MISSION CARD */
+  .mission-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px 32px;font-size:15px;line-height:2;color:var(--text)}
+  .mission-card p{margin-bottom:10px}
+  .mission-card p:last-child{margin-bottom:0}
+
+  /* FEATURES GRID */
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .feature-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;transition:box-shadow .2s}
+  .feature-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.07)}
+  .feature-icon{font-size:28px;margin-bottom:12px}
+  .feature-title{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:8px}
+  .feature-desc{font-size:13px;color:var(--muted);line-height:1.8}
+  .feature-badge{display:inline-block;background:rgba(201,168,76,.12);color:var(--accent);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:8px;letter-spacing:1px}
+
+  /* VALUES GRID */
+  .values-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  .value-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;gap:14px;align-items:flex-start}
+  .value-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+  .value-title{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:4px}
+  .value-desc{font-size:12px;color:var(--muted);line-height:1.7}
+
+  /* CONTACT BOX */
+  .contact-box{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px 32px;display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between}
+  .contact-info{display:flex;flex-direction:column;gap:10px}
+  .contact-row{display:flex;align-items:center;gap:10px;font-size:14px}
+  .contact-row a{color:var(--dark);font-weight:700;text-decoration:none}
+  .contact-row a:hover{color:var(--accent)}
+  .contact-label{color:var(--muted);font-size:13px;min-width:60px}
+
+  /* CTA */
+  .cta{background:linear-gradient(135deg,var(--dark),var(--teal));border-radius:20px;padding:44px;text-align:center;margin-top:50px}
+  .cta h2{font-family:'Tajawal',sans-serif;font-size:28px;font-weight:900;color:#fff;margin-bottom:10px}
+  .cta p{color:rgba(255,255,255,.65);font-size:14px;margin-bottom:28px;line-height:1.8}
+  .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn-gold{background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:13px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;text-decoration:none;transition:opacity .2s}
+  .btn-gold:hover{opacity:.9}
+  .btn-outline{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:13px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;text-decoration:none;transition:all .2s}
+  .btn-outline:hover{background:rgba(255,255,255,.2)}
+
+  /* FOOTER */
+  footer{background:var(--dark);padding:24px 40px;text-align:center}
+  footer p{color:rgba(255,255,255,.35);font-size:12px}
+  footer a{color:var(--accent);text-decoration:none}
+
+  @media(max-width:600px){
+    nav{padding:14px 20px}
+    .hero{padding:50px 20px}
+    .container{padding:40px 16px 60px}
+    .mission-card{padding:20px}
+    .contact-box{flex-direction:column}
+    .cta{padding:32px 20px}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">ملاذ <span>·</span> MALAAZ</a>
+  <a href="/" class="nav-back">← الرئيسية</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">من نحن</div>
+  <h1>ملاذ — الرعاية الطبية<br>في بيتك، <span>بضغطة واحدة</span></h1>
+  <p>مش لازم تتعب وتروح — إحنا بنيجي ليك. خدمات طبية منزلية متكاملة في القاهرة والجيزة.</p>
+</div>
+
+<div class="container">
+
+  <!-- رسالتنا -->
+  <h2 class="sec-title">🎯 رسالتنا</h2>
+  <div class="mission-card">
+    <p>ملاذ منصة طبية منزلية بتربط المرضى بأفضل الأطباء والمتخصصين المعتمدين في القاهرة والجيزة — بسهولة وبأسعار واضحة من أول لحظة.</p>
+    <p>بنؤمن إن كل مصري يستاهل رعاية طبية حقيقية من غير إجهاد أو انتظار. مش لازم تقف في طوابير أو تدور على مواصلات — الطبيب والممرض والأشعة بيجوا إليك في بيتك.</p>
+  </div>
+
+  <!-- ما يميزنا -->
+  <h2 class="sec-title">✨ اللي بيميّزنا</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🏥</div>
+      <div class="feature-title">خدمات طبية في بيتك</div>
+      <div class="feature-desc">أطباء، ممرضين، وفنيو أشعة معتمدين — بيجوا إليك في أي وقت.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🗣️</div>
+      <div class="feature-title">Revoice — صوت للي مش بيقدر يتكلم</div>
+      <div class="feature-desc">مساعد ناطق فريد من نوعه يساعد المرضى غير القادرين على الكلام يتواصلوا بحرية.</div>
+      <div class="feature-badge">فريد في مصر</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💊</div>
+      <div class="feature-title">تذكيرات الأدوية</div>
+      <div class="feature-desc">إشعارات يومية منتظمة عشان متنساش جرعاتك في وقتها.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👨‍👩‍👧</div>
+      <div class="feature-title">الملف الطبي العائلي</div>
+      <div class="feature-desc">سجّل طبي رقمي متكامل لك ولجميع أفراد أسرتك في مكان واحد.</div>
+    </div>
+  </div>
+
+  <!-- قيمنا -->
+  <h2 class="sec-title">🌟 قيمنا</h2>
+  <div class="values-grid">
+    <div class="value-card">
+      <div class="value-icon">🛡️</div>
+      <div>
+        <div class="value-title">الأمان أولاً</div>
+        <div class="value-desc">كل مقدم خدمة بيمر بفحص دقيق ومراجعة كاملة للتراخيص قبل الانضمام.</div>
+      </div>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">💡</div>
+      <div>
+        <div class="value-title">أسعار شفافة</div>
+        <div class="value-desc">السعر اللي بتشوفه هو اللي بتدفعه — مفيش رسوم خفية.</div>
+      </div>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">⚡</div>
+      <div>
+        <div class="value-title">وصول سريع</div>
+        <div class="value-desc">تأكيد الحجز خلال ١٥ دقيقة — في معظم مناطق القاهرة والجيزة.</div>
+      </div>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">💬</div>
+      <div>
+        <div class="value-title">دعم مستمر</div>
+        <div class="value-desc">فريقنا متاح على واتساب في أي وقت لأي استفسار.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- تواصل معنا -->
+  <h2 class="sec-title">📞 تواصل معنا</h2>
+  <div class="contact-box">
+    <div class="contact-info">
+      <div class="contact-row">
+        <span class="contact-label">واتساب</span>
+        <a href="https://wa.me/201039091989">01039091989</a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-label">البريد</span>
+        <a href="mailto:malaaz.medical@gmail.com">malaaz.medical@gmail.com</a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-label">التغطية</span>
+        <span>القاهرة والجيزة — ٢٤ ساعة / ٧ أيام</span>
+      </div>
+    </div>
+    <a href="https://wa.me/201039091989" target="_blank" class="btn-gold" style="align-self:center">💬 تواصل عبر واتساب</a>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2>ابدأ دلوقتي</h2>
+    <p>الحجز مجاني — الدفع بعد الخدمة فقط<br>متاح ٢٤ ساعة طول الأسبوع</p>
+    <div class="cta-btns">
+      <a href="/" class="btn-gold" onclick="sessionStorage.setItem('autoBook','1')">🏥 احجز خدمة طبية</a>
+      <a href="/provider.html" class="btn-outline">👨‍⚕️ انضم كمقدم خدمة</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2026 ملاذ للرعاية الطبية المنزلية · <a href="/">الرئيسية</a> · <a href="/faq.html">أسئلة شائعة</a> · <a href="/privacy.html">سياسة الخصوصية</a> · <a href="https://wa.me/201039091989">01039091989</a></p>
+</footer>
+
+</body>
+</html>
