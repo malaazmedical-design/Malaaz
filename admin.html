@@ -1307,13 +1307,18 @@ async function updateBookingStatus(id, status) {
     if(b?.phone) {
       const pidParam = b.provider_id ? `&pid=${b.provider_id}` : '';
       const reviewLink = `https://malaaz-plum.vercel.app/review.html?bid=${id}&svc=${encodeURIComponent(b.service_type||'')}${pidParam}`;
+      const appLink = `https://play.google.com/store/apps/details?id=com.malaaz.app`;
       const waMsg = encodeURIComponent(
         `مرحباً ${b.patient_name||''}! 👋\n\n` +
         `شكراً لاختيارك منصة *ملاذ* للرعاية الطبية المنزلية 🏥\n\n` +
         `نتمنى تكون تجربتك معنا كانت مميزة 😊\n\n` +
         `لو عندك دقيقة، يسعدنا تقيّم تجربتك:\n` +
         `⭐ ${reviewLink}\n\n` +
-        `رأيك بيفرق معانا كتير! ❤️`
+        `رأيك بيفرق معانا كتير! ❤️\n\n` +
+        `━━━━━━━━━━━━━━\n` +
+        `📲 *حمّل تطبيق ملاذ* واحجز خدماتك الطبية المنزلية بسهولة في أي وقت!\n` +
+        `👇 رابط التحميل:\n` +
+        `${appLink}`
       );
       setTimeout(() => {
         window.open(`https://wa.me/20${b.phone.replace(/^0/,'')}?text=${waMsg}`, '_blank');
