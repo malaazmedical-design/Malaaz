@@ -14,16 +14,12 @@ module.exports = async function handler(req, res) {
         }
       }
     );
-    const text = await supaRes.text();
-    let data;
-    try { data = JSON.parse(text); } catch(e) { data = null; }
-    if (Array.isArray(data) && data.length > 0) {
-      posts = data;
-    } else {
-      posts = [{ id: `DBG:ok=${supaRes.ok}:status=${supaRes.status}:body=${text.slice(0,80)}`, updated_at: '2026-01-01', created_at: '2026-01-01' }];
+    if (supaRes.ok) {
+      const data = await supaRes.json();
+      if (Array.isArray(data)) posts = data;
     }
-  } catch (e) {
-    posts = [{ id: `DBG:catch:${e.message.slice(0,80)}`, updated_at: '2026-01-01', created_at: '2026-01-01' }];
+  } catch (_) {
+    // continue with empty posts
   }
 
   const staticPages = [
