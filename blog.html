@@ -5,6 +5,14 @@
 <link rel="apple-touch-icon" href="/favicon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJDVMGBPN5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-MJDVMGBPN5');
+  </script>
   <title>مقالات ملاذ — رعاية طبية منزلية في القاهرة والجيزة</title>
   <meta name="description" content="مقالات طبية متخصصة من ملاذ — نصائح صحية ومعلومات عن الرعاية المنزلية في القاهرة والجيزة.">
   <link rel="canonical" href="https://malaaz-plum.vercel.app/blog.html">
@@ -177,7 +185,7 @@ async function loadPosts() {
     if(data?.length) {
       const f = data[0];
       featWrap.innerHTML = `
-        <div class="featured-card" onclick="goToPost('${f.id}')">
+        <a href="/blog-post.html?id=${f.id}" class="featured-card">
           <div class="feat-img">${f.emoji || '📝'}</div>
           <div class="feat-body">
             <span class="feat-tag">${f.category || 'طبي'}</span>
@@ -189,7 +197,7 @@ async function loadPosts() {
             </div>
             <span class="feat-read">اقرأ المقال ←</span>
           </div>
-        </div>`;
+        </a>`;
     } else {
       featWrap.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>لا توجد مقالات بعد</p></div>';
     }
@@ -198,7 +206,7 @@ async function loadPosts() {
     const grid = document.getElementById('articles-grid');
     if(data?.length > 1) {
       grid.innerHTML = data.slice(1).map(p => `
-        <div class="article-card" onclick="goToPost('${p.id}')">
+        <a href="/blog-post.html?id=${p.id}" class="article-card">
           <div class="art-thumb">
             ${p.emoji || '📝'}
             <span class="art-tag">${p.category || 'طبي'}</span>
@@ -209,12 +217,12 @@ async function loadPosts() {
             <div class="art-footer">
               <span>⏱️ ${p.read_time || 5} دقائق</span>
               <div style="display:flex;align-items:center;gap:6px">
-                <button class="art-share" onclick="event.stopPropagation();sharePost('${p.id}','${p.title.replace(/'/g,"\\'")}')">🔗</button>
+                <button class="art-share" onclick="event.preventDefault();event.stopPropagation();sharePost('${p.id}','${p.title.replace(/'/g,"\\'")}')">🔗</button>
                 <span class="art-arrow">اقرأ ←</span>
               </div>
             </div>
           </div>
-        </div>`).join('');
+        </a>`).join('');
     } else {
       grid.innerHTML = '<p style="color:var(--muted);font-size:14px">مقالات جديدة قريباً...</p>';
     }

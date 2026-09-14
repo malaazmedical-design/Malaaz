@@ -5,6 +5,14 @@
 <link rel="apple-touch-icon" href="/favicon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJDVMGBPN5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-MJDVMGBPN5');
+  </script>
   <title>مقال طبي — ملاذ للرعاية الطبية المنزلية</title>
   <meta name="description" content="مقال طبي متخصص من ملاذ — منصة الرعاية الطبية المنزلية في القاهرة والجيزة. كشف منزلي، تمريض منزلي، وأشعة منزلية.">
   <link rel="canonical" href="https://malaaz-plum.vercel.app/blog-post.html">
@@ -267,13 +275,13 @@ async function loadRelated(currentId, category) {
 
     const grid = document.getElementById('related-grid');
     grid.innerHTML = data.map(p => `
-      <div class="related-card" onclick="window.location.href='/blog-post.html?id=${p.id}'">
+      <a href="/blog-post.html?id=${p.id}" class="related-card">
         <span>${p.emoji || '📝'}</span>
         <div>
           <h4>${p.title}</h4>
           <small>⏱️ ${p.read_time || 5} دقائق</small>
         </div>
-      </div>`).join('');
+      </a>`).join('');
 
     document.getElementById('related-wrap').style.display = 'block';
   } catch(e) {}
