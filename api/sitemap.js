@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   try {
     const key = process.env.SUPABASE_KEY;
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/blog_posts?select=id,updated_at,created_at&status=eq.published&order=created_at.desc`,
+      `${SUPABASE_URL}/rest/v1/blog_posts?select=id,updated_at,created_at&order=created_at.desc`,
       {
         headers: {
           apikey: key,
