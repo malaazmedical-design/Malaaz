@@ -15,12 +15,14 @@ module.exports = async function handler(req, res) {
         }
       }
     );
-    if (supaRes.ok) {
-      const data = await supaRes.json();
-      if (Array.isArray(data)) posts = data;
+    const data = await supaRes.json();
+    if (Array.isArray(data)) {
+      posts = data;
+    } else {
+      posts = [{ id: `DEBUG:status=${supaRes.status}:key=${String(process.env.SUPABASE_KEY).slice(0,10)}`, updated_at: '2026-01-01', created_at: '2026-01-01' }];
     }
-  } catch (_) {
-    // silently continue with empty posts
+  } catch (e) {
+    posts = [{ id: `DEBUG:error:${e.message.slice(0,50)}`, updated_at: '2026-01-01', created_at: '2026-01-01' }];
   }
 
   const staticPages = [
