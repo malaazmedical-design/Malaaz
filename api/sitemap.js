@@ -1,7 +1,7 @@
 const SUPABASE_URL = 'https://omsictbrqlsohrmxeuym.supabase.co';
 const BASE_URL = 'https://malaaz-plum.vercel.app';
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     const key = process.env.SUPABASE_KEY;
     const response = await fetch(
