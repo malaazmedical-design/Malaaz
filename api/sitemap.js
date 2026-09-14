@@ -6,8 +6,15 @@ export default async function handler(req, res) {
     const key = process.env.SUPABASE_KEY;
     const response = await fetch(
       `${SUPABASE_URL}/rest/v1/blog_posts?select=id,updated_at,created_at&status=eq.published&order=created_at.desc`,
-      { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+      {
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          'Content-Type': 'application/json'
+        }
+      }
     );
+    if (!response.ok) throw new Error(`Supabase error: ${response.status}`);
     const posts = await response.json();
 
     const staticPages = [
