@@ -16,7 +16,8 @@
     }
   ],
   "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" }
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/blog-post.html", "destination": "/api/render-post" }
   ],
   "redirects": [
     { "source": "/provider", "destination": "/provider.html", "permanent": false },
