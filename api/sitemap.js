@@ -40,6 +40,6 @@ module.exports = async function handler(req, res) {
     res.setHeader('Cache-Control', 'public, max-age=3600');
     res.status(200).send(xml);
   } catch (e) {
-    res.status(500).send('Error generating sitemap');
+    res.status(500).send(`Error generating sitemap: ${e.message}`);
   }
 }
