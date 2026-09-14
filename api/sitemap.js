@@ -1,28 +1,25 @@
 const SUPABASE_URL = 'https://omsictbrqlsohrmxeuym.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho';
 const BASE_URL = 'https://malaaz-plum.vercel.app';
 
 module.exports = async function handler(req, res) {
   let posts = [];
   try {
-    const key = process.env.SUPABASE_KEY;
     const supaRes = await fetch(
       `${SUPABASE_URL}/rest/v1/blog_posts?select=id,updated_at,created_at&order=created_at.desc`,
       {
         headers: {
-          apikey: key,
-          Authorization: `Bearer ${key}`,
-          'Content-Type': 'application/json'
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
         }
       }
     );
-    const data = await supaRes.json();
-    if (Array.isArray(data)) {
-      posts = data;
-    } else {
-      posts = [{ id: `DEBUG:status=${supaRes.status}:key=${String(process.env.SUPABASE_KEY).slice(0,10)}`, updated_at: '2026-01-01', created_at: '2026-01-01' }];
+    if (supaRes.ok) {
+      const data = await supaRes.json();
+      if (Array.isArray(data)) posts = data;
     }
-  } catch (e) {
-    posts = [{ id: `DEBUG:error:${e.message.slice(0,50)}`, updated_at: '2026-01-01', created_at: '2026-01-01' }];
+  } catch (_) {
+    // continue with empty posts
   }
 
   const staticPages = [
