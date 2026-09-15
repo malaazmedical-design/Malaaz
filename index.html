@@ -957,26 +957,16 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
   <!-- APP DOWNLOAD -->
   <section class="app-dl-section">
     <div class="app-dl-inner">
-      <div class="app-dl-phone" aria-hidden="true">
-        <div class="app-dl-phone-frame">
-          <div class="app-dl-phone-screen">
-            <div class="app-dl-screen-header">
-              <span class="app-dl-logo-text">ملاذ</span>
-            </div>
-            <div class="app-dl-screen-card">
-              <div class="app-dl-screen-row"></div>
-              <div class="app-dl-screen-row short"></div>
-            </div>
-            <div class="app-dl-screen-card">
-              <div class="app-dl-screen-row"></div>
-              <div class="app-dl-screen-row short"></div>
-            </div>
-            <div class="app-dl-screen-card">
-              <div class="app-dl-screen-row"></div>
-              <div class="app-dl-screen-row short"></div>
-            </div>
-            <div class="app-dl-screen-btn"></div>
-          </div>
+      <div class="app-dl-slider-wrap">
+        <div class="app-dl-slider" id="appDlSlider">
+          <img src="images/app-img-3.jpg" alt="تطبيق ملاذ - الشاشة الرئيسية" class="app-dl-slide" />
+          <img src="images/app-img-1.jpg" alt="تطبيق ملاذ - قارن الأطباء" class="app-dl-slide" />
+          <img src="images/app-img-2.jpg" alt="تطبيق ملاذ - ابحث بالموقع" class="app-dl-slide" />
+        </div>
+        <div class="app-dl-dots" id="appDlDots">
+          <button class="app-dl-dot-btn active" data-idx="0" aria-label="صورة 1"></button>
+          <button class="app-dl-dot-btn" data-idx="1" aria-label="صورة 2"></button>
+          <button class="app-dl-dot-btn" data-idx="2" aria-label="صورة 3"></button>
         </div>
       </div>
       <div class="app-dl-content">
@@ -1000,88 +990,86 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       </div>
     </div>
   </section>
+  <script>
+  (function(){
+    var slider = document.getElementById('appDlSlider');
+    var dots = document.querySelectorAll('.app-dl-dot-btn');
+    var current = 0;
+    var total = 3;
+    function goTo(idx){
+      current = idx;
+      slider.style.transform = 'translateX(' + (idx * 100 / total * -1) + '%)';
+      dots.forEach(function(d,i){ d.classList.toggle('active', i===idx); });
+    }
+    dots.forEach(function(d){ d.addEventListener('click', function(){ goTo(+this.dataset.idx); }); });
+    setInterval(function(){ goTo((current+1)%total); }, 3500);
+  })();
+  </script>
 
   <style>
   .app-dl-section {
     background: #1e2c2f;
     padding: 72px 20px;
     direction: rtl;
+    overflow: hidden;
   }
   .app-dl-inner {
-    max-width: 920px;
+    max-width: 960px;
     margin: 0 auto;
     display: flex;
     align-items: center;
-    gap: 56px;
+    gap: 64px;
     justify-content: center;
   }
-  /* Phone mockup */
-  .app-dl-phone { flex-shrink: 0; }
-  .app-dl-phone-frame {
-    width: 168px;
-    height: 300px;
-    border-radius: 28px;
-    background: #0e1a1c;
-    border: 3px solid #c9a84c;
-    box-shadow: 0 0 0 6px rgba(201,168,76,.12), 0 24px 48px rgba(0,0,0,.5);
-    padding: 14px 10px;
+  /* Slider */
+  .app-dl-slider-wrap {
+    flex-shrink: 0;
+    width: 320px;
     display: flex;
     flex-direction: column;
-  }
-  .app-dl-phone-screen {
-    flex: 1;
-    background: #f5f2ec;
-    border-radius: 18px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px 8px 8px;
-  }
-  .app-dl-screen-header {
-    background: #1e2c2f;
-    border-radius: 10px;
-    height: 30px;
-    display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 16px;
   }
-  .app-dl-logo-text {
-    color: #c9a84c;
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-  }
-  .app-dl-screen-card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 8px;
+  .app-dl-slider {
+    width: 100%;
     display: flex;
-    flex-direction: column;
-    gap: 5px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+    transition: transform .5s cubic-bezier(.4,0,.2,1);
   }
-  .app-dl-screen-row {
+  .app-dl-slide {
+    width: 100%;
+    flex-shrink: 0;
+    border-radius: 20px;
+    object-fit: cover;
+    aspect-ratio: 1/1;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    display: block;
+  }
+  .app-dl-dots {
+    display: flex;
+    gap: 8px;
+  }
+  .app-dl-dot-btn {
+    width: 8px;
     height: 8px;
-    background: #e0dbd0;
-    border-radius: 4px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,.3);
+    cursor: pointer;
+    padding: 0;
+    transition: background .2s, transform .2s;
   }
-  .app-dl-screen-row.short { width: 60%; }
-  .app-dl-screen-btn {
-    margin-top: auto;
-    background: #1e2c2f;
-    border-radius: 8px;
-    height: 28px;
+  .app-dl-dot-btn.active {
+    background: #c9a84c;
+    transform: scale(1.3);
   }
   /* Content */
-  .app-dl-content { color: #fff; text-align: right; }
+  .app-dl-content { color: #fff; text-align: right; flex: 1; }
   .app-dl-eyebrow {
     font-family: 'Cairo', sans-serif;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: .12em;
     color: #c9a84c;
-    text-transform: uppercase;
     margin: 0 0 10px;
   }
   .app-dl-title {
@@ -1096,9 +1084,6 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
     list-style: none;
     margin: 0 0 32px;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
   }
   .app-dl-features li {
     font-family: 'Cairo', sans-serif;
@@ -1137,8 +1122,9 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
   .app-dl-btn-dark { background: #c9a84c; color: #1e2c2f; }
   .app-dl-btn-outline { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.35); }
   .app-dl-btn-outline:hover { border-color: rgba(255,255,255,.7); }
-  @media (max-width: 680px) {
-    .app-dl-inner { flex-direction: column; gap: 36px; text-align: center; }
+  @media (max-width: 720px) {
+    .app-dl-inner { flex-direction: column; gap: 36px; }
+    .app-dl-slider-wrap { width: 100%; max-width: 340px; }
     .app-dl-content { text-align: center; }
     .app-dl-features li { text-align: right; }
     .app-dl-title { font-size: 26px; }

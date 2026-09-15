@@ -467,26 +467,16 @@ document.getElementById('booking-form').addEventListener('submit', async functio
 <!-- APP DOWNLOAD -->
 <section class="app-dl">
   <div class="app-dl-inner">
-    <div class="app-dl-phone" aria-hidden="true">
-      <div class="app-dl-phone-frame">
-        <div class="app-dl-phone-screen">
-          <div class="app-dl-screen-header">
-            <span class="app-dl-logo-text">ملاذ</span>
-          </div>
-          <div class="app-dl-screen-card">
-            <div class="app-dl-screen-row"></div>
-            <div class="app-dl-screen-row short"></div>
-          </div>
-          <div class="app-dl-screen-card">
-            <div class="app-dl-screen-row"></div>
-            <div class="app-dl-screen-row short"></div>
-          </div>
-          <div class="app-dl-screen-card">
-            <div class="app-dl-screen-row"></div>
-            <div class="app-dl-screen-row short"></div>
-          </div>
-          <div class="app-dl-screen-btn"></div>
-        </div>
+    <div class="app-dl-slider-wrap">
+      <div class="app-dl-slider" id="landingDlSlider">
+        <img src="images/app-img-3.jpg" alt="تطبيق ملاذ - الشاشة الرئيسية" class="app-dl-slide" />
+        <img src="images/app-img-1.jpg" alt="تطبيق ملاذ - قارن الأطباء" class="app-dl-slide" />
+        <img src="images/app-img-2.jpg" alt="تطبيق ملاذ - ابحث بالموقع" class="app-dl-slide" />
+      </div>
+      <div class="app-dl-dots" id="landingDlDots">
+        <button class="app-dl-dot-btn active" data-idx="0" aria-label="صورة 1"></button>
+        <button class="app-dl-dot-btn" data-idx="1" aria-label="صورة 2"></button>
+        <button class="app-dl-dot-btn" data-idx="2" aria-label="صورة 3"></button>
       </div>
     </div>
     <div class="app-dl-text">
@@ -510,11 +500,27 @@ document.getElementById('booking-form').addEventListener('submit', async functio
     </div>
   </div>
 </section>
+<script>
+(function(){
+  var slider = document.getElementById('landingDlSlider');
+  var dots = document.querySelectorAll('#landingDlDots .app-dl-dot-btn');
+  var current = 0;
+  var total = 3;
+  function goTo(idx){
+    current = idx;
+    slider.style.transform = 'translateX(' + (idx * 100 / total * -1) + '%)';
+    dots.forEach(function(d,i){ d.classList.toggle('active', i===idx); });
+  }
+  dots.forEach(function(d){ d.addEventListener('click', function(){ goTo(+this.dataset.idx); }); });
+  setInterval(function(){ goTo((current+1)%total); }, 3500);
+})();
+</script>
 <style>
 .app-dl {
   background: #1e2c2f;
   padding: 64px 24px;
   direction: rtl;
+  overflow: hidden;
 }
 .app-dl-inner {
   max-width: 860px;
@@ -524,56 +530,42 @@ document.getElementById('booking-form').addEventListener('submit', async functio
   gap: 52px;
   justify-content: center;
 }
-/* Phone */
-.app-dl-phone { flex-shrink: 0; }
-.app-dl-phone-frame {
-  width: 156px;
-  height: 280px;
-  border-radius: 26px;
-  background: #0e1a1c;
-  border: 3px solid #c9a84c;
-  box-shadow: 0 0 0 6px rgba(201,168,76,.12), 0 20px 40px rgba(0,0,0,.5);
-  padding: 12px 9px;
+.app-dl-slider-wrap {
+  flex-shrink: 0;
+  width: 300px;
   display: flex;
   flex-direction: column;
-}
-.app-dl-phone-screen {
-  flex: 1;
-  background: #f5f2ec;
-  border-radius: 16px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 9px 7px 7px;
-}
-.app-dl-screen-header {
-  background: #1e2c2f;
-  border-radius: 9px;
-  height: 28px;
-  display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 14px;
 }
-.app-dl-logo-text {
-  color: #c9a84c;
-  font-family: 'Cairo', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-}
-.app-dl-screen-card {
-  background: #fff;
-  border-radius: 7px;
-  padding: 7px;
+.app-dl-slider {
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.07);
+  transition: transform .5s cubic-bezier(.4,0,.2,1);
 }
-.app-dl-screen-row { height: 7px; background: #e0dbd0; border-radius: 4px; }
-.app-dl-screen-row.short { width: 60%; }
-.app-dl-screen-btn { margin-top: auto; background: #1e2c2f; border-radius: 7px; height: 26px; }
+.app-dl-slide {
+  width: 100%;
+  flex-shrink: 0;
+  border-radius: 18px;
+  object-fit: cover;
+  aspect-ratio: 1/1;
+  box-shadow: 0 16px 48px rgba(0,0,0,.5);
+  display: block;
+}
+.app-dl-dots { display: flex; gap: 8px; }
+.app-dl-dot-btn {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.3);
+  cursor: pointer;
+  padding: 0;
+  transition: background .2s, transform .2s;
+}
+.app-dl-dot-btn.active { background: #c9a84c; transform: scale(1.3); }
 /* Text */
+.app-dl-text { color: #fff; text-align: right; flex: 1; }
 .app-dl-eyebrow {
   font-family: 'Cairo', sans-serif;
   font-size: 12px;
@@ -634,6 +626,7 @@ document.getElementById('booking-form').addEventListener('submit', async functio
 .app-dl-outline:hover { border-color: rgba(255,255,255,.7); }
 @media (max-width: 640px) {
   .app-dl-inner { flex-direction: column; gap: 32px; }
+  .app-dl-slider-wrap { width: 100%; max-width: 320px; }
   .app-dl-text { text-align: center; }
   .app-dl-features li { text-align: right; }
   .app-dl-title { font-size: 24px; }
