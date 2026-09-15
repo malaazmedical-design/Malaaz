@@ -205,15 +205,15 @@ nav{position:sticky;top:0;z-index:100;background:var(--dark);display:flex;align-
 .page-sub{font-size:16px;color:rgba(255,255,255,.55);max-width:560px;margin:0 auto;line-height:1.7;position:relative}
 
 /* SEARCH BAR */
-.search-bar{background:var(--white);border-radius:16px;box-shadow:0 4px 32px rgba(0,0,0,.1);padding:20px 24px;max-width:900px;margin:-28px auto 0;position:relative;z-index:10}
-.search-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
-.search-field{display:flex;flex-direction:column;gap:6px;flex:1;min-width:140px}
-.search-field label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.05em}
-.search-field select,.search-field input{padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);outline:none;width:100%;transition:border-color .2s}
+.search-bar{background:var(--white);border-radius:16px;box-shadow:0 4px 32px rgba(0,0,0,.1);padding:20px 24px;max-width:1060px;margin:-28px auto 0;position:relative;z-index:10}
+.search-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:nowrap}
+.search-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.search-field label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;white-space:nowrap}
+.search-field select,.search-field input{padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);outline:none;width:100%;transition:border-color .2s}
 .search-field select:focus,.search-field input:focus{border-color:var(--accent)}
-.search-btn{background:var(--dark);color:var(--accent);font-size:15px;font-weight:700;padding:10px 28px;border-radius:10px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;height:42px;margin-top:24px;align-self:flex-end;transition:background .2s}
+.search-btn{background:var(--dark);color:var(--accent);font-size:14px;font-weight:700;padding:9px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;align-self:flex-end;margin-top:16px;transition:background .2s;flex-shrink:0}
 .search-btn:hover{background:#253438}
-.dynamic-fields{display:flex;gap:12px;flex:2;flex-wrap:wrap}
+#s-dynamic{display:contents}
 
 /* CONTENT */
 .prov-content{max-width:1100px;margin:48px auto;padding:0 20px}
