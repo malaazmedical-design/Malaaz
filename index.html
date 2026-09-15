@@ -957,11 +957,12 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
   <!-- APP DOWNLOAD -->
   <section class="app-dl-section">
     <div class="app-dl-inner">
-      <div class="app-dl-slider-wrap">
-        <div class="app-dl-slider" id="appDlSlider">
-          <img src="images/app-img-3.jpg" alt="تطبيق ملاذ - الشاشة الرئيسية" class="app-dl-slide" />
-          <img src="images/app-img-1.jpg" alt="تطبيق ملاذ - قارن الأطباء" class="app-dl-slide" />
-          <img src="images/app-img-2.jpg" alt="تطبيق ملاذ - ابحث بالموقع" class="app-dl-slide" />
+      <div class="app-dl-img-col">
+        <div class="app-dl-glow"></div>
+        <div class="app-dl-slides" id="appDlSlides">
+          <img src="images/app-img-3.jpg" alt="تطبيق ملاذ" class="app-dl-slide active" />
+          <img src="images/app-img-1.jpg" alt="تطبيق ملاذ" class="app-dl-slide" />
+          <img src="images/app-img-2.jpg" alt="تطبيق ملاذ" class="app-dl-slide" />
         </div>
         <div class="app-dl-dots" id="appDlDots">
           <button class="app-dl-dot-btn active" data-idx="0" aria-label="صورة 1"></button>
@@ -992,77 +993,92 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
   </section>
   <script>
   (function(){
-    var slider = document.getElementById('appDlSlider');
-    var dots = document.querySelectorAll('.app-dl-dot-btn');
+    var slides = document.querySelectorAll('#appDlSlides .app-dl-slide');
+    var dots = document.querySelectorAll('#appDlDots .app-dl-dot-btn');
     var current = 0;
-    var total = 3;
     function goTo(idx){
+      slides[current].classList.remove('active');
+      dots[current].classList.remove('active');
       current = idx;
-      slider.style.transform = 'translateX(-' + (idx * 100 / total) + '%)';
-      dots.forEach(function(d,i){ d.classList.toggle('active', i===idx); });
+      slides[current].classList.add('active');
+      dots[current].classList.add('active');
     }
     dots.forEach(function(d){ d.addEventListener('click', function(){ goTo(+this.dataset.idx); }); });
-    setInterval(function(){ goTo((current+1)%total); }, 3500);
+    setInterval(function(){ goTo((current+1) % slides.length); }, 3500);
   })();
   </script>
 
   <style>
   .app-dl-section {
     background: #1e2c2f;
-    padding: 72px 20px;
+    padding: 64px 20px 56px;
     direction: rtl;
-    overflow: hidden;
   }
   .app-dl-inner {
-    max-width: 960px;
+    max-width: 980px;
     margin: 0 auto;
     display: flex;
     align-items: center;
     gap: 64px;
     justify-content: center;
   }
-  /* Slider */
-  .app-dl-slider-wrap {
+  /* Image column */
+  .app-dl-img-col {
     flex-shrink: 0;
-    width: 320px;
+    width: 380px;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
-    overflow: hidden;
+    gap: 18px;
   }
-  .app-dl-slider {
-    width: 300%;
-    display: flex;
-    transition: transform .5s cubic-bezier(.4,0,.2,1);
+  .app-dl-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,.28) 0%, rgba(201,168,76,0) 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .app-dl-slides {
+    width: 100%;
+    position: relative;
+    aspect-ratio: 1/1;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,.55);
+    z-index: 1;
   }
   .app-dl-slide {
-    width: 33.333%;
-    flex-shrink: 0;
-    border-radius: 20px;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    aspect-ratio: 1/1;
-    box-shadow: 0 20px 60px rgba(0,0,0,.5);
-    display: block;
+    opacity: 0;
+    transition: opacity .6s ease;
   }
+  .app-dl-slide.active { opacity: 1; }
   .app-dl-dots {
     display: flex;
     gap: 8px;
+    z-index: 1;
   }
   .app-dl-dot-btn {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     border: none;
-    background: rgba(255,255,255,.3);
+    background: rgba(255,255,255,.25);
     cursor: pointer;
     padding: 0;
     transition: background .2s, transform .2s;
   }
-  .app-dl-dot-btn.active {
-    background: #c9a84c;
-    transform: scale(1.3);
-  }
+  .app-dl-dot-btn.active { background: #c9a84c; transform: scale(1.35); }
   /* Content */
   .app-dl-content { color: #fff; text-align: right; flex: 1; }
   .app-dl-eyebrow {
@@ -1125,7 +1141,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
   .app-dl-btn-outline:hover { border-color: rgba(255,255,255,.7); }
   @media (max-width: 720px) {
     .app-dl-inner { flex-direction: column; gap: 36px; }
-    .app-dl-slider-wrap { width: 100%; max-width: 340px; }
+    .app-dl-img-col { width: 100%; max-width: 340px; }
     .app-dl-content { text-align: center; }
     .app-dl-features li { text-align: right; }
     .app-dl-title { font-size: 26px; }

@@ -467,11 +467,12 @@ document.getElementById('booking-form').addEventListener('submit', async functio
 <!-- APP DOWNLOAD -->
 <section class="app-dl">
   <div class="app-dl-inner">
-    <div class="app-dl-slider-wrap">
-      <div class="app-dl-slider" id="landingDlSlider">
-        <img src="images/app-img-3.jpg" alt="تطبيق ملاذ - الشاشة الرئيسية" class="app-dl-slide" />
-        <img src="images/app-img-1.jpg" alt="تطبيق ملاذ - قارن الأطباء" class="app-dl-slide" />
-        <img src="images/app-img-2.jpg" alt="تطبيق ملاذ - ابحث بالموقع" class="app-dl-slide" />
+    <div class="app-dl-img-col">
+      <div class="app-dl-glow"></div>
+      <div class="app-dl-slides" id="landingDlSlides">
+        <img src="images/app-img-3.jpg" alt="تطبيق ملاذ" class="app-dl-slide active" />
+        <img src="images/app-img-1.jpg" alt="تطبيق ملاذ" class="app-dl-slide" />
+        <img src="images/app-img-2.jpg" alt="تطبيق ملاذ" class="app-dl-slide" />
       </div>
       <div class="app-dl-dots" id="landingDlDots">
         <button class="app-dl-dot-btn active" data-idx="0" aria-label="صورة 1"></button>
@@ -479,7 +480,7 @@ document.getElementById('booking-form').addEventListener('submit', async functio
         <button class="app-dl-dot-btn" data-idx="2" aria-label="صورة 3"></button>
       </div>
     </div>
-    <div class="app-dl-text">
+    <div class="app-dl-text" style="flex:1">
       <p class="app-dl-eyebrow">التطبيق</p>
       <h2 class="app-dl-title">حمّل تطبيق ملاذ</h2>
       <ul class="app-dl-features">
@@ -502,71 +503,87 @@ document.getElementById('booking-form').addEventListener('submit', async functio
 </section>
 <script>
 (function(){
-  var slider = document.getElementById('landingDlSlider');
+  var slides = document.querySelectorAll('#landingDlSlides .app-dl-slide');
   var dots = document.querySelectorAll('#landingDlDots .app-dl-dot-btn');
   var current = 0;
-  var total = 3;
   function goTo(idx){
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
     current = idx;
-    slider.style.transform = 'translateX(-' + (idx * 100 / total) + '%)';
-    dots.forEach(function(d,i){ d.classList.toggle('active', i===idx); });
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
   }
   dots.forEach(function(d){ d.addEventListener('click', function(){ goTo(+this.dataset.idx); }); });
-  setInterval(function(){ goTo((current+1)%total); }, 3500);
+  setInterval(function(){ goTo((current+1) % slides.length); }, 3500);
 })();
 </script>
 <style>
 .app-dl {
   background: #1e2c2f;
-  padding: 64px 24px;
+  padding: 64px 24px 56px;
   direction: rtl;
-  overflow: hidden;
 }
 .app-dl-inner {
-  max-width: 860px;
+  max-width: 900px;
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 52px;
+  gap: 56px;
   justify-content: center;
 }
-.app-dl-slider-wrap {
+.app-dl-img-col {
   flex-shrink: 0;
-  width: 300px;
+  width: 340px;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  overflow: hidden;
+  gap: 16px;
 }
-.app-dl-slider {
-  width: 300%;
-  display: flex;
-  transition: transform .5s cubic-bezier(.4,0,.2,1);
+.app-dl-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,168,76,.28) 0%, rgba(201,168,76,0) 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.app-dl-slides {
+  width: 100%;
+  position: relative;
+  aspect-ratio: 1/1;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 20px 56px rgba(0,0,0,.55);
+  z-index: 1;
 }
 .app-dl-slide {
-  width: 33.333%;
-  flex-shrink: 0;
-  border-radius: 18px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  aspect-ratio: 1/1;
-  box-shadow: 0 16px 48px rgba(0,0,0,.5);
-  display: block;
+  opacity: 0;
+  transition: opacity .6s ease;
 }
-.app-dl-dots { display: flex; gap: 8px; }
+.app-dl-slide.active { opacity: 1; }
+.app-dl-dots { display: flex; gap: 8px; z-index: 1; }
 .app-dl-dot-btn {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   border: none;
-  background: rgba(255,255,255,.3);
+  background: rgba(255,255,255,.25);
   cursor: pointer;
   padding: 0;
   transition: background .2s, transform .2s;
 }
-.app-dl-dot-btn.active { background: #c9a84c; transform: scale(1.3); }
-/* Text */
-.app-dl-text { color: #fff; text-align: right; flex: 1; }
+.app-dl-dot-btn.active { background: #c9a84c; transform: scale(1.35); }
+.app-dl-text { color: #fff; text-align: right; }
 .app-dl-eyebrow {
   font-family: 'Cairo', sans-serif;
   font-size: 12px;
@@ -627,7 +644,7 @@ document.getElementById('booking-form').addEventListener('submit', async functio
 .app-dl-outline:hover { border-color: rgba(255,255,255,.7); }
 @media (max-width: 640px) {
   .app-dl-inner { flex-direction: column; gap: 32px; }
-  .app-dl-slider-wrap { width: 100%; max-width: 320px; }
+  .app-dl-img-col { width: 100%; max-width: 320px; }
   .app-dl-text { text-align: center; }
   .app-dl-features li { text-align: right; }
   .app-dl-title { font-size: 24px; }
