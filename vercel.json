@@ -17,7 +17,9 @@
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/blog-post.html", "destination": "/api/render-post" }
+    { "source": "/blog-post.html", "destination": "/api/render-post" },
+    { "source": "/مقدمو-الخدمة/:area", "destination": "/api/render-providers?area=:area" },
+    { "source": "/مقدمو-الخدمة", "destination": "/api/render-providers" }
   ],
   "redirects": [
     { "source": "/provider", "destination": "/provider.html", "permanent": false },

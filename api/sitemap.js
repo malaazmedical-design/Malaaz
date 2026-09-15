@@ -4,26 +4,21 @@ const BASE_URL = 'https://malaaz-plum.vercel.app';
 
 module.exports = async function handler(req, res) {
   let posts = [];
+  let areas = [];
   try {
-    const supaRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/blog_posts?select=id,updated_at,created_at&order=created_at.desc`,
-      {
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
-        }
-      }
-    );
-    if (supaRes.ok) {
-      const data = await supaRes.json();
-      if (Array.isArray(data)) posts = data;
-    }
+    const [postsRes, areasRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/blog_posts?select=id,updated_at,created_at&order=created_at.desc`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }),
+      fetch(`${SUPABASE_URL}/rest/v1/coverage_areas?select=name,updated_at&is_active=eq.true&order=name`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }),
+    ]);
+    if (postsRes.ok) { const d = await postsRes.json(); if (Array.isArray(d)) posts = d; }
+    if (areasRes.ok) { const d = await areasRes.json(); if (Array.isArray(d)) areas = d; }
   } catch (_) {
-    // continue with empty posts
+    // continue with empty
   }
 
   const staticPages = [
     { loc: `${BASE_URL}/`,                    lastmod: '2026-08-17', changefreq: 'weekly',  priority: '1.0' },
+    { loc: `${BASE_URL}/مقدمو-الخدمة`,        lastmod: '2026-09-01', changefreq: 'daily',   priority: '0.95' },
     { loc: `${BASE_URL}/faq.html`,             lastmod: '2026-08-17', changefreq: 'monthly', priority: '0.9' },
     { loc: `${BASE_URL}/blog.html`,            lastmod: '2026-08-17', changefreq: 'weekly',  priority: '0.8' },
     { loc: `${BASE_URL}/privacy.html`,         lastmod: '2026-08-17', changefreq: 'yearly',  priority: '0.4' },
@@ -39,7 +34,13 @@ module.exports = async function handler(req, res) {
     return `  <url>\n    <loc>${BASE_URL}/blog-post.html?id=${p.id}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
   }).join('\n');
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${staticEntries}\n${postEntries}\n</urlset>`;
+  const areaEntries = areas.map(a => {
+    const lastmod = (a.updated_at || '').split('T')[0] || '2026-09-01';
+    const slug = encodeURIComponent(a.name);
+    return `  <url>\n    <loc>${BASE_URL}/مقدمو-الخدمة/${slug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.85</priority>\n  </url>`;
+  }).join('\n');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${staticEntries}\n${areaEntries}\n${postEntries}\n</urlset>`;
 
   const buf = Buffer.from(xml, 'utf8');
   res.writeHead(200, {
