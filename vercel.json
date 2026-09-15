@@ -18,8 +18,8 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/blog-post.html", "destination": "/api/render-post" },
-    { "source": "/مقدمو-الخدمة/:area", "destination": "/api/render-providers?area=:area" },
-    { "source": "/مقدمو-الخدمة", "destination": "/api/render-providers" }
+    { "source": "/%D9%85%D9%82%D8%AF%D9%85%D9%88-%D8%A7%D9%84%D8%AE%D8%AF%D9%85%D8%A9/:area", "destination": "/api/render-providers?area=:area" },
+    { "source": "/%D9%85%D9%82%D8%AF%D9%85%D9%88-%D8%A7%D9%84%D8%AE%D8%AF%D9%85%D8%A9", "destination": "/api/render-providers" }
   ],
   "redirects": [
     { "source": "/provider", "destination": "/provider.html", "permanent": false },
