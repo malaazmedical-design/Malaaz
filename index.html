@@ -915,11 +915,11 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       <div class="app-dl-content">
         <p class="app-dl-eyebrow">التطبيق</p>
         <h2 class="app-dl-title">حمّل تطبيق ملاذ</h2>
-        <ul class="app-dl-features">
-          <li><span class="app-dl-dot"></span>اختار وقارن بحرية بين مزودي الخدمة</li>
-          <li><span class="app-dl-dot"></span>احجز بنفسك بدون أي رسوم إضافية</li>
-          <li><span class="app-dl-dot"></span>الدفع بعد استلام الخدمة فقط</li>
-        </ul>
+        <div class="app-dl-features">
+          <span class="app-dl-chip"><span class="app-dl-dot"></span>اختار وقارن</span>
+          <span class="app-dl-chip"><span class="app-dl-dot"></span>احجز بدون رسوم</span>
+          <span class="app-dl-chip"><span class="app-dl-dot"></span>الدفع بعد الخدمة</span>
+        </div>
         <div class="app-dl-btns">
           <a href="https://play.google.com/store/apps/details?id=com.malaaz.app" target="_blank" rel="noopener" class="app-dl-btn app-dl-btn-dark">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.38.21.82.22 1.22.03l11.62-6.54-2.93-2.93-9.91 9.44zm-1.65-20.5C1.2 3.6 1 4.03 1 4.56v14.88c0 .53.2.96.53 1.3l.07.07 8.34-8.34v-.2L1.6 3.19l-.07.07zm17.33 7.63l-2.37-1.34-3.27 3.27 3.27 3.27 2.39-1.35c.68-.38.68-1.01 0-1.39l-.02-.46zM4.4.21L16.02 6.75l-2.93 2.93L3.18.24C3.58.05 4.02.06 4.4.21z"/></svg>
@@ -964,35 +964,6 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
     </div>
   </section>
 
-  <!-- COVERAGE -->
-  <section class="section" aria-labelledby="coverage-heading">
-    <div class="section-header" style="text-align:center">
-      <div class="section-tag">مناطق التغطية</div>
-      <h2 class="section-title" id="coverage-heading" style="margin:0 auto">نوصلك في كل مكان<br>بالقاهرة والجيزة</h2>
-    </div>
-    <div class="coverage-grid">
-      <div class="coverage-card">
-        <div class="coverage-card-head">
-          <div class="coverage-city-icon">🏙️</div>
-          <div>
-            <div class="coverage-city-name">القاهرة</div>
-            <div class="coverage-city-count" id="lp-count-cairo">مناطق التغطية</div>
-          </div>
-        </div>
-        <div class="coverage-areas" id="lp-areas-cairo"><span class="area-tag" style="opacity:.4">جاري التحميل...</span></div>
-      </div>
-      <div class="coverage-card">
-        <div class="coverage-card-head">
-          <div class="coverage-city-icon">🌆</div>
-          <div>
-            <div class="coverage-city-name">الجيزة</div>
-            <div class="coverage-city-count" id="lp-count-giza">مناطق التغطية</div>
-          </div>
-        </div>
-        <div class="coverage-areas" id="lp-areas-giza"><span class="area-tag" style="opacity:.4">جاري التحميل...</span></div>
-      </div>
-    </div>
-  </section>
 
   <!-- FAQ -->
   <section style="background:var(--dark);padding:90px 60px" aria-labelledby="faq-heading">
@@ -1099,21 +1070,24 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
     color: #fff;
   }
   .app-dl-features {
-    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
     margin: 0 0 32px;
     padding: 0;
   }
-  .app-dl-features li {
-    font-family: 'Cairo', sans-serif;
-    font-size: 15px;
-    color: rgba(255,255,255,.85);
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,.1);
-    display: flex;
+  .app-dl-chip {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 7px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    color: rgba(255,255,255,.9);
   }
-  .app-dl-features li:first-child { border-top: 1px solid rgba(255,255,255,.1); }
   .app-dl-dot {
     width: 6px;
     height: 6px;
