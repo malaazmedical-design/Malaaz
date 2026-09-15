@@ -356,6 +356,69 @@ footer a:hover{color:rgba(255,255,255,.7)}
   </div>
 </div>
 
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal-box" style="max-width:520px">
+    <button class="modal-close" onclick="closeBooking()"><i class="fas fa-times"></i></button>
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-bottom:6px">احجز مع</div>
+      <div id="bk-prov-name" style="font-size:20px;font-weight:800;color:#fff"></div>
+      <div id="bk-prov-spec" style="font-size:13px;color:rgba(255,255,255,.5);margin-top:3px"></div>
+    </div>
+
+    <!-- Step 1: service selection -->
+    <div id="bk-step1">
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:10px">اختار الخدمة</div>
+      <div id="bk-services-list"></div>
+    </div>
+
+    <!-- Step 2: client info -->
+    <div id="bk-step2" style="display:none">
+      <button onclick="bkBack()" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:13px;font-family:'Cairo',sans-serif;padding:0;margin-bottom:16px;display:flex;align-items:center;gap:6px">
+        <i class="fas fa-arrow-right"></i> تغيير الخدمة
+      </button>
+      <div id="bk-selected-info" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);border-radius:12px;padding:12px 16px;margin-bottom:20px;font-size:14px;color:var(--accent);font-weight:700"></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.05em;display:block;margin-bottom:5px">الاسم</label>
+          <input id="bk-name" type="text" placeholder="اسمك كاملاً" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Cairo',sans-serif;color:#fff;outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.05em;display:block;margin-bottom:5px">رقم الموبايل</label>
+          <input id="bk-phone" type="tel" placeholder="01XXXXXXXXX" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Cairo',sans-serif;color:#fff;outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.05em;display:block;margin-bottom:5px">المنطقة</label>
+          <select id="bk-area" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Cairo',sans-serif;color:#fff;outline:none">
+            ${areaOptions}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.05em;display:block;margin-bottom:5px">العنوان بالتفصيل</label>
+          <input id="bk-address" type="text" placeholder="الشارع والبناية والدور..." style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Cairo',sans-serif;color:#fff;outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.05em;display:block;margin-bottom:5px">الوقت المفضل</label>
+          <input id="bk-time" type="text" placeholder="مثال: غداً 3 مساءً أو أقرب وقت ممكن" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Cairo',sans-serif;color:#fff;outline:none">
+        </div>
+      </div>
+      <div id="bk-error" style="display:none;color:#ff6b6b;font-size:13px;margin-top:12px;text-align:center"></div>
+      <button onclick="bkSubmit()" id="bk-submit-btn" class="modal-book-now" style="margin-top:20px">
+        <i class="fas fa-calendar-check" style="margin-left:8px"></i> تأكيد الحجز مجاناً
+      </button>
+      <div style="text-align:center;margin-top:10px;font-size:12px;color:rgba(255,255,255,.3)">الحجز مجاني · الدفع بعد الخدمة</div>
+    </div>
+
+    <!-- Step 3: success -->
+    <div id="bk-step3" style="display:none;text-align:center;padding:20px 0">
+      <div style="font-size:48px;margin-bottom:16px">✅</div>
+      <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:8px">تم إرسال طلب الحجز!</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.5);line-height:1.7">هيتواصل معك فريق ملاذ خلال أقل من ساعة لتأكيد الموعد</div>
+      <button onclick="closeBooking()" class="modal-book-now" style="margin-top:24px;background:rgba(255,255,255,.1);color:#fff">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer>
   <div style="margin-bottom:12px">
@@ -511,10 +574,121 @@ document.getElementById('profileModal').addEventListener('click', function(e) {
   if (e.target === this) closeProfile();
 });
 
-function openProviderPage(id, name) {
+// ── Booking modal ──────────────────────────────────────
+let bkProvider = null;
+let bkSelectedSub = null;
+let bkSelectedPrice = null;
+let bkSelectedService = null;
+
+async function openProviderPage(id, name) {
   closeProfile();
-  location.href = '/?provider=' + encodeURIComponent(id) + '&providerName=' + encodeURIComponent(name);
+  bkProvider = { id, name };
+  bkSelectedSub = null; bkSelectedPrice = null; bkSelectedService = null;
+  document.getElementById('bk-prov-name').textContent = name;
+  document.getElementById('bk-prov-spec').textContent = '';
+  document.getElementById('bk-step1').style.display = '';
+  document.getElementById('bk-step2').style.display = 'none';
+  document.getElementById('bk-step3').style.display = 'none';
+  document.getElementById('bk-error').style.display = 'none';
+  document.getElementById('bk-services-list').innerHTML =
+    '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">جاري التحميل...</div>';
+  document.getElementById('bookingModal').classList.add('open');
+
+  const data = await sf("provider_services?select=sub_service_id,custom_price,sub_services(name,service_name,price_min)&provider_id=eq."+encodeURIComponent(id)+"&is_active=eq.true");
+  if (!data || !data.length) {
+    document.getElementById('bk-services-list').innerHTML =
+      '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">لا توجد خدمات مسجّلة. تواصل معنا مباشرة.</div>';
+    return;
+  }
+  const items = data.map(ps => ({ name: ps.sub_services?.name, service: ps.sub_services?.service_name, price: ps.custom_price || ps.sub_services?.price_min })).filter(i=>i.name);
+  document.getElementById('bk-services-list').innerHTML = items.map((it,i) =>
+    \`<div onclick="bkSelectSub('\${esc(it.service||'')}','\${esc(it.name)}',\${it.price||0})" style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(201,168,76,.5)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#fff">\${esc(it.name)}</div>
+        \${it.service ? \`<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">\${esc(it.service)}</div>\` : ''}
+      </div>
+      \${it.price ? \`<div style="font-size:15px;font-weight:800;color:var(--accent)">\${it.price} ج.م</div>\` : ''}
+    </div>\`
+  ).join('');
 }
+
+function bkSelectSub(service, sub, price) {
+  bkSelectedSub = sub;
+  bkSelectedService = service;
+  bkSelectedPrice = price;
+  document.getElementById('bk-selected-info').textContent = sub + (price ? ' — ' + price + ' ج.م' : '');
+  document.getElementById('bk-step1').style.display = 'none';
+  document.getElementById('bk-step2').style.display = '';
+}
+
+function bkBack() {
+  document.getElementById('bk-step1').style.display = '';
+  document.getElementById('bk-step2').style.display = 'none';
+}
+
+async function bkSubmit() {
+  const name = document.getElementById('bk-name').value.trim();
+  const phone = document.getElementById('bk-phone').value.trim();
+  const area = document.getElementById('bk-area').value;
+  const address = document.getElementById('bk-address').value.trim();
+  const time = document.getElementById('bk-time').value.trim() || 'أقرب وقت ممكن';
+  const errEl = document.getElementById('bk-error');
+  if (!name || !phone || !address) {
+    errEl.textContent = 'يرجى تعبئة الاسم والموبايل والعنوان';
+    errEl.style.display = '';
+    return;
+  }
+  if (!/^01[0-9]{9}$/.test(phone.replace(/\\s/g,''))) {
+    errEl.textContent = 'رقم الموبايل غير صحيح';
+    errEl.style.display = '';
+    return;
+  }
+  errEl.style.display = 'none';
+  const btn = document.getElementById('bk-submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'جاري الإرسال...';
+  try {
+    const payload = {
+      patient_name: name,
+      phone: phone.replace(/\\s/g,''),
+      area,
+      address,
+      appointment_time: time,
+      service_type: bkSelectedService || 'كشف منزلي',
+      payment_method: 'cash',
+      status: 'pending',
+      ...(bkSelectedSub && { sub_option: bkSelectedSub }),
+      ...(bkProvider?.id && { provider_id: bkProvider.id }),
+      ...(bkSelectedPrice && { price: bkSelectedPrice }),
+    };
+    const resp = await fetch('${SUPABASE_URL}/rest/v1/bookings', {
+      method: 'POST',
+      headers: {
+        'apikey': '${SUPABASE_KEY}',
+        'Authorization': 'Bearer ${SUPABASE_KEY}',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!resp.ok) throw new Error(await resp.text());
+    document.getElementById('bk-step2').style.display = 'none';
+    document.getElementById('bk-step3').style.display = '';
+  } catch(e) {
+    errEl.textContent = 'حدث خطأ، يرجى المحاولة مرة أخرى';
+    errEl.style.display = '';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-calendar-check" style="margin-left:8px"></i> تأكيد الحجز مجاناً';
+  }
+}
+
+function closeBooking() {
+  document.getElementById('bookingModal').classList.remove('open');
+}
+
+document.getElementById('bookingModal').addEventListener('click', function(e) {
+  if (e.target === this) closeBooking();
+});
 
 // Init
 onServiceChange();
