@@ -998,7 +998,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
     var total = 3;
     function goTo(idx){
       current = idx;
-      slider.style.transform = 'translateX(' + (idx * 100 / total * -1) + '%)';
+      slider.style.transform = 'translateX(-' + (idx * 100 / total) + '%)';
       dots.forEach(function(d,i){ d.classList.toggle('active', i===idx); });
     }
     dots.forEach(function(d){ d.addEventListener('click', function(){ goTo(+this.dataset.idx); }); });
@@ -1029,14 +1029,15 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
     flex-direction: column;
     align-items: center;
     gap: 16px;
+    overflow: hidden;
   }
   .app-dl-slider {
-    width: 100%;
+    width: 300%;
     display: flex;
     transition: transform .5s cubic-bezier(.4,0,.2,1);
   }
   .app-dl-slide {
-    width: 100%;
+    width: 33.333%;
     flex-shrink: 0;
     border-radius: 20px;
     object-fit: cover;
