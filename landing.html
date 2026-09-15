@@ -467,17 +467,44 @@ document.getElementById('booking-form').addEventListener('submit', async functio
 <!-- APP DOWNLOAD -->
 <section class="app-dl">
   <div class="app-dl-inner">
+    <div class="app-dl-phone" aria-hidden="true">
+      <div class="app-dl-phone-frame">
+        <div class="app-dl-phone-screen">
+          <div class="app-dl-screen-header">
+            <span class="app-dl-logo-text">ملاذ</span>
+          </div>
+          <div class="app-dl-screen-card">
+            <div class="app-dl-screen-row"></div>
+            <div class="app-dl-screen-row short"></div>
+          </div>
+          <div class="app-dl-screen-card">
+            <div class="app-dl-screen-row"></div>
+            <div class="app-dl-screen-row short"></div>
+          </div>
+          <div class="app-dl-screen-card">
+            <div class="app-dl-screen-row"></div>
+            <div class="app-dl-screen-row short"></div>
+          </div>
+          <div class="app-dl-screen-btn"></div>
+        </div>
+      </div>
+    </div>
     <div class="app-dl-text">
+      <p class="app-dl-eyebrow">التطبيق</p>
       <h2 class="app-dl-title">حمّل تطبيق ملاذ</h2>
-      <p class="app-dl-sub">احجز خدماتك الطبية المنزلية بسهولة في أي وقت</p>
+      <ul class="app-dl-features">
+        <li><span class="app-dl-dot"></span>اختار وقارن بحرية بين مزودي الخدمة</li>
+        <li><span class="app-dl-dot"></span>احجز بنفسك بدون أي رسوم إضافية</li>
+        <li><span class="app-dl-dot"></span>الدفع بعد استلام الخدمة فقط</li>
+      </ul>
       <div class="app-dl-btns">
-        <a href="https://play.google.com/store/apps/details?id=com.malaaz.app" target="_blank" rel="noopener" class="app-dl-btn app-dl-google">
+        <a href="https://play.google.com/store/apps/details?id=com.malaaz.app" target="_blank" rel="noopener" class="app-dl-btn app-dl-gold">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.38.21.82.22 1.22.03l11.62-6.54-2.93-2.93-9.91 9.44zm-1.65-20.5C1.2 3.6 1 4.03 1 4.56v14.88c0 .53.2.96.53 1.3l.07.07 8.34-8.34v-.2L1.6 3.19l-.07.07zm17.33 7.63l-2.37-1.34-3.27 3.27 3.27 3.27 2.39-1.35c.68-.38.68-1.01 0-1.39l-.02-.46zM4.4.21L16.02 6.75l-2.93 2.93L3.18.24C3.58.05 4.02.06 4.4.21z"/></svg>
-          Google Play
+          <span><small>احصل عليه من</small><br>Google Play</span>
         </a>
-        <a href="https://apps.apple.com/app/id6743782700" target="_blank" rel="noopener" class="app-dl-btn app-dl-apple">
+        <a href="https://apps.apple.com/app/id6743782700" target="_blank" rel="noopener" class="app-dl-btn app-dl-outline">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04l-.08.23zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          App Store
+          <span><small>حمّله من</small><br>App Store</span>
         </a>
       </div>
     </div>
@@ -485,49 +512,133 @@ document.getElementById('booking-form').addEventListener('submit', async functio
 </section>
 <style>
 .app-dl {
-  background: linear-gradient(135deg, #1a73e8 0%, #0d5dbf 100%);
-  padding: 48px 24px;
+  background: #1e2c2f;
+  padding: 64px 24px;
   direction: rtl;
 }
 .app-dl-inner {
-  max-width: 700px;
+  max-width: 860px;
   margin: 0 auto;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 52px;
+  justify-content: center;
+}
+/* Phone */
+.app-dl-phone { flex-shrink: 0; }
+.app-dl-phone-frame {
+  width: 156px;
+  height: 280px;
+  border-radius: 26px;
+  background: #0e1a1c;
+  border: 3px solid #c9a84c;
+  box-shadow: 0 0 0 6px rgba(201,168,76,.12), 0 20px 40px rgba(0,0,0,.5);
+  padding: 12px 9px;
+  display: flex;
+  flex-direction: column;
+}
+.app-dl-phone-screen {
+  flex: 1;
+  background: #f5f2ec;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 9px 7px 7px;
+}
+.app-dl-screen-header {
+  background: #1e2c2f;
+  border-radius: 9px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.app-dl-logo-text {
+  color: #c9a84c;
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.app-dl-screen-card {
+  background: #fff;
+  border-radius: 7px;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.07);
+}
+.app-dl-screen-row { height: 7px; background: #e0dbd0; border-radius: 4px; }
+.app-dl-screen-row.short { width: 60%; }
+.app-dl-screen-btn { margin-top: auto; background: #1e2c2f; border-radius: 7px; height: 26px; }
+/* Text */
+.app-dl-eyebrow {
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: #c9a84c;
+  margin: 0 0 8px;
 }
 .app-dl-title {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 800;
   color: #fff;
-  margin: 0 0 10px;
+  margin: 0 0 20px;
   font-family: 'Cairo', sans-serif;
+  line-height: 1.25;
 }
-.app-dl-sub {
+.app-dl-features {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 0;
+}
+.app-dl-features li {
+  font-family: 'Cairo', sans-serif;
   font-size: 15px;
-  color: rgba(255,255,255,.88);
-  margin: 0 0 24px;
-  font-family: 'Cairo', sans-serif;
-}
-.app-dl-btns {
+  color: rgba(255,255,255,.85);
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,.1);
   display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
 }
+.app-dl-features li:first-child { border-top: 1px solid rgba(255,255,255,.1); }
+.app-dl-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c9a84c;
+  flex-shrink: 0;
+}
+.app-dl-btns { display: flex; gap: 12px; flex-wrap: wrap; }
 .app-dl-btn {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  padding: 12px 22px;
-  border-radius: 12px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: 'Cairo', sans-serif;
   font-size: 14px;
   font-weight: 700;
-  font-family: 'Cairo', sans-serif;
   text-decoration: none;
+  line-height: 1.3;
   transition: transform .15s, box-shadow .15s;
 }
-.app-dl-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
-.app-dl-google { background: #fff; color: #1a73e8; }
-.app-dl-apple  { background: rgba(255,255,255,.15); color: #fff; border: 2px solid rgba(255,255,255,.5); }
+.app-dl-btn small { font-size: 11px; font-weight: 400; opacity: .8; display: block; }
+.app-dl-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+.app-dl-gold { background: #c9a84c; color: #1e2c2f; }
+.app-dl-outline { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.35); }
+.app-dl-outline:hover { border-color: rgba(255,255,255,.7); }
+@media (max-width: 640px) {
+  .app-dl-inner { flex-direction: column; gap: 32px; }
+  .app-dl-text { text-align: center; }
+  .app-dl-features li { text-align: right; }
+  .app-dl-title { font-size: 24px; }
+  .app-dl-btns { justify-content: center; }
+}
 </style>
 </body>
 </html>
