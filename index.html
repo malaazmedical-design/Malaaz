@@ -420,7 +420,7 @@
   .page-hero { padding: 80px 20px 40px !important; }
   .page-title { font-size: 30px !important; }
   .sub-grid { grid-template-columns: 1fr 1fr !important; }
-  footer .footer-top { grid-template-columns: 1fr 1fr !important; gap: 28px !important; }
+  footer .footer-top { grid-template-columns: 1fr 1fr !important; gap: 24px !important; }
 }
 @media (max-width: 420px) {
   .services-grid { grid-template-columns: 1fr !important; }
@@ -698,7 +698,7 @@ h1 span.accent{color:var(--accent);}
 
 /* Footer */
 footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,255,255,.04);}
-.footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:48px;margin-bottom:40px;}
+.footer-top{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
 .footer-brand .fl-logo{font-size:32px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;letter-spacing:-1px;}
 .footer-brand .fl-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.9;}
 .footer-app-btns{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
@@ -1162,10 +1162,13 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       <div class="footer-col">
         <h4>المنصة</h4>
         <a href="/مقدمو-الخدمة">مقدمو الخدمة</a>
+        <span onclick="window.open('provider.html','_blank')">انضم كمقدم خدمة</span>
+      </div>
+      <div class="footer-col">
+        <h4>محتاج للمساعدة؟</h4>
         <span onclick="showPage('about')">من نحن</span>
         <a href="/faq.html">الأسئلة الشائعة</a>
         <a href="/blog.html">المقالات</a>
-        <span onclick="window.open('provider.html','_blank')">انضم كمقدم خدمة</span>
         <a href="/privacy.html">سياسة الخصوصية</a>
       </div>
       <div class="footer-col">
@@ -3658,7 +3661,7 @@ function injectIndexResponsive() {
       .modal-panel { border-radius: 20px 20px 0 0 !important; max-height: 95vh !important; }
       .bm-svc-grid { grid-template-columns: 1fr 1fr 1fr !important; }
       .payment-options { grid-template-columns: 1fr 1fr 1fr !important; }
-      footer .footer-top { grid-template-columns: 1fr 1fr !important; gap: 28px !important; }
+      footer .footer-top { grid-template-columns: 1fr 1fr !important; gap: 24px !important; }
       .page-hero { padding: 80px 20px 40px !important; }
       .page-title { font-size: 30px !important; }
       .container { padding: 30px 16px !important; }
