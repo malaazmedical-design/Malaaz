@@ -253,19 +253,38 @@ nav{position:sticky;top:0;z-index:100;background:var(--dark);display:flex;align-
 .prov-empty{text-align:center;padding:80px 20px;color:var(--muted);font-size:16px}
 
 /* PROFILE MODAL */
-.profile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:20px}
+.profile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:flex-end;justify-content:center;padding:0}
 .profile-overlay.open{display:flex}
-.modal-box{background:var(--dark);border-radius:20px;padding:28px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;position:relative}
-.modal-close{position:absolute;top:16px;left:16px;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
-.modal-prov-name{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px}
-.modal-prov-spec{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:20px}
-.modal-service-group{margin-bottom:16px}
-.modal-service-title{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:6px}
-.modal-sub-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;transition:background .15s;border-radius:8px;padding:10px}
-.modal-sub-item:hover{background:rgba(255,255,255,.04)}
-.modal-sub-name{font-size:14px;color:rgba(255,255,255,.85)}
-.modal-sub-price{font-size:15px;font-weight:700;color:var(--accent)}
-.modal-book-now{width:100%;background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;margin-top:20px}
+.modal-box{background:var(--dark);border-radius:24px 24px 0 0;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;position:relative;padding-bottom:32px}
+.modal-close{position:absolute;top:16px;left:16px;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;z-index:10}
+.modal-close:hover{background:rgba(255,255,255,.14)}
+.modal-hero{display:flex;align-items:center;gap:16px;padding:24px 22px 16px}
+.modal-ava{width:72px;height:72px;border-radius:18px;object-fit:cover;background:rgba(255,255,255,.08);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.modal-ava img{width:100%;height:100%;object-fit:cover;border-radius:18px}
+.modal-ava i{font-size:28px;color:rgba(255,255,255,.4)}
+.modal-prov-name{font-size:20px;font-weight:800;color:#fff;margin-bottom:3px}
+.modal-prov-spec{font-size:13px;color:rgba(255,255,255,.5)}
+.modal-stars-row{font-size:13px;color:var(--accent);margin-top:4px}
+.modal-tags{display:flex;flex-wrap:wrap;gap:6px;padding:0 22px 14px}
+.modal-tag{font-size:11px;color:rgba(255,255,255,.6);background:rgba(255,255,255,.07);padding:4px 11px;border-radius:100px;border:1px solid rgba(255,255,255,.1)}
+.modal-bio{font-size:13px;color:rgba(255,255,255,.55);line-height:1.7;padding:0 22px 16px}
+.modal-cta-row{display:flex;gap:10px;padding:0 22px 20px}
+.modal-wa-btn{flex:1;background:#25d366;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px}
+.modal-call-btn{flex:1;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px}
+.modal-section-title{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.1em;padding:0 22px 10px;border-top:1px solid rgba(255,255,255,.07);padding-top:18px}
+.modal-service-group{padding:0 22px;margin-bottom:12px}
+.modal-svc-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.08em;margin-bottom:8px}
+.modal-sub-item{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;cursor:pointer;margin-bottom:7px;transition:all .15s}
+.modal-sub-item:hover{background:rgba(201,168,76,.09);border-color:rgba(201,168,76,.3)}
+.modal-sub-name{font-size:13px;color:rgba(255,255,255,.85)}
+.modal-sub-dur{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px}
+.modal-sub-price{font-size:16px;font-weight:900;color:var(--accent)}
+.modal-book-now{margin:8px 22px 0;width:calc(100% - 44px);background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.modal-reviews-wrap{padding:0 22px}
+.modal-review-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.modal-review-author{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px}
+.modal-review-stars{color:var(--accent);font-size:12px;margin-bottom:5px}
+.modal-review-text{font-size:12px;color:rgba(255,255,255,.55);line-height:1.6}
 
 /* FOOTER */
 footer{background:#141e20;color:rgba(255,255,255,.5);text-align:center;padding:32px 20px;font-size:13px}
@@ -357,11 +376,28 @@ __BOOKING_CSS__
 <div class="profile-overlay" id="profileModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeProfile()"><i class="fas fa-times"></i></button>
-    <div class="modal-prov-name" id="modal-name"></div>
-    <div class="modal-prov-spec" id="modal-spec"></div>
-    <div id="modal-stars" style="font-size:13px;color:var(--accent);margin-bottom:16px"></div>
+    <!-- Hero -->
+    <div class="modal-hero">
+      <div class="modal-ava" id="modal-ava"><i class="fas fa-user-md"></i></div>
+      <div>
+        <div class="modal-prov-name" id="modal-name"></div>
+        <div class="modal-prov-spec" id="modal-spec"></div>
+        <div class="modal-stars-row" id="modal-stars"></div>
+      </div>
+    </div>
+    <!-- Tags -->
+    <div class="modal-tags" id="modal-tags"></div>
+    <!-- Bio -->
+    <div class="modal-bio" id="modal-bio" style="display:none"></div>
+    <!-- CTA -->
+    <div class="modal-cta-row" id="modal-cta-row"></div>
+    <!-- Services -->
+    <div class="modal-section-title" id="modal-svc-title" style="display:none">💊 الخدمات والأسعار</div>
     <div id="modal-services-body"></div>
     <button class="modal-book-now" id="modal-book-btn">احجز الآن مجاناً</button>
+    <!-- Reviews -->
+    <div class="modal-section-title" id="modal-rev-title" style="display:none">⭐ آراء العملاء</div>
+    <div class="modal-reviews-wrap" id="modal-reviews"></div>
   </div>
 </div>
 
@@ -482,46 +518,133 @@ function clientFilter() {
 
 // Profile modal
 let currentProviderId = null;
+let _provCache = {};
+
 async function viewProfile(id) {
   currentProviderId = id;
   const modal = document.getElementById('profileModal');
-  const card = document.querySelector('.prov-card [onclick*="viewProfile(\\''+id+'\\')"]')?.closest('.prov-card');
-  const name = card?.querySelector('.prov-name')?.textContent || '';
-  const spec = card?.querySelector('.prov-spec')?.textContent || '';
-  document.getElementById('modal-name').textContent = name;
-  document.getElementById('modal-spec').textContent = spec;
-  const starsEl = document.getElementById('modal-stars');
-  if (starsEl) starsEl.innerHTML = card?.querySelector('.prov-stars')?.innerHTML || '';
-  document.getElementById('modal-services-body').innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.4)">جاري التحميل...</div>';
-  document.getElementById('modal-book-btn').onclick = () => openProviderPage(id, name);
   modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
 
-  const data = await sf("provider_services?select=sub_service_id,custom_price,sub_services(name,service_name,price_min)&provider_id=eq."+encodeURIComponent(id)+"&is_active=eq.true");
-  if (!data || !data.length) {
-    document.getElementById('modal-services-body').innerHTML = '<div style="color:rgba(255,255,255,.4);padding:12px 0">لا توجد خدمات مسجّلة</div>';
-    return;
+  // Reset
+  document.getElementById('modal-name').textContent = '...';
+  document.getElementById('modal-spec').textContent = '';
+  document.getElementById('modal-stars').innerHTML = '';
+  document.getElementById('modal-tags').innerHTML = '';
+  document.getElementById('modal-bio').style.display = 'none';
+  document.getElementById('modal-cta-row').innerHTML = '';
+  document.getElementById('modal-svc-title').style.display = 'none';
+  document.getElementById('modal-rev-title').style.display = 'none';
+  document.getElementById('modal-services-body').innerHTML = '<div style="padding:20px 22px;color:rgba(255,255,255,.35);font-size:13px">جاري التحميل...</div>';
+  document.getElementById('modal-reviews').innerHTML = '';
+  document.getElementById('modal-ava').innerHTML = '<i class="fas fa-user-md" style="font-size:28px;color:rgba(255,255,255,.3)"></i>';
+
+  // Fetch provider full data + services + reviews in parallel
+  const [provArr, services, reviews] = await Promise.all([
+    _provCache[id]
+      ? Promise.resolve([_provCache[id]])
+      : sf('providers?select=*&id=eq.'+encodeURIComponent(id)),
+    sf('provider_services?select=custom_price,sub_services(name,service_name,duration,price_min)&provider_id=eq.'+encodeURIComponent(id)+'&is_active=eq.true'),
+    sf('reviews?select=reviewer_name,rating,comment,created_at&provider_id=eq.'+encodeURIComponent(id)+'&is_approved=eq.true&order=created_at.desc&limit=5'),
+  ]);
+
+  const p = provArr?.[0];
+  if (!p) { document.getElementById('modal-services-body').innerHTML = '<div style="padding:20px 22px;color:rgba(255,255,255,.35)">تعذّر تحميل البيانات</div>'; return; }
+  _provCache[id] = p;
+
+  // ── Hero ──
+  const avaEl = document.getElementById('modal-ava');
+  avaEl.innerHTML = p.photo_url
+    ? '<img src="'+esc(p.photo_url)+'" alt="'+esc(p.name)+'">'
+    : '<i class="fas fa-user-md" style="font-size:28px;color:rgba(255,255,255,.3)"></i>';
+
+  const icons = {'كشف منزلي':'fa-stethoscope','تمريض منزلي':'fa-user-nurse','أشعة منزلية':'fa-x-ray'};
+  if (!p.photo_url) avaEl.innerHTML = '<i class="fas '+(icons[p.service_type]||'fa-user-md')+'" style="font-size:28px;color:rgba(255,255,255,.35)"></i>';
+
+  const specText = p.grade
+    ? p.grade + ' ' + (p.specialty || p.service_type || '')
+    : (p.specialty || p.service_type || '');
+  document.getElementById('modal-name').textContent = p.name || '';
+  document.getElementById('modal-spec').textContent = specText;
+
+  // Stars
+  const rMap = {};
+  (reviews||[]).forEach(r => { rMap.sum = (rMap.sum||0)+r.rating; rMap.count = (rMap.count||0)+1; });
+  const avg = rMap.count ? rMap.sum/rMap.count : null;
+  const starsEl = document.getElementById('modal-stars');
+  if (avg) {
+    const full = Math.floor(avg); const half = (avg-full)>=.5;
+    starsEl.innerHTML = '★'.repeat(full)+(half?'⯨':'')+'☆'.repeat(5-full-(half?1:0))
+      +' <span style="font-size:11px;color:rgba(255,255,255,.35)">'+avg.toFixed(1)+' ('+rMap.count+' تقييم)</span>';
+  } else {
+    starsEl.innerHTML = '<span style="font-size:12px;color:rgba(255,255,255,.35)">⭐ مقدم جديد</span>';
   }
+
+  // Tags
+  const tags = [];
+  if (p.areas) p.areas.split(',').slice(0,4).forEach(a => tags.push('📍 '+a.trim()));
+  if (p.experience_years) tags.push('🏅 '+p.experience_years+' سنة خبرة');
+  if (p.grade) tags.push(p.grade);
+  document.getElementById('modal-tags').innerHTML = tags.map(t=>'<span class="modal-tag">'+esc(t)+'</span>').join('');
+
+  // Bio
+  if (p.bio) {
+    const bioEl = document.getElementById('modal-bio');
+    bioEl.textContent = p.bio;
+    bioEl.style.display = 'block';
+  }
+
+  // CTA — WhatsApp + Call
+  const ctaRow = document.getElementById('modal-cta-row');
+  const phone = p.phone || '';
+  ctaRow.innerHTML = (phone
+    ? '<a href="https://wa.me/2'+phone.replace(/\D/g,'')+'" target="_blank" class="modal-wa-btn"><i class="fab fa-whatsapp"></i> واتساب</a>'
+      +'<a href="tel:'+esc(phone)+'" class="modal-call-btn"><i class="fas fa-phone"></i> اتصال</a>'
+    : '<button class="modal-call-btn" style="flex:1" onclick="openProviderPage(\''+esc(id)+'\',\''+esc(p.name||'')+'\')"><i class="fas fa-calendar-check"></i> احجز الآن</button>');
+
+  // Services
   const grouped = {};
-  data.forEach(ps => {
-    const sub = ps.sub_services;
-    if (!sub) return;
-    const g = sub.service_name || 'خدمات';
-    if (!grouped[g]) grouped[g] = [];
-    grouped[g].push({ name: sub.name, price: ps.custom_price || sub.price_min });
+  (services||[]).forEach(ps => {
+    const sub = ps.sub_services; if(!sub) return;
+    const g = sub.service_name||'خدمات';
+    if(!grouped[g]) grouped[g]=[];
+    grouped[g].push({ name:sub.name, dur:sub.duration, price:ps.custom_price||sub.price_min });
   });
-  let html = '';
-  for (const [group, items] of Object.entries(grouped)) {
-    html += '<div class="modal-service-group"><div class="modal-service-title">'+esc(group)+'</div>';
-    items.forEach(it => {
-      html += '<div class="modal-sub-item"><span class="modal-sub-name">'+esc(it.name)+'</span>'+(it.price?'<span class="modal-sub-price">'+esc(String(it.price))+' ج.م</span>':'')+'</div>';
+  const svcKeys = Object.keys(grouped);
+  if (svcKeys.length) {
+    document.getElementById('modal-svc-title').style.display = 'block';
+    let svcHtml = '';
+    svcKeys.forEach(g => {
+      svcHtml += '<div class="modal-service-group"><div class="modal-svc-label">'+esc(g)+'</div>';
+      grouped[g].forEach(it => {
+        svcHtml += '<div class="modal-sub-item" onclick="closeProfile();openProviderPage(\''+esc(id)+'\',\''+esc(p.name||'')+'\')"><div><div class="modal-sub-name">'+esc(it.name)+'</div>'+(it.dur?'<div class="modal-sub-dur">⏱ '+esc(it.dur)+'</div>':'')+'</div>'+(it.price?'<div class="modal-sub-price">'+esc(String(it.price))+' ج.م</div>':'')+'</div>';
+      });
+      svcHtml += '</div>';
     });
-    html += '</div>';
+    document.getElementById('modal-services-body').innerHTML = svcHtml;
+  } else {
+    document.getElementById('modal-services-body').innerHTML = '<div style="padding:12px 22px;color:rgba(255,255,255,.35);font-size:13px">لم تُحدَّد خدمات فرعية بعد</div>';
   }
-  document.getElementById('modal-services-body').innerHTML = html;
+
+  document.getElementById('modal-book-btn').onclick = () => { closeProfile(); openProviderPage(id, p.name||''); };
+
+  // Reviews
+  if (reviews?.length) {
+    document.getElementById('modal-rev-title').style.display = 'block';
+    document.getElementById('modal-reviews').innerHTML = reviews.map(r => {
+      const s = Math.round(r.rating||0);
+      return '<div class="modal-review-card">'
+        +'<div class="modal-review-author">'+esc(r.reviewer_name||'عميل')+'</div>'
+        +'<div class="modal-review-stars">'+'★'.repeat(s)+'☆'.repeat(5-s)+'</div>'
+        +(r.comment?'<div class="modal-review-text">'+esc(r.comment)+'</div>':'')
+        +'</div>';
+    }).join('');
+  }
 }
 
 function closeProfile() {
   document.getElementById('profileModal').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 document.getElementById('profileModal').addEventListener('click', function(e) {
