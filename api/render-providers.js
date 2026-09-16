@@ -252,39 +252,7 @@ nav{position:sticky;top:0;z-index:100;background:var(--dark);display:flex;align-
 .prov-profile-btn:hover{background:rgba(255,255,255,.12)}
 .prov-empty{text-align:center;padding:80px 20px;color:var(--muted);font-size:16px}
 
-/* PROFILE MODAL */
-.profile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:flex-end;justify-content:center;padding:0}
-.profile-overlay.open{display:flex}
-.modal-box{background:var(--dark);border-radius:24px 24px 0 0;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;position:relative;padding-bottom:32px}
-.modal-close{position:absolute;top:16px;left:16px;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;z-index:10}
-.modal-close:hover{background:rgba(255,255,255,.14)}
-.modal-hero{display:flex;align-items:center;gap:16px;padding:24px 22px 16px}
-.modal-ava{width:72px;height:72px;border-radius:18px;object-fit:cover;background:rgba(255,255,255,.08);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.modal-ava img{width:100%;height:100%;object-fit:cover;border-radius:18px}
-.modal-ava i{font-size:28px;color:rgba(255,255,255,.4)}
-.modal-prov-name{font-size:20px;font-weight:800;color:#fff;margin-bottom:3px}
-.modal-prov-spec{font-size:13px;color:rgba(255,255,255,.5)}
-.modal-stars-row{font-size:13px;color:var(--accent);margin-top:4px}
-.modal-tags{display:flex;flex-wrap:wrap;gap:6px;padding:0 22px 14px}
-.modal-tag{font-size:11px;color:rgba(255,255,255,.6);background:rgba(255,255,255,.07);padding:4px 11px;border-radius:100px;border:1px solid rgba(255,255,255,.1)}
-.modal-bio{font-size:13px;color:rgba(255,255,255,.55);line-height:1.7;padding:0 22px 16px}
-.modal-cta-row{display:flex;gap:10px;padding:0 22px 20px}
-.modal-wa-btn{flex:1;background:#25d366;color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px}
-.modal-call-btn{flex:1;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px}
-.modal-section-title{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.1em;padding:0 22px 10px;border-top:1px solid rgba(255,255,255,.07);padding-top:18px}
-.modal-service-group{padding:0 22px;margin-bottom:12px}
-.modal-svc-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.08em;margin-bottom:8px}
-.modal-sub-item{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;cursor:pointer;margin-bottom:7px;transition:all .15s}
-.modal-sub-item:hover{background:rgba(201,168,76,.09);border-color:rgba(201,168,76,.3)}
-.modal-sub-name{font-size:13px;color:rgba(255,255,255,.85)}
-.modal-sub-dur{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px}
-.modal-sub-price{font-size:16px;font-weight:900;color:var(--accent)}
-.modal-book-now{margin:8px 22px 0;width:calc(100% - 44px);background:var(--accent);color:var(--dark);border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
-.modal-reviews-wrap{padding:0 22px}
-.modal-review-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;margin-bottom:8px}
-.modal-review-author{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px}
-.modal-review-stars{color:var(--accent);font-size:12px;margin-bottom:5px}
-.modal-review-text{font-size:12px;color:rgba(255,255,255,.55);line-height:1.6}
+/* profile modal uses booking .modal-overlay + .modal-panel — no extra CSS needed */
 
 /* FOOTER */
 footer{background:#141e20;color:rgba(255,255,255,.5);text-align:center;padding:32px 20px;font-size:13px}
@@ -372,34 +340,7 @@ __BOOKING_CSS__
   ${sectionsHtml}
 </div>
 
-<!-- PROFILE MODAL -->
-<div class="profile-overlay" id="profileModal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeProfile()"><i class="fas fa-times"></i></button>
-    <!-- Hero -->
-    <div class="modal-hero">
-      <div class="modal-ava" id="modal-ava"><i class="fas fa-user-md"></i></div>
-      <div>
-        <div class="modal-prov-name" id="modal-name"></div>
-        <div class="modal-prov-spec" id="modal-spec"></div>
-        <div class="modal-stars-row" id="modal-stars"></div>
-      </div>
-    </div>
-    <!-- Tags -->
-    <div class="modal-tags" id="modal-tags"></div>
-    <!-- Bio -->
-    <div class="modal-bio" id="modal-bio" style="display:none"></div>
-    <!-- CTA -->
-    <div class="modal-cta-row" id="modal-cta-row"></div>
-    <!-- Services -->
-    <div class="modal-section-title" id="modal-svc-title" style="display:none">💊 الخدمات والأسعار</div>
-    <div id="modal-services-body"></div>
-    <button class="modal-book-now" id="modal-book-btn">احجز الآن مجاناً</button>
-    <!-- Reviews -->
-    <div class="modal-section-title" id="modal-rev-title" style="display:none">⭐ آراء العملاء</div>
-    <div class="modal-reviews-wrap" id="modal-reviews"></div>
-  </div>
-</div>
+<!-- provider-profile-modal injected dynamically by viewProfile() -->
 
 <!-- BOOKING MODAL injected at runtime -->
 __BOOKING_HTML__
@@ -516,140 +457,141 @@ function clientFilter() {
   });
 }
 
-// Profile modal
+// Profile modal — original logic from main branch adapted for SSR page
 let currentProviderId = null;
 let _provCache = {};
 
+function renderProviderAreas(areasStr) {
+  if (!areasStr) return '';
+  return areasStr.split(',').slice(0,4).map(a =>
+    '<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">📍 '+esc(a.trim())+'</span>'
+  ).join('');
+}
+
 async function viewProfile(id) {
   currentProviderId = id;
-  const modal = document.getElementById('profileModal');
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
 
-  // Reset
-  document.getElementById('modal-name').textContent = '...';
-  document.getElementById('modal-spec').textContent = '';
-  document.getElementById('modal-stars').innerHTML = '';
-  document.getElementById('modal-tags').innerHTML = '';
-  document.getElementById('modal-bio').style.display = 'none';
-  document.getElementById('modal-cta-row').innerHTML = '';
-  document.getElementById('modal-svc-title').style.display = 'none';
-  document.getElementById('modal-rev-title').style.display = 'none';
-  document.getElementById('modal-services-body').innerHTML = '<div style="padding:20px 22px;color:rgba(255,255,255,.35);font-size:13px">جاري التحميل...</div>';
-  document.getElementById('modal-reviews').innerHTML = '';
-  document.getElementById('modal-ava').innerHTML = '<i class="fas fa-user-md" style="font-size:28px;color:rgba(255,255,255,.3)"></i>';
-
-  // Fetch provider full data + services + reviews in parallel
-  const [provArr, services, reviews] = await Promise.all([
+  // Fetch provider + services + reviews in parallel
+  const [provArr, provSvcsRaw, provReviews] = await Promise.all([
     _provCache[id]
       ? Promise.resolve([_provCache[id]])
       : sf('providers?select=*&id=eq.'+encodeURIComponent(id)),
-    sf('provider_services?select=custom_price,sub_services(name,service_name,duration,price_min)&provider_id=eq.'+encodeURIComponent(id)+'&is_active=eq.true'),
-    sf('reviews?select=reviewer_name,rating,comment,created_at&provider_id=eq.'+encodeURIComponent(id)+'&is_approved=eq.true&order=created_at.desc&limit=5'),
+    sf('provider_services?select=sub_service_id,custom_price,sub_services(name,service_name,duration,price_min,price_min_specialist,price_min_consultant)&provider_id=eq.'+encodeURIComponent(id)+'&is_active=eq.true'),
+    sf('reviews?select=client_name,rating,text&provider_id=eq.'+encodeURIComponent(id)+'&is_approved=eq.true&limit=5'),
   ]);
 
-  const p = provArr?.[0];
-  if (!p) { document.getElementById('modal-services-body').innerHTML = '<div style="padding:20px 22px;color:rgba(255,255,255,.35)">تعذّر تحميل البيانات</div>'; return; }
-  _provCache[id] = p;
+  const provider = provArr?.[0];
+  if (!provider) return;
+  _provCache[id] = provider;
 
-  // ── Hero ──
-  const avaEl = document.getElementById('modal-ava');
-  avaEl.innerHTML = p.photo_url
-    ? '<img src="'+esc(p.photo_url)+'" alt="'+esc(p.name)+'">'
-    : '<i class="fas fa-user-md" style="font-size:28px;color:rgba(255,255,255,.3)"></i>';
-
-  const icons = {'كشف منزلي':'fa-stethoscope','تمريض منزلي':'fa-user-nurse','أشعة منزلية':'fa-x-ray'};
-  if (!p.photo_url) avaEl.innerHTML = '<i class="fas '+(icons[p.service_type]||'fa-user-md')+'" style="font-size:28px;color:rgba(255,255,255,.35)"></i>';
-
-  const specText = p.grade
-    ? p.grade + ' ' + (p.specialty || p.service_type || '')
-    : (p.specialty || p.service_type || '');
-  document.getElementById('modal-name').textContent = p.name || '';
-  document.getElementById('modal-spec').textContent = specText;
-
-  // Stars
-  const rMap = {};
-  (reviews||[]).forEach(r => { rMap.sum = (rMap.sum||0)+r.rating; rMap.count = (rMap.count||0)+1; });
-  const avg = rMap.count ? rMap.sum/rMap.count : null;
-  const starsEl = document.getElementById('modal-stars');
-  if (avg) {
-    const full = Math.floor(avg); const half = (avg-full)>=.5;
-    starsEl.innerHTML = '★'.repeat(full)+(half?'⯨':'')+'☆'.repeat(5-full-(half?1:0))
-      +' <span style="font-size:11px;color:rgba(255,255,255,.35)">'+avg.toFixed(1)+' ('+rMap.count+' تقييم)</span>';
-  } else {
-    starsEl.innerHTML = '<span style="font-size:12px;color:rgba(255,255,255,.35)">⭐ مقدم جديد</span>';
+  // Attach rating from already-rendered card data if available
+  if (!provider.realRating) {
+    const card = document.querySelector('[onclick*="viewProfile(\''+id+'\'"]')?.closest('.prov-card');
+    const starsText = card?.querySelector('.prov-stars')?.textContent || '';
+    const m = starsText.match(/([\d.]+)\s*\((\d+)/);
+    if (m) { provider.realRating = parseFloat(m[1]); provider.reviewCount = parseInt(m[2]); }
   }
 
-  // Tags
-  const tags = [];
-  if (p.areas) p.areas.split(',').slice(0,4).forEach(a => tags.push('📍 '+a.trim()));
-  if (p.experience_years) tags.push('🏅 '+p.experience_years+' سنة خبرة');
-  if (p.grade) tags.push(p.grade);
-  document.getElementById('modal-tags').innerHTML = tags.map(t=>'<span class="modal-tag">'+esc(t)+'</span>').join('');
+  const isConsultant = (provider.grade || '') === 'استشاري';
+  const provSvcs = (provSvcsRaw || []).map(ps => {
+    const sub = ps.sub_services; if (!sub) return null;
+    const tierPrice = isConsultant ? sub.price_min_consultant : sub.price_min_specialist;
+    return { sub_name: sub.name, service_name: sub.service_name, duration: sub.duration, price: ps.custom_price ?? tierPrice ?? sub.price_min };
+  }).filter(Boolean);
 
-  // Bio
-  if (p.bio) {
-    const bioEl = document.getElementById('modal-bio');
-    bioEl.textContent = p.bio;
-    bioEl.style.display = 'block';
-  }
-
-  // CTA — WhatsApp + Call
-  const ctaRow = document.getElementById('modal-cta-row');
-  const phone = p.phone || '';
-  ctaRow.innerHTML = (phone
-    ? '<a href="https://wa.me/2'+phone.replace(/\D/g,'')+'" target="_blank" class="modal-wa-btn"><i class="fab fa-whatsapp"></i> واتساب</a>'
-      +'<a href="tel:'+esc(phone)+'" class="modal-call-btn"><i class="fas fa-phone"></i> اتصال</a>'
-    : '<button class="modal-call-btn" style="flex:1" onclick="openProviderPage(\''+esc(id)+'\',\''+esc(p.name||'')+'\')"><i class="fas fa-calendar-check"></i> احجز الآن</button>');
-
-  // Services
-  const grouped = {};
-  (services||[]).forEach(ps => {
-    const sub = ps.sub_services; if(!sub) return;
-    const g = sub.service_name||'خدمات';
-    if(!grouped[g]) grouped[g]=[];
-    grouped[g].push({ name:sub.name, dur:sub.duration, price:ps.custom_price||sub.price_min });
-  });
-  const svcKeys = Object.keys(grouped);
-  if (svcKeys.length) {
-    document.getElementById('modal-svc-title').style.display = 'block';
-    let svcHtml = '';
-    svcKeys.forEach(g => {
-      svcHtml += '<div class="modal-service-group"><div class="modal-svc-label">'+esc(g)+'</div>';
-      grouped[g].forEach(it => {
-        svcHtml += '<div class="modal-sub-item" onclick="closeProfile();openProviderPage(\''+esc(id)+'\',\''+esc(p.name||'')+'\')"><div><div class="modal-sub-name">'+esc(it.name)+'</div>'+(it.dur?'<div class="modal-sub-dur">⏱ '+esc(it.dur)+'</div>':'')+'</div>'+(it.price?'<div class="modal-sub-price">'+esc(String(it.price))+' ج.م</div>':'')+'</div>';
-      });
-      svcHtml += '</div>';
+  // Build services HTML
+  let servicesHtml = '';
+  if (provSvcs.length) {
+    const grouped = {};
+    provSvcs.forEach(ps => { const k = ps.service_name||'خدمات'; if(!grouped[k]) grouped[k]=[]; grouped[k].push(ps); });
+    const svcIcons = {'كشف منزلي':'🩺','تمريض منزلي':'👩‍⚕️','أشعة منزلية':'🔬'};
+    Object.entries(grouped).forEach(([svcName, subs]) => {
+      servicesHtml += '<div style="margin-bottom:14px">'
+        +'<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.3px">'+(svcIcons[svcName]||'🔧')+' '+esc(svcName)+'</div>'
+        +'<div style="display:flex;flex-direction:column;gap:8px">'
+        +subs.map(ps =>
+          '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg);border-radius:12px;cursor:pointer;border:1.5px solid var(--border);transition:border .2s"'
+          +' onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'"'
+          +' onclick="closeProfile();openProviderBooking({id:\''+esc(provider.id)+'\',name:\''+esc(provider.name)+'\',email:\''+esc(provider.email||'')+'\',service_type:\''+esc(provider.service_type||'')+'\',sub:\''+esc(ps.sub_name)+'\'})">'
+          +'<div><div style="font-size:14px;font-weight:700;color:var(--text)">'+esc(ps.sub_name)+'</div>'
+          +(ps.duration?'<div style="font-size:11px;color:var(--muted);margin-top:2px">⏱ '+esc(ps.duration)+'</div>':'')+'</div>'
+          +'<div style="text-align:left;flex-shrink:0"><div style="font-size:17px;font-weight:900;color:var(--dark)">'+(ps.price||'—')+'<span style="font-size:11px;font-weight:400;color:var(--muted)"> ج.م</span></div></div>'
+          +'</div>'
+        ).join('')
+        +'</div></div>';
     });
-    document.getElementById('modal-services-body').innerHTML = svcHtml;
   } else {
-    document.getElementById('modal-services-body').innerHTML = '<div style="padding:12px 22px;color:rgba(255,255,255,.35);font-size:13px">لم تُحدَّد خدمات فرعية بعد</div>';
+    servicesHtml = '<div style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px"><div style="font-size:28px;margin-bottom:8px">📋</div>لم يحدد هذا المقدم خدماته بعد — يمكنك الحجز المباشر معه</div>';
   }
 
-  document.getElementById('modal-book-btn').onclick = () => { closeProfile(); openProviderPage(id, p.name||''); };
+  // Build reviews HTML
+  const reviewsHtml = provReviews?.length ? '<div style="padding:16px 18px;border-top:1px solid rgba(255,255,255,.08)">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px">⭐ آراء العملاء ('+provReviews.length+')</div>'
+    +provReviews.map(r =>
+      '<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-size:12px;font-weight:700">'+esc(r.client_name||'عميل')+'</span>'
+      +'<span style="color:var(--accent);font-size:11px">'+'★'.repeat(r.rating||5)+'</span></div>'
+      +(r.text?'<div style="font-size:12px;color:var(--muted);line-height:1.6">'+esc(r.text)+'</div>':'')
+      +'</div>'
+    ).join('')+'</div>' : '';
 
-  // Reviews
-  if (reviews?.length) {
-    document.getElementById('modal-rev-title').style.display = 'block';
-    document.getElementById('modal-reviews').innerHTML = reviews.map(r => {
-      const s = Math.round(r.rating||0);
-      return '<div class="modal-review-card">'
-        +'<div class="modal-review-author">'+esc(r.reviewer_name||'عميل')+'</div>'
-        +'<div class="modal-review-stars">'+'★'.repeat(s)+'☆'.repeat(5-s)+'</div>'
-        +(r.comment?'<div class="modal-review-text">'+esc(r.comment)+'</div>':'')
-        +'</div>';
-    }).join('');
+  const stars = provider.reviewCount > 0
+    ? '★'.repeat(Math.round(provider.realRating))+'☆'.repeat(5-Math.round(provider.realRating))
+      +' <span style="font-size:12px;color:var(--muted)">'+provider.realRating.toFixed(1)+' ('+provider.reviewCount+' تقييم)</span>'
+    : '<span style="color:var(--muted);font-size:13px">⭐ مقدم جديد</span>';
+  const gradeLabel = provider.grade
+    ? '<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px">'+esc(provider.grade)+'</span>' : '';
+  const specText = esc(provider.specialty||(provider.service_type==='تمريض منزلي'?'أخصائي تمريض':provider.service_type==='أشعة منزلية'?'مركز أشعة':provider.service_type||''));
+
+  // Create/reuse modal
+  let modal = document.getElementById('provider-profile-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'provider-profile-modal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = '<div class="modal-panel" style="max-height:88vh;overflow-y:auto;border-radius:20px 20px 0 0"><div id="provider-profile-content"></div></div>';
+    modal.addEventListener('click', e => { if (e.target === modal) { modal.classList.remove('open'); document.body.style.overflow=''; } });
+    document.body.appendChild(modal);
   }
+
+  document.getElementById('provider-profile-content').innerHTML =
+    '<div style="background:var(--dark2,#243235);padding:20px;border-radius:20px 20px 0 0">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+    +'<div style="display:flex;gap:14px;align-items:center">'
+    +(provider.photo_url?'<img src="'+esc(provider.photo_url)+'" style="width:64px;height:64px;border-radius:16px;object-fit:cover;border:2px solid rgba(255,255,255,.15);flex-shrink:0">':'')
+    +'<div style="min-width:0;flex:1">'
+    +'<div style="font-size:18px;font-weight:900;color:#fff;font-family:\'Tajawal\',sans-serif;overflow-wrap:break-word">'+esc(provider.name)+'</div>'
+    +'<div style="margin-top:5px">'+gradeLabel+'<span style="font-size:12px;color:rgba(255,255,255,.5)">'+specText+'</span></div>'
+    +'<div style="color:var(--accent);font-size:14px;margin-top:6px">'+stars+'</div>'
+    +'</div></div>'
+    +'<button onclick="closeProfile()" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0">×</button>'
+    +'</div>'
+    +'<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">'+renderProviderAreas(provider.areas||provider.area)
+    +(provider.experience?'<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">'+esc(String(provider.experience))+' سنة خبرة</span>':'')
+    +'</div>'
+    +(provider.bio?'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.7">'+esc(provider.bio)+'</div>':'')
+    +'<div style="display:flex;gap:8px;margin-top:14px">'
+    +'<a href="https://wa.me/201039091989?text='+encodeURIComponent('مرحباً، عندي استفسار عن مقدم الخدمة: '+(provider.name||''))+'" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:\'Cairo\',sans-serif"><i class="fab fa-whatsapp" style="font-size:16px"></i> واتساب</a>'
+    +'<a href="tel:01039091989" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:\'Cairo\',sans-serif"><i class="fas fa-phone" style="font-size:14px"></i> اتصال</a>'
+    +'</div></div>'
+    +'<div style="padding:14px 18px 18px">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>'
+    +servicesHtml
+    +(provider.is_available
+      ?'<button onclick="closeProfile();openProviderBooking({id:\''+esc(provider.id)+'\',name:\''+esc(provider.name)+'\',email:\''+esc(provider.email||'')+'\',service_type:\''+esc(provider.service_type||'')+'\'})" style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Cairo\',sans-serif;margin-top:8px"><i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع '+esc(provider.name)+'</button>'
+      :'<button disabled style="width:100%;background:#e5e5e5;color:#999;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:not-allowed;font-family:\'Cairo\',sans-serif;margin-top:8px"><i class="fas fa-times" style="margin-left:8px"></i> غير متاح حالياً</button>')
+    +'</div>'
+    +reviewsHtml;
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeProfile() {
-  document.getElementById('profileModal').classList.remove('open');
-  document.body.style.overflow = '';
+  const modal = document.getElementById('provider-profile-modal') || document.getElementById('profileModal');
+  if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
 }
-
-document.getElementById('profileModal').addEventListener('click', function(e) {
-  if (e.target === this) closeProfile();
-});
 
 
 // ── Supabase client (required by booking JS) ──────────────
