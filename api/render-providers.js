@@ -539,7 +539,38 @@ try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { sb = 
 let allDocs = [];
 function sanitize(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sanitizeNum(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
-async function loadSiteContentForIndex() {} // no-op shim (index-only)
+async function loadSiteContentForIndex() {} // no-op (index-only)
+function updateSEO() {}                    // no-op (index-only)
+function updateSchemaRating() {}           // no-op (index-only)
+function setMeta() {}                      // no-op (index-only)
+
+// Load coverage areas into #bm-area select (used by openBookingModal)
+async function loadAreas() {
+  if (!sb) return;
+  try {
+    const { data } = await sb.from('coverage_areas').select('name,city').eq('is_active', true).order('name');
+    if (!data) return;
+    const areaSelect = document.getElementById('bm-area');
+    if (!areaSelect) return;
+    areaSelect.innerHTML = '<option value="">اختر المنطقة *</option>';
+    const cairo = data.filter(a => a.city === 'القاهرة');
+    const giza  = data.filter(a => a.city === 'الجيزة');
+    const addGroup = (label, list) => {
+      if (!list.length) return;
+      const grp = document.createElement('optgroup');
+      grp.label = label;
+      list.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.name;
+        opt.textContent = a.name;
+        grp.appendChild(opt);
+      });
+      areaSelect.appendChild(grp);
+    };
+    addGroup('القاهرة', cairo);
+    addGroup('الجيزة', giza);
+  } catch(e) {}
+}
 
 // ── Booking modal JS injected at runtime ──────────
 __BOOKING_JS__
