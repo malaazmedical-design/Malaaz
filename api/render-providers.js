@@ -167,6 +167,8 @@ module.exports = async function handler(req, res) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+<script>window.addEventListener('load',()=>{if(typeof emailjs!=='undefined')emailjs.init('P2Xy0_OBIWdVXk1gE');});</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -395,7 +397,11 @@ footer a:hover{color:rgba(255,255,255,.7)}
         </div>
         <div>
           <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.05em;display:block;margin-bottom:5px">العنوان بالتفصيل</label>
-          <input id="bk-address" type="text" placeholder="الشارع والبناية والدور..." style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Cairo',sans-serif;color:#fff;outline:none">
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <input id="bk-address" type="text" placeholder="الشارع والبناية والدور..." style="flex:1;box-sizing:border-box;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Cairo',sans-serif;color:#fff;outline:none">
+            <button type="button" id="bk-gps-btn" onclick="bkDetectLocation()" style="background:rgba(46,184,114,.15);border:1.5px solid rgba(46,184,114,.3);color:#2eb872;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;flex-shrink:0" title="تحديد موقعي">📍 موقعي</button>
+          </div>
+          <div id="bk-gps-status" style="display:none;font-size:11px;color:#2eb872;margin-top:5px;padding:5px 10px;background:rgba(46,184,114,.08);border-radius:6px"></div>
         </div>
         <div>
           <label style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.05em;display:block;margin-bottom:5px">الوقت المفضل</label>
@@ -579,11 +585,14 @@ let bkProvider = null;
 let bkSelectedSub = null;
 let bkSelectedPrice = null;
 let bkSelectedService = null;
+let bkLat = null;
+let bkLng = null;
 
 async function openProviderPage(id, name) {
   closeProfile();
   bkProvider = { id, name };
   bkSelectedSub = null; bkSelectedPrice = null; bkSelectedService = null;
+  bkLat = null; bkLng = null;
   document.getElementById('bk-prov-name').textContent = name;
   document.getElementById('bk-prov-spec').textContent = '';
   document.getElementById('bk-step1').style.display = '';
@@ -593,6 +602,12 @@ async function openProviderPage(id, name) {
   document.getElementById('bk-services-list').innerHTML =
     '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">جاري التحميل...</div>';
   document.getElementById('bookingModal').classList.add('open');
+
+  // جلب إيميل المقدم للـ notification
+  try {
+    const provInfo = await sf("providers?select=email&id=eq."+encodeURIComponent(id));
+    if (provInfo?.[0]?.email) bkProvider.email = provInfo[0].email;
+  } catch(e) {}
 
   const data = await sf("provider_services?select=sub_service_id,custom_price,sub_services(name,service_name,price_min)&provider_id=eq."+encodeURIComponent(id)+"&is_active=eq.true");
   if (!data || !data.length) {
@@ -626,6 +641,34 @@ function bkBack() {
   document.getElementById('bk-step2').style.display = 'none';
 }
 
+function bkDetectLocation() {
+  const btn = document.getElementById('bk-gps-btn');
+  const statusEl = document.getElementById('bk-gps-status');
+  if (!navigator.geolocation) return;
+  btn.textContent = '⏳ جاري...';
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    bkLat = pos.coords.latitude;
+    bkLng = pos.coords.longitude;
+    btn.textContent = '✅ تم';
+    statusEl.style.display = '';
+    statusEl.textContent = 'تم تحديد موقعك بالـ GPS';
+    try {
+      const r = await fetch(\`https://nominatim.openstreetmap.org/reverse?lat=\${bkLat}&lon=\${bkLng}&format=json&accept-language=ar\`);
+      const geo = await r.json();
+      const addr = geo?.address;
+      const readable = [addr?.road, addr?.suburb, addr?.city_district, addr?.city].filter(Boolean).join('، ');
+      if (readable) {
+        document.getElementById('bk-address').value = readable;
+        statusEl.textContent = 'تم تحديد موقعك: ' + readable;
+      }
+    } catch(e) {}
+  }, () => {
+    btn.textContent = '📍 موقعي';
+    btn.disabled = false;
+  }, { enableHighAccuracy: true, timeout: 12000 });
+}
+
 async function bkSubmit() {
   const name = document.getElementById('bk-name').value.trim();
   const phone = document.getElementById('bk-phone').value.trim();
@@ -646,9 +689,25 @@ async function bkSubmit() {
   errEl.style.display = 'none';
   const btn = document.getElementById('bk-submit-btn');
   btn.disabled = true;
-  btn.textContent = 'جاري الإرسال...';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left:8px"></i> جاري الإرسال...';
+
+  // Geocode if no GPS
+  let lat = bkLat, lng = bkLng;
+  if (!lat) {
+    try {
+      const gr = await fetch('${SUPABASE_URL}/functions/v1/geocode', {
+        method: 'POST',
+        headers: { 'apikey': '${SUPABASE_KEY}', 'Authorization': 'Bearer ${SUPABASE_KEY}', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: area + ' ' + address })
+      });
+      if (gr.ok) { const gd = await gr.json(); lat = gd?.lat; lng = gd?.lng; }
+    } catch(e) {}
+  }
+
   try {
+    const bookingId = crypto.randomUUID ? crypto.randomUUID() : null;
     const payload = {
+      ...(bookingId ? { id: bookingId } : {}),
       patient_name: name,
       phone: phone.replace(/\\s/g,''),
       area,
@@ -660,18 +719,49 @@ async function bkSubmit() {
       ...(bkSelectedSub && { sub_option: bkSelectedSub }),
       ...(bkProvider?.id && { provider_id: bkProvider.id }),
       ...(bkSelectedPrice && { price: bkSelectedPrice }),
+      ...(lat && { lat }),
+      ...(lng && { lng }),
     };
     const resp = await fetch('${SUPABASE_URL}/rest/v1/bookings', {
       method: 'POST',
-      headers: {
-        'apikey': '${SUPABASE_KEY}',
-        'Authorization': 'Bearer ${SUPABASE_KEY}',
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
+      headers: { 'apikey': '${SUPABASE_KEY}', 'Authorization': 'Bearer ${SUPABASE_KEY}', 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify(payload)
     });
     if (!resp.ok) throw new Error(await resp.text());
+
+    // إيميل لمقدم الخدمة لو الحجز مباشر
+    if (bkProvider?.email && typeof emailjs !== 'undefined') {
+      const mapsLink = lat ? \`https://www.google.com/maps?q=\${lat},\${lng}\` : 'غير متاح';
+      try {
+        await emailjs.send('service_tv0w6ov', 'template_lxahygl', {
+          to_email: bkProvider.email,
+          provider_name: bkProvider.name || 'مقدم الخدمة',
+          patient_name: name,
+          phone: phone,
+          service_type: bkSelectedService || '—',
+          sub_option: bkSelectedSub || '—',
+          area,
+          address,
+          appointment_time: time,
+          payment_method: 'كاش',
+          dashboard_link: 'https://malaaz-plum.vercel.app/provider.html',
+          maps_link: mapsLink,
+          name: 'منصة ملاذ',
+        });
+      } catch(e) {}
+    }
+
+    // نشر الحجز على أقرب المقدمين لو حجز عام
+    if (!bkProvider?.id && bookingId && lat) {
+      try {
+        await fetch('${SUPABASE_URL}/rest/v1/rpc/create_booking_offers', {
+          method: 'POST',
+          headers: { 'apikey': '${SUPABASE_KEY}', 'Authorization': 'Bearer ${SUPABASE_KEY}', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_booking_id: bookingId })
+        });
+      } catch(e) {}
+    }
+
     document.getElementById('bk-step2').style.display = 'none';
     document.getElementById('bk-step3').style.display = '';
   } catch(e) {
