@@ -1,6 +1,7 @@
 const SUPABASE_URL = 'https://omsictbrqlsohrmxeuym.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho';
 const BASE_URL = 'https://malaaz-plum.vercel.app';
+const { getBookingPartial } = require('./booking-partial');
 
 const H = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
 
@@ -150,6 +151,8 @@ module.exports = async function handler(req, res) {
     "medicalSpecialty": "GeneralPractice"
   });
 
+  const booking = getBookingPartial();
+
   const html = `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -165,8 +168,9 @@ module.exports = async function handler(req, res) {
 <meta name="robots" content="index,follow">
 <script type="application/ld+json">${schema}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 <script>window.addEventListener('load',()=>{if(typeof emailjs!=='undefined')emailjs.init('P2Xy0_OBIWdVXk1gE');});</script>
 <style>
@@ -280,6 +284,8 @@ footer a:hover{color:rgba(255,255,255,.7)}
   .search-btn{width:100%;margin-top:0}
   .prov-content{margin:28px auto}
 }
+/* ── Booking modal styles (extracted from index.html) ── */
+${booking.css}
 </style>
 </head>
 <body>
@@ -299,7 +305,7 @@ footer a:hover{color:rgba(255,255,255,.7)}
   </div>
   <div class="nav-right">
     <button class="nav-provider-btn" onclick="window.open('/provider.html','_blank')">مقدم خدمة؟ سجّل هنا</button>
-    <button class="nav-cta" onclick="location.href='/'">احجز الآن <i class="fas fa-arrow-left" style="margin-right:5px;font-size:12px"></i></button>
+    <button class="nav-cta" onclick="openBookingModal()">احجز الآن <i class="fas fa-arrow-left" style="margin-right:5px;font-size:12px"></i></button>
   </div>
 </nav>
 
@@ -358,13 +364,11 @@ footer a:hover{color:rgba(255,255,255,.7)}
   </div>
 </div>
 
-<!-- BOOKING IFRAME OVERLAY -->
-<div id="bookingOverlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.7);align-items:flex-end;justify-content:center">
-  <div style="position:relative;width:100%;max-width:520px;height:92vh;border-radius:20px 20px 0 0;overflow:hidden;box-shadow:0 -8px 48px rgba(0,0,0,.5)">
-    <button onclick="closeBooking()" style="position:absolute;top:14px;left:14px;z-index:10;background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
-    <iframe id="bookingIframe" src="" style="width:100%;height:100%;border:none;display:block" allow="geolocation"></iframe>
-  </div>
-</div>
+<!-- BOOKING MODAL (extracted from index.html) -->
+${booking.html}
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;top:90px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:var(--dark);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid rgba(201,168,76,.2);"></div>
 
 <!-- FOOTER -->
 <footer>
@@ -521,31 +525,24 @@ document.getElementById('profileModal').addEventListener('click', function(e) {
   if (e.target === this) closeProfile();
 });
 
-// ── Booking iframe overlay ──────────────────────────────
+// ── Supabase client (required by booking JS) ──────────────
+const SUPABASE_URL = '${SUPABASE_URL}';
+const SUPABASE_KEY = '${SUPABASE_KEY}';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Shims referenced by booking JS
+let allDocs = [];
+function sanitize(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function sanitizeNum(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+
+// ── Booking modal JS (extracted from index.html) ──────────
+${booking.js}
+
+// Open booking for a specific provider from this page
 function openProviderPage(id, name) {
   closeProfile();
-  const overlay = document.getElementById('bookingOverlay');
-  const iframe  = document.getElementById('bookingIframe');
-  iframe.src = '/?provider=' + encodeURIComponent(id) + '&providerName=' + encodeURIComponent(name) + '&embed=1';
-  overlay.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
+  openProviderBooking({ id, name });
 }
-
-function closeBooking() {
-  const overlay = document.getElementById('bookingOverlay');
-  overlay.style.display = 'none';
-  document.getElementById('bookingIframe').src = '';
-  document.body.style.overflow = '';
-}
-
-document.getElementById('bookingOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeBooking();
-});
-
-// إغلاق الـ overlay لو الـ iframe بعث رسالة إغلاق
-window.addEventListener('message', function(e) {
-  if (e.data === 'malaaz:closeBooking') closeBooking();
-});
 
 // Init
 onServiceChange();
