@@ -284,8 +284,8 @@ footer a:hover{color:rgba(255,255,255,.7)}
   .search-btn{width:100%;margin-top:0}
   .prov-content{margin:28px auto}
 }
-/* ── Booking modal styles (extracted from index.html) ── */
-${booking.css}
+/* ── Booking modal styles injected at runtime ── */
+__BOOKING_CSS__
 </style>
 </head>
 <body>
@@ -364,8 +364,8 @@ ${booking.css}
   </div>
 </div>
 
-<!-- BOOKING MODAL (extracted from index.html) -->
-${booking.html}
+<!-- BOOKING MODAL injected at runtime -->
+__BOOKING_HTML__
 
 <!-- TOAST -->
 <div id="toast" style="position:fixed;top:90px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:var(--dark);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid rgba(201,168,76,.2);"></div>
@@ -536,8 +536,8 @@ let allDocs = [];
 function sanitize(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sanitizeNum(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
 
-// ── Booking modal JS (extracted from index.html) ──────────
-${booking.js}
+// ── Booking modal JS injected at runtime ──────────
+__BOOKING_JS__
 
 // Open booking for a specific provider from this page
 function openProviderPage(id, name) {
@@ -552,7 +552,14 @@ clientFilter();
 </body>
 </html>`;
 
-  const buf = Buffer.from(html, 'utf8');
+  // Inject booking partial via replace (not template literal) to avoid
+  // Node.js interpolating backticks and ${...} inside the booking JS/CSS.
+  const finalHtml = html
+    .replace('__BOOKING_CSS__', booking.css)
+    .replace('__BOOKING_HTML__', booking.html)
+    .replace('__BOOKING_JS__', booking.js);
+
+  const buf = Buffer.from(finalHtml, 'utf8');
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'public, max-age=180, s-maxage=900',
