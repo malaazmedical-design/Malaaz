@@ -70,8 +70,8 @@ module.exports = async function handler(req, res) {
   // Parallel fetches
   let [providers, reviews, areas, xraySubs] = await Promise.all([
     areaParam
-      ? supaFetch(`providers?select=*&status=eq.active&is_available=eq.true&areas=ilike.*${encodeURIComponent(areaParam)}*&order=name`)
-      : supaFetch(`providers?select=*&status=eq.active&is_available=eq.true&order=name`),
+      ? supaFetch(`providers?select=*&status=eq.active&areas=ilike.*${encodeURIComponent(areaParam)}*&order=is_available.desc,name.asc`)
+      : supaFetch(`providers?select=*&status=eq.active&order=is_available.desc,name.asc`),
     supaFetch(`reviews?select=provider_id,rating&is_approved=eq.true`),
     supaFetch(`coverage_areas?select=name,city&is_active=eq.true&order=name`),
     supaFetch(`sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`),
