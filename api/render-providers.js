@@ -1,6 +1,140 @@
 const SUPABASE_URL = 'https://omsictbrqlsohrmxeuym.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho';
 const BASE_URL = 'https://malaaz-plum.vercel.app';
+
+// Profile modal JS — uses String.raw so \' is preserved as \' in client-side output
+const profileModalJs = String.raw`
+let currentProviderId = null;
+let _provCache = {};
+
+function renderProviderAreas(areasStr) {
+  if (!areasStr) return '';
+  return areasStr.split(',').slice(0,4).map(a =>
+    '<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">\u{1F4CD} '+esc(a.trim())+'</span>'
+  ).join('');
+}
+
+async function viewProfile(id) {
+  currentProviderId = id;
+
+  const [provArr, provSvcsRaw, provReviews] = await Promise.all([
+    _provCache[id]
+      ? Promise.resolve([_provCache[id]])
+      : sf('providers?select=*&id=eq.'+encodeURIComponent(id)),
+    sf('provider_services?select=sub_service_id,custom_price,sub_services(name,service_name,duration,price_min,price_min_specialist,price_min_consultant)&provider_id=eq.'+encodeURIComponent(id)+'&is_active=eq.true'),
+    sf('reviews?select=client_name,rating,text&provider_id=eq.'+encodeURIComponent(id)+'&is_approved=eq.true&limit=5'),
+  ]);
+
+  const provider = provArr?.[0];
+  if (!provider) { console.warn('viewProfile: provider not found', id); return; }
+  _provCache[id] = provider;
+
+  const isConsultant = (provider.grade || '') === 'استشاري';
+  const provSvcs = (provSvcsRaw || []).map(ps => {
+    const sub = ps.sub_services; if (!sub) return null;
+    const tierPrice = isConsultant ? sub.price_min_consultant : sub.price_min_specialist;
+    return { sub_name: sub.name, service_name: sub.service_name, duration: sub.duration, price: ps.custom_price ?? tierPrice ?? sub.price_min };
+  }).filter(Boolean);
+
+  let servicesHtml = '';
+  if (provSvcs.length) {
+    const grouped = {};
+    provSvcs.forEach(ps => { const k = ps.service_name||'خدمات'; if(!grouped[k]) grouped[k]=[]; grouped[k].push(ps); });
+    Object.entries(grouped).forEach(([svcName, subs]) => {
+      servicesHtml += '<div style="margin-bottom:14px">'
+        +'<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">'+esc(svcName)+'</div>'
+        +'<div style="display:flex;flex-direction:column;gap:8px">'
+        +subs.map(ps =>
+          '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg);border-radius:12px;cursor:pointer;border:1.5px solid var(--border);transition:border .2s"'
+          +' onmouseover="this.style.borderColor=\'#c9a84c\'" onmouseout="this.style.borderColor=\'var(--border)\'"'
+          +' onclick="doSvcBook(this)" data-id="'+esc(provider.id)+'" data-name="'+esc(provider.name)+'" data-email="'+esc(provider.email||'')+'" data-stype="'+esc(provider.service_type||'')+'" data-sub="'+esc(ps.sub_name)+'">'
+          +'<div><div style="font-size:14px;font-weight:700;color:var(--text)">'+esc(ps.sub_name)+'</div>'
+          +(ps.duration?'<div style="font-size:11px;color:var(--muted);margin-top:2px">⏱ '+esc(ps.duration)+'</div>':'')+'</div>'
+          +'<div style="font-size:17px;font-weight:900;color:var(--dark)">'+(ps.price||'—')+'<span style="font-size:11px;font-weight:400;color:var(--muted)"> ج.م</span></div>'
+          +'</div>'
+        ).join('')
+        +'</div></div>';
+    });
+  } else {
+    servicesHtml = '<div style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px">لم يحدد هذا المقدم خدماته بعد</div>';
+  }
+
+  const reviewsHtml = provReviews?.length ? '<div style="padding:16px 18px;border-top:1px solid rgba(255,255,255,.08)">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px">⭐ آراء العملاء ('+provReviews.length+')</div>'
+    +provReviews.map(r =>
+      '<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-size:12px;font-weight:700">'+esc(r.client_name||'عميل')+'</span>'
+      +'<span style="color:var(--accent);font-size:11px">'+'★'.repeat(r.rating||5)+'</span></div>'
+      +(r.text?'<div style="font-size:12px;color:var(--muted);line-height:1.6">'+esc(r.text)+'</div>':'')
+      +'</div>'
+    ).join('')+'</div>' : '';
+
+  const stars = provider.reviewCount > 0
+    ? '★'.repeat(Math.round(provider.realRating||0))+'☆'.repeat(5-Math.round(provider.realRating||0))
+      +' <span style="font-size:12px;color:var(--muted)">'+(provider.realRating||0).toFixed(1)+' ('+provider.reviewCount+' تقييم)</span>'
+    : '<span style="color:var(--muted);font-size:13px">⭐ مقدم جديد</span>';
+  const gradeLabel = provider.grade
+    ? '<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px">'+esc(provider.grade)+'</span>' : '';
+  const specText = esc(provider.specialty||provider.service_type||'');
+
+  let modal = document.getElementById('provider-profile-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'provider-profile-modal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = '<div class="modal-panel" style="max-height:88vh;overflow-y:auto;border-radius:20px 20px 0 0"><div id="provider-profile-content"></div></div>';
+    modal.addEventListener('click', e => { if (e.target === modal) closeProfile(); });
+    document.body.appendChild(modal);
+  }
+
+  document.getElementById('provider-profile-content').innerHTML =
+    '<div style="background:#243235;padding:20px;border-radius:20px 20px 0 0">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+    +'<div style="display:flex;gap:14px;align-items:center">'
+    +(provider.photo_url?'<img src="'+esc(provider.photo_url)+'" style="width:64px;height:64px;border-radius:16px;object-fit:cover;border:2px solid rgba(255,255,255,.15);flex-shrink:0">':'')
+    +'<div style="min-width:0;flex:1">'
+    +'<div style="font-size:18px;font-weight:900;color:#fff;font-family:Tajawal,sans-serif;overflow-wrap:break-word">'+esc(provider.name)+'</div>'
+    +'<div style="margin-top:5px">'+gradeLabel+'<span style="font-size:12px;color:rgba(255,255,255,.5)">'+specText+'</span></div>'
+    +'<div style="color:var(--accent);font-size:14px;margin-top:6px">'+stars+'</div>'
+    +'</div></div>'
+    +'<button onclick="closeProfile()" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0">\xD7</button>'
+    +'</div>'
+    +'<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">'+renderProviderAreas(provider.areas||provider.area)
+    +(provider.experience?'<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">'+esc(String(provider.experience))+' سنة خبرة</span>':'')
+    +'</div>'
+    +(provider.bio?'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.7">'+esc(provider.bio)+'</div>':'')
+    +'<div style="display:flex;gap:8px;margin-top:14px">'
+    +'<a href="https://wa.me/201039091989" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:Cairo,sans-serif"><i class="fab fa-whatsapp" style="font-size:16px"></i> واتساب</a>'
+    +'<a href="tel:01039091989" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:Cairo,sans-serif"><i class="fas fa-phone" style="font-size:14px"></i> اتصال</a>'
+    +'</div></div>'
+    +'<div style="padding:14px 18px 18px">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px">⚙️ الخدمات والأسعار</div>'
+    +servicesHtml
+    +(provider.is_available
+      ?'<button onclick="doMainBook(this)" data-id="'+esc(provider.id)+'" data-name="'+esc(provider.name)+'" data-email="'+esc(provider.email||'')+'" data-stype="'+esc(provider.service_type||'')+'" style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-top:8px"><i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع '+esc(provider.name)+'</button>'
+      :'<button disabled style="width:100%;background:#e5e5e5;color:#999;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:not-allowed;font-family:Cairo,sans-serif;margin-top:8px">غير متاح حالياً</button>')
+    +'</div>'
+    +reviewsHtml;
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function doSvcBook(el) {
+  closeProfile();
+  openProviderBooking({ id: el.dataset.id, name: el.dataset.name, email: el.dataset.email, service_type: el.dataset.stype, sub: el.dataset.sub });
+}
+function doMainBook(el) {
+  closeProfile();
+  openProviderBooking({ id: el.dataset.id, name: el.dataset.name, email: el.dataset.email, service_type: el.dataset.stype });
+}
+
+function closeProfile() {
+  const modal = document.getElementById('provider-profile-modal') || document.getElementById('profileModal');
+  if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
+}
+`;
 const { getBookingPartial } = require('./booking-partial');
 
 const H = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
@@ -457,142 +591,7 @@ function clientFilter() {
   });
 }
 
-// Profile modal — original logic from main branch adapted for SSR page
-let currentProviderId = null;
-let _provCache = {};
-
-function renderProviderAreas(areasStr) {
-  if (!areasStr) return '';
-  return areasStr.split(',').slice(0,4).map(a =>
-    '<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">📍 '+esc(a.trim())+'</span>'
-  ).join('');
-}
-
-async function viewProfile(id) {
-  currentProviderId = id;
-
-  // Fetch provider + services + reviews in parallel
-  const [provArr, provSvcsRaw, provReviews] = await Promise.all([
-    _provCache[id]
-      ? Promise.resolve([_provCache[id]])
-      : sf('providers?select=*&id=eq.'+encodeURIComponent(id)),
-    sf('provider_services?select=sub_service_id,custom_price,sub_services(name,service_name,duration,price_min,price_min_specialist,price_min_consultant)&provider_id=eq.'+encodeURIComponent(id)+'&is_active=eq.true'),
-    sf('reviews?select=client_name,rating,text&provider_id=eq.'+encodeURIComponent(id)+'&is_approved=eq.true&limit=5'),
-  ]);
-
-  const provider = provArr?.[0];
-  if (!provider) return;
-  _provCache[id] = provider;
-
-  // Attach rating from already-rendered card data if available
-  if (!provider.realRating) {
-    const card = document.querySelector('[onclick*="viewProfile(\''+id+'\'"]')?.closest('.prov-card');
-    const starsText = card?.querySelector('.prov-stars')?.textContent || '';
-    const m = starsText.match(/([\d.]+)\s*\((\d+)/);
-    if (m) { provider.realRating = parseFloat(m[1]); provider.reviewCount = parseInt(m[2]); }
-  }
-
-  const isConsultant = (provider.grade || '') === 'استشاري';
-  const provSvcs = (provSvcsRaw || []).map(ps => {
-    const sub = ps.sub_services; if (!sub) return null;
-    const tierPrice = isConsultant ? sub.price_min_consultant : sub.price_min_specialist;
-    return { sub_name: sub.name, service_name: sub.service_name, duration: sub.duration, price: ps.custom_price ?? tierPrice ?? sub.price_min };
-  }).filter(Boolean);
-
-  // Build services HTML
-  let servicesHtml = '';
-  if (provSvcs.length) {
-    const grouped = {};
-    provSvcs.forEach(ps => { const k = ps.service_name||'خدمات'; if(!grouped[k]) grouped[k]=[]; grouped[k].push(ps); });
-    const svcIcons = {'كشف منزلي':'🩺','تمريض منزلي':'👩‍⚕️','أشعة منزلية':'🔬'};
-    Object.entries(grouped).forEach(([svcName, subs]) => {
-      servicesHtml += '<div style="margin-bottom:14px">'
-        +'<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.3px">'+(svcIcons[svcName]||'🔧')+' '+esc(svcName)+'</div>'
-        +'<div style="display:flex;flex-direction:column;gap:8px">'
-        +subs.map(ps =>
-          '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg);border-radius:12px;cursor:pointer;border:1.5px solid var(--border);transition:border .2s"'
-          +' onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'"'
-          +' onclick="closeProfile();openProviderBooking({id:\''+esc(provider.id)+'\',name:\''+esc(provider.name)+'\',email:\''+esc(provider.email||'')+'\',service_type:\''+esc(provider.service_type||'')+'\',sub:\''+esc(ps.sub_name)+'\'})">'
-          +'<div><div style="font-size:14px;font-weight:700;color:var(--text)">'+esc(ps.sub_name)+'</div>'
-          +(ps.duration?'<div style="font-size:11px;color:var(--muted);margin-top:2px">⏱ '+esc(ps.duration)+'</div>':'')+'</div>'
-          +'<div style="text-align:left;flex-shrink:0"><div style="font-size:17px;font-weight:900;color:var(--dark)">'+(ps.price||'—')+'<span style="font-size:11px;font-weight:400;color:var(--muted)"> ج.م</span></div></div>'
-          +'</div>'
-        ).join('')
-        +'</div></div>';
-    });
-  } else {
-    servicesHtml = '<div style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px"><div style="font-size:28px;margin-bottom:8px">📋</div>لم يحدد هذا المقدم خدماته بعد — يمكنك الحجز المباشر معه</div>';
-  }
-
-  // Build reviews HTML
-  const reviewsHtml = provReviews?.length ? '<div style="padding:16px 18px;border-top:1px solid rgba(255,255,255,.08)">'
-    +'<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px">⭐ آراء العملاء ('+provReviews.length+')</div>'
-    +provReviews.map(r =>
-      '<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px">'
-      +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
-      +'<span style="font-size:12px;font-weight:700">'+esc(r.client_name||'عميل')+'</span>'
-      +'<span style="color:var(--accent);font-size:11px">'+'★'.repeat(r.rating||5)+'</span></div>'
-      +(r.text?'<div style="font-size:12px;color:var(--muted);line-height:1.6">'+esc(r.text)+'</div>':'')
-      +'</div>'
-    ).join('')+'</div>' : '';
-
-  const stars = provider.reviewCount > 0
-    ? '★'.repeat(Math.round(provider.realRating))+'☆'.repeat(5-Math.round(provider.realRating))
-      +' <span style="font-size:12px;color:var(--muted)">'+provider.realRating.toFixed(1)+' ('+provider.reviewCount+' تقييم)</span>'
-    : '<span style="color:var(--muted);font-size:13px">⭐ مقدم جديد</span>';
-  const gradeLabel = provider.grade
-    ? '<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px">'+esc(provider.grade)+'</span>' : '';
-  const specText = esc(provider.specialty||(provider.service_type==='تمريض منزلي'?'أخصائي تمريض':provider.service_type==='أشعة منزلية'?'مركز أشعة':provider.service_type||''));
-
-  // Create/reuse modal
-  let modal = document.getElementById('provider-profile-modal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'provider-profile-modal';
-    modal.className = 'modal-overlay';
-    modal.innerHTML = '<div class="modal-panel" style="max-height:88vh;overflow-y:auto;border-radius:20px 20px 0 0"><div id="provider-profile-content"></div></div>';
-    modal.addEventListener('click', e => { if (e.target === modal) { modal.classList.remove('open'); document.body.style.overflow=''; } });
-    document.body.appendChild(modal);
-  }
-
-  document.getElementById('provider-profile-content').innerHTML =
-    '<div style="background:var(--dark2,#243235);padding:20px;border-radius:20px 20px 0 0">'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
-    +'<div style="display:flex;gap:14px;align-items:center">'
-    +(provider.photo_url?'<img src="'+esc(provider.photo_url)+'" style="width:64px;height:64px;border-radius:16px;object-fit:cover;border:2px solid rgba(255,255,255,.15);flex-shrink:0">':'')
-    +'<div style="min-width:0;flex:1">'
-    +'<div style="font-size:18px;font-weight:900;color:#fff;font-family:\'Tajawal\',sans-serif;overflow-wrap:break-word">'+esc(provider.name)+'</div>'
-    +'<div style="margin-top:5px">'+gradeLabel+'<span style="font-size:12px;color:rgba(255,255,255,.5)">'+specText+'</span></div>'
-    +'<div style="color:var(--accent);font-size:14px;margin-top:6px">'+stars+'</div>'
-    +'</div></div>'
-    +'<button onclick="closeProfile()" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0">×</button>'
-    +'</div>'
-    +'<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">'+renderProviderAreas(provider.areas||provider.area)
-    +(provider.experience?'<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">'+esc(String(provider.experience))+' سنة خبرة</span>':'')
-    +'</div>'
-    +(provider.bio?'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.7">'+esc(provider.bio)+'</div>':'')
-    +'<div style="display:flex;gap:8px;margin-top:14px">'
-    +'<a href="https://wa.me/201039091989?text='+encodeURIComponent('مرحباً، عندي استفسار عن مقدم الخدمة: '+(provider.name||''))+'" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:\'Cairo\',sans-serif"><i class="fab fa-whatsapp" style="font-size:16px"></i> واتساب</a>'
-    +'<a href="tel:01039091989" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:\'Cairo\',sans-serif"><i class="fas fa-phone" style="font-size:14px"></i> اتصال</a>'
-    +'</div></div>'
-    +'<div style="padding:14px 18px 18px">'
-    +'<div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.5px">⚙️ الخدمات والأسعار</div>'
-    +servicesHtml
-    +(provider.is_available
-      ?'<button onclick="closeProfile();openProviderBooking({id:\''+esc(provider.id)+'\',name:\''+esc(provider.name)+'\',email:\''+esc(provider.email||'')+'\',service_type:\''+esc(provider.service_type||'')+'\'})" style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Cairo\',sans-serif;margin-top:8px"><i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع '+esc(provider.name)+'</button>'
-      :'<button disabled style="width:100%;background:#e5e5e5;color:#999;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:not-allowed;font-family:\'Cairo\',sans-serif;margin-top:8px"><i class="fas fa-times" style="margin-left:8px"></i> غير متاح حالياً</button>')
-    +'</div>'
-    +reviewsHtml;
-
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeProfile() {
-  const modal = document.getElementById('provider-profile-modal') || document.getElementById('profileModal');
-  if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
-}
-
+__PROFILE_MODAL_JS__
 
 // ── Supabase client (required by booking JS) ──────────────
 const SUPABASE_URL = '${SUPABASE_URL}';
@@ -658,7 +657,8 @@ clientFilter();
   const finalHtml = html
     .replace('__BOOKING_CSS__', booking.css)
     .replace('__BOOKING_HTML__', booking.html)
-    .replace('__BOOKING_JS__', booking.js);
+    .replace('__BOOKING_JS__', booking.js)
+    .replace('__PROFILE_MODAL_JS__', profileModalJs);
 
   const buf = Buffer.from(finalHtml, 'utf8');
   res.writeHead(200, {
