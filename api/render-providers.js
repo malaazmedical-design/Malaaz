@@ -203,11 +203,10 @@ module.exports = async function handler(req, res) {
   const serviceParam = req.query.service || '';
   const today = new Date().toISOString().split('T')[0];
 
-  // Build providers query
+  // Build providers query — service_type filtered client-side only
   const buildProvidersQuery = () => {
     let q = `providers?select=*&status=eq.active`;
     if (areaParam) q += `&areas=ilike.*${encodeURIComponent(areaParam)}*`;
-    if (serviceParam) q += `&service_type=eq.${encodeURIComponent(serviceParam)}`;
     q += `&order=is_available.desc,name.asc`;
     return q;
   };
@@ -533,19 +532,30 @@ async function loadXray() {
 async function onServiceChange() {
   const svc = document.getElementById('s-service').value;
   const dyn = document.getElementById('s-dynamic');
+  // Render fields immediately (synchronous), then fill options asynchronously
   if (svc === 'كشف منزلي') {
-    await loadSpecialties();
-    const specOpts = specialties.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join('');
     dyn.innerHTML =
-      '<div class="search-field"><label>التخصص</label><select id="s-spec"><option value="">كل التخصصات</option>'+specOpts+'</select></div>' +
+      '<div class="search-field"><label>التخصص</label><select id="s-spec"><option value="">كل التخصصات</option></select></div>' +
       '<div class="search-field"><label>الدرجة العلمية</label><select id="s-grade"><option value="">الكل</option><option>أخصائي</option><option>استشاري</option></select></div>';
+    try {
+      await loadSpecialties();
+      const sel = document.getElementById('s-spec');
+      if (sel && specialties.length) {
+        sel.innerHTML = '<option value="">كل التخصصات</option>' + specialties.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join('');
+      }
+    } catch(e) { /* keep empty options */ }
   } else if (svc === 'تمريض منزلي') {
     const opts = nursingOptions.map(o=>'<option>'+esc(o)+'</option>').join('');
     dyn.innerHTML = '<div class="search-field" style="flex:2"><label>نوع الخدمة</label><select id="s-nursing-type"><option value="">كل الأنواع</option>'+opts+'</select></div>';
   } else {
-    await loadXray();
-    const opts = xrayTypes.map(x=>'<option>'+esc(x)+'</option>').join('');
-    dyn.innerHTML = '<div class="search-field" style="flex:2"><label>نوع الأشعة</label><select id="s-xray-type"><option value="">كل الأنواع</option>'+opts+'</select></div>';
+    dyn.innerHTML = '<div class="search-field" style="flex:2"><label>نوع الأشعة</label><select id="s-xray-type"><option value="">كل الأنواع</option></select></div>';
+    try {
+      await loadXray();
+      const sel = document.getElementById('s-xray-type');
+      if (sel && xrayTypes.length) {
+        sel.innerHTML = '<option value="">كل الأنواع</option>' + xrayTypes.map(x=>'<option>'+esc(x)+'</option>').join('');
+      }
+    } catch(e) { /* keep empty options */ }
   }
 }
 
@@ -556,7 +566,7 @@ function doSearch(e) {
   const params = new URLSearchParams();
   const svc = document.getElementById('s-service').value;
   const name = document.getElementById('s-name').value.trim();
-  if (svc && svc !== 'كشف منزلي') params.set('service', svc);
+  if (svc) params.set('service', svc);
   if (name) params.set('q', name);
   const spec = document.getElementById('s-spec')?.value;
   if (spec) params.set('spec', spec);
