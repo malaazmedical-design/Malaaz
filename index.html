@@ -420,7 +420,7 @@
   .page-hero { padding: 80px 20px 40px !important; }
   .page-title { font-size: 30px !important; }
   .sub-grid { grid-template-columns: 1fr 1fr !important; }
-  footer .footer-top { grid-template-columns: 1fr 1fr !important; gap: 24px !important; }
+  footer .footer-top { grid-template-columns: 1fr 1fr !important; gap: 28px !important; }
 }
 @media (max-width: 420px) {
   .services-grid { grid-template-columns: 1fr !important; }
@@ -698,15 +698,20 @@ h1 span.accent{color:var(--accent);}
 
 /* Footer */
 footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,255,255,.04);}
-.footer-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
-.footer-brand .fl-logo{font-size:30px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;letter-spacing:-1px;}
-.footer-brand .fl-sub{font-size:12px;color:rgba(255,255,255,.35);margin-top:6px;line-height:1.8;}
-.footer-col h4{font-size:13px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:14px;letter-spacing:.5px;}
-.footer-col a,.footer-col span{display:block;font-size:13px;color:rgba(255,255,255,.35);text-decoration:none;margin-bottom:10px;transition:color .2s;cursor:pointer;}
+.footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:48px;margin-bottom:40px;}
+.footer-brand .fl-logo{font-size:32px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;letter-spacing:-1px;}
+.footer-brand .fl-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.9;}
+.footer-app-btns{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.footer-app-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#fff;text-decoration:none;padding:9px 16px;border-radius:10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;transition:background .2s;}
+.footer-app-btn:hover{background:rgba(255,255,255,.13);}
+.footer-app-btn small{display:block;font-size:10px;font-weight:400;opacity:.6;}
+.footer-socials-row{display:flex;gap:10px;margin-top:20px;}
+.footer-col h4{font-size:12px;font-weight:700;color:rgba(255,255,255,.45);margin-bottom:16px;letter-spacing:1px;text-transform:uppercase;}
+.footer-col a,.footer-col span{display:block;font-size:13px;color:rgba(255,255,255,.55);text-decoration:none;margin-bottom:11px;transition:color .2s;cursor:pointer;}
 .footer-col a:hover,.footer-col span:hover{color:var(--accent);}
-.footer-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.05);padding-top:24px;}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.07);padding-top:24px;flex-wrap:wrap;gap:12px;}
 .footer-copy{font-size:12px;color:rgba(255,255,255,.25);}
-.footer-socials{display:flex;gap:12px;}
+.footer-socials{display:flex;gap:10px;}
 .soc-btn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;transition:all .2s;text-decoration:none;}
 .soc-btn:hover{background:rgba(201,168,76,.15);color:var(--accent);}
 
@@ -1133,6 +1138,20 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       <div class="footer-brand">
         <div class="fl-logo">ملاذ</div>
         <div class="fl-sub" id="footer-about">منصة رعاية طبية منزلية متكاملة<br>كشف · تمريض · أشعة في بيتك</div>
+        <div class="footer-app-btns">
+          <a href="https://play.google.com/store/apps/details?id=com.malaaz.app" target="_blank" rel="noopener" class="footer-app-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.38.21.82.22 1.22.03l11.62-6.54-2.93-2.93-9.91 9.44zm-1.65-20.5C1.2 3.6 1 4.03 1 4.56v14.88c0 .53.2.96.53 1.3l.07.07 8.34-8.34v-.2L1.6 3.19l-.07.07zm17.33 7.63l-2.37-1.34-3.27 3.27 3.27 3.27 2.39-1.35c.68-.38.68-1.01 0-1.39l-.02-.46zM4.4.21L16.02 6.75l-2.93 2.93L3.18.24C3.58.05 4.02.06 4.4.21z"/></svg>
+            <span><small>احصل عليه من</small>Google Play</span>
+          </a>
+          <a href="https://apps.apple.com/app/id6743782700" target="_blank" rel="noopener" class="footer-app-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04l-.08.23zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            <span><small>حمّله من</small>App Store</span>
+          </a>
+        </div>
+        <div class="footer-socials-row">
+          <a class="soc-btn" href="https://www.facebook.com/share/17iBWvQ9JJ/" target="_blank" rel="noopener" aria-label="فيسبوك"><i class="fab fa-facebook-f"></i></a>
+          <a class="soc-btn" id="footer-whatsapp" href="https://wa.me/201039091989" target="_blank" rel="noopener" aria-label="واتساب"><i class="fab fa-whatsapp"></i></a>
+        </div>
       </div>
       <div class="footer-col">
         <h4>الخدمات</h4>
@@ -1142,26 +1161,27 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       </div>
       <div class="footer-col">
         <h4>المنصة</h4>
-        <a href="/مقدمو-الخدمة" style="color:inherit;text-decoration:none">مقدمو الخدمة</a>
+        <span onclick="showPage('home')">الرئيسية</span>
+        <a href="/مقدمو-الخدمة">مقدمو الخدمة</a>
         <span onclick="showPage('pricing')">الأسعار</span>
         <span onclick="showPage('about')">من نحن</span>
         <a href="/faq.html">الأسئلة الشائعة</a>
         <a href="/blog.html">المقالات</a>
         <span onclick="window.open('provider.html','_blank')">انضم كمقدم خدمة</span>
-        <span onclick="window.open('privacy.html','_blank')">سياسة الخصوصية والشروط</span>
+        <a href="/privacy.html">سياسة الخصوصية</a>
       </div>
       <div class="footer-col">
         <h4>تواصل معنا</h4>
-        <span>📱 <a id="footer-phone" href="tel:+201039091989" style="color:inherit;text-decoration:none">01039091989</a></span>
-        <span>📧 <a id="footer-email" href="mailto:malaaz.medical@gmail.com" style="color:inherit;text-decoration:none">malaaz.medical@gmail.com</a></span>
-        <span>⏰ 24 ساعة / 7 أيام</span>
+        <a id="footer-phone" href="tel:+201039091989">📱 01039091989</a>
+        <a id="footer-email" href="mailto:malaaz.medical@gmail.com">📧 malaaz.medical@gmail.com</a>
+        <span>⏰ متاحون 24/7</span>
       </div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy" id="footer-copyright">© 2026 ملاذ. جميع الحقوق محفوظة.</div>
+      <div class="footer-copy" id="footer-copyright">© 2026 ملاذ للرعاية الطبية المنزلية — جميع الحقوق محفوظة</div>
       <div class="footer-socials">
         <a class="soc-btn" href="https://www.facebook.com/share/17iBWvQ9JJ/" target="_blank" rel="noopener" aria-label="فيسبوك"><i class="fab fa-facebook-f"></i></a>
-        <a class="soc-btn" id="footer-whatsapp" href="https://wa.me/201039091989" target="_blank" rel="noopener" aria-label="واتساب"><i class="fab fa-whatsapp"></i></a>
+        <a class="soc-btn" href="https://wa.me/201039091989" target="_blank" rel="noopener" aria-label="واتساب"><i class="fab fa-whatsapp"></i></a>
       </div>
     </div>
   </footer>
@@ -3640,7 +3660,7 @@ function injectIndexResponsive() {
       .modal-panel { border-radius: 20px 20px 0 0 !important; max-height: 95vh !important; }
       .bm-svc-grid { grid-template-columns: 1fr 1fr 1fr !important; }
       .payment-options { grid-template-columns: 1fr 1fr 1fr !important; }
-      footer .footer-top { grid-template-columns: 1fr 1fr !important; gap: 24px !important; }
+      footer .footer-top { grid-template-columns: 1fr 1fr !important; gap: 28px !important; }
       .page-hero { padding: 80px 20px 40px !important; }
       .page-title { font-size: 30px !important; }
       .container { padding: 30px 16px !important; }
