@@ -2783,6 +2783,36 @@ function detectClientLocation() {
           const parts = geo.display_name.split(',').slice(0, 3).join('،');
           addressText = `📍 ${parts}`;
         }
+
+        // محاولة اختيار المنطقة تلقائياً من قائمة التغطية
+        const areaSelect = document.getElementById('bm-area');
+        if (areaSelect && geo?.address) {
+          // الحقول المحتملة من Nominatim بالترتيب الأولوية
+          const candidates = [
+            geo.address.suburb,
+            geo.address.neighbourhood,
+            geo.address.city_district,
+            geo.address.quarter,
+            geo.address.town,
+            geo.address.village,
+          ].filter(Boolean).map(s => s.trim());
+
+          const options = [...areaSelect.options].map(o => o.value).filter(Boolean);
+
+          // دوّر على الخيارات وشوف لو في تطابق جزئي
+          let matched = null;
+          for (const cand of candidates) {
+            matched = options.find(o =>
+              o.includes(cand) || cand.includes(o)
+            );
+            if (matched) break;
+          }
+
+          if (matched) {
+            areaSelect.value = matched;
+            showToast('📍 تم اختيار المنطقة: ' + matched);
+          }
+        }
       } catch(e) {}
 
       if (input) input.value = addressText;

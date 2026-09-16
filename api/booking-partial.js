@@ -5,7 +5,7 @@
  * Line ranges must stay in sync with index.html:
  *   CSS  : 659–732
  *   HTML : 1366–1662
- *   JS   : 2381–3644
+ *   JS   : 2381–3674
  */
 const fs   = require('fs');
 const path = require('path');
@@ -21,7 +21,7 @@ function getBookingPartial() {
   // Slice is 0-indexed, line numbers in comments are 1-indexed
   const css  = lines.slice(658, 732).join('\n');
   const html = lines.slice(1365, 1662).join('\n');
-  const js   = lines.slice(2380, 3645).join('\n');
+  const js   = lines.slice(2380, 3675).join('\n');
 
   _cache = { css, html, js };
   return _cache;
