@@ -200,13 +200,21 @@ function buildCard(p) {
 
 module.exports = async function handler(req, res) {
   const areaParam = decodeURIComponent(req.query.area || '').trim();
+  const serviceParam = req.query.service || '';
   const today = new Date().toISOString().split('T')[0];
+
+  // Build providers query
+  const buildProvidersQuery = () => {
+    let q = `providers?select=*&status=eq.active`;
+    if (areaParam) q += `&areas=ilike.*${encodeURIComponent(areaParam)}*`;
+    if (serviceParam) q += `&service_type=eq.${encodeURIComponent(serviceParam)}`;
+    q += `&order=is_available.desc,name.asc`;
+    return q;
+  };
 
   // Parallel fetches
   let [providers, reviews, areas, xraySubs] = await Promise.all([
-    areaParam
-      ? supaFetch(`providers?select=*&status=eq.active&areas=ilike.*${encodeURIComponent(areaParam)}*&order=is_available.desc,name.asc`)
-      : supaFetch(`providers?select=*&status=eq.active&order=is_available.desc,name.asc`),
+    supaFetch(buildProvidersQuery()),
     supaFetch(`reviews?select=provider_id,rating&is_approved=eq.true`),
     supaFetch(`coverage_areas?select=name,city&is_active=eq.true&order=name`),
     supaFetch(`sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`),
@@ -650,7 +658,15 @@ function openProviderPage(id, name) {
   openProviderBooking({ id, name });
 }
 
-// Init
+// Init — restore select state from URL then trigger dynamic fields
+(function() {
+  const params = new URLSearchParams(location.search);
+  const svc = params.get('service');
+  if (svc) {
+    const sel = document.getElementById('s-service');
+    if (sel) sel.value = svc;
+  }
+})();
 onServiceChange();
 clientFilter();
 </script>
