@@ -253,8 +253,8 @@ nav{position:sticky;top:0;z-index:100;background:var(--dark);display:flex;align-
 .prov-empty{text-align:center;padding:80px 20px;color:var(--muted);font-size:16px}
 
 /* PROFILE MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:20px}
-.modal-overlay.open{display:flex}
+.profile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:20px}
+.profile-overlay.open{display:flex}
 .modal-box{background:var(--dark);border-radius:20px;padding:28px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;position:relative}
 .modal-close{position:absolute;top:16px;left:16px;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
 .modal-prov-name{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px}
@@ -354,7 +354,7 @@ ${booking.css}
 </div>
 
 <!-- PROFILE MODAL -->
-<div class="modal-overlay" id="profileModal">
+<div class="profile-overlay" id="profileModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeProfile()"><i class="fas fa-times"></i></button>
     <div class="modal-prov-name" id="modal-name"></div>
@@ -524,6 +524,7 @@ function closeProfile() {
 document.getElementById('profileModal').addEventListener('click', function(e) {
   if (e.target === this) closeProfile();
 });
+
 
 // ── Supabase client (required by booking JS) ──────────────
 const SUPABASE_URL = '${SUPABASE_URL}';
