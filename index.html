@@ -2786,26 +2786,46 @@ function detectClientLocation() {
 
         // محاولة اختيار المنطقة تلقائياً من قائمة التغطية
         const areaSelect = document.getElementById('bm-area');
-        if (areaSelect && geo?.address) {
-          // الحقول المحتملة من Nominatim بالترتيب الأولوية
-          const candidates = [
-            geo.address.suburb,
-            geo.address.neighbourhood,
-            geo.address.city_district,
-            geo.address.quarter,
-            geo.address.town,
-            geo.address.village,
-          ].filter(Boolean).map(s => s.trim());
+        if (areaSelect && geo) {
+          // تطبيع النص: إزالة بادئات شائعة لا تؤثر في الاسم الفعلي
+          const normalize = s => s
+            .replace(/^(حي|منطقة|قسم|شياخة|ناحية)\s+/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+          // تجميع المرشحين من حقول Nominatim + أجزاء display_name
+          const rawCandidates = [
+            geo.address?.suburb,
+            geo.address?.neighbourhood,
+            geo.address?.city_district,
+            geo.address?.quarter,
+            geo.address?.county,
+            geo.address?.state_district,
+            geo.address?.town,
+            geo.address?.village,
+            // أجزاء display_name (أول 5 فقرات)
+            ...(geo.display_name ? geo.display_name.split(',').slice(0, 5) : []),
+          ].filter(Boolean).map(s => normalize(s.trim()));
 
           const options = [...areaSelect.options].map(o => o.value).filter(Boolean);
 
-          // دوّر على الخيارات وشوف لو في تطابق جزئي
+          // تطابق: كامل أولاً ثم جزئي
           let matched = null;
-          for (const cand of candidates) {
-            matched = options.find(o =>
-              o.includes(cand) || cand.includes(o)
-            );
+          for (const cand of rawCandidates) {
+            if (!cand) continue;
+            // تطابق كامل (حساس لحالة الأحرف لأن Arabic)
+            matched = options.find(o => normalize(o) === cand);
             if (matched) break;
+          }
+          if (!matched) {
+            for (const cand of rawCandidates) {
+              if (!cand || cand.length < 3) continue;
+              matched = options.find(o => {
+                const on = normalize(o);
+                return on.includes(cand) || cand.includes(on);
+              });
+              if (matched) break;
+            }
           }
 
           if (matched) {
