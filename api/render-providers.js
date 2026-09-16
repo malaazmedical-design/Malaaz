@@ -359,6 +359,7 @@ __BOOKING_CSS__
     <button class="modal-close" onclick="closeProfile()"><i class="fas fa-times"></i></button>
     <div class="modal-prov-name" id="modal-name"></div>
     <div class="modal-prov-spec" id="modal-spec"></div>
+    <div id="modal-stars" style="font-size:13px;color:var(--accent);margin-bottom:16px"></div>
     <div id="modal-services-body"></div>
     <button class="modal-book-now" id="modal-book-btn">احجز الآن مجاناً</button>
   </div>
@@ -489,6 +490,8 @@ async function viewProfile(id) {
   const spec = card?.querySelector('.prov-spec')?.textContent || '';
   document.getElementById('modal-name').textContent = name;
   document.getElementById('modal-spec').textContent = spec;
+  const starsEl = document.getElementById('modal-stars');
+  if (starsEl) starsEl.innerHTML = card?.querySelector('.prov-stars')?.innerHTML || '';
   document.getElementById('modal-services-body').innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.4)">جاري التحميل...</div>';
   document.getElementById('modal-book-btn').onclick = () => openProviderPage(id, name);
   modal.classList.add('open');
