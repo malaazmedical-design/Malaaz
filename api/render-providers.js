@@ -529,12 +529,14 @@ document.getElementById('profileModal').addEventListener('click', function(e) {
 // ── Supabase client (required by booking JS) ──────────────
 const SUPABASE_URL = '${SUPABASE_URL}';
 const SUPABASE_KEY = '${SUPABASE_KEY}';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let sb;
+try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { sb = null; }
 
 // Shims referenced by booking JS
 let allDocs = [];
 function sanitize(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sanitizeNum(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+async function loadSiteContentForIndex() {} // no-op shim (index-only)
 
 // ── Booking modal JS injected at runtime ──────────
 __BOOKING_JS__
