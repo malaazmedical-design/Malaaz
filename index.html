@@ -3262,11 +3262,32 @@ window.addEventListener('load', async () => {
     openBookingModal();
   }
 
-  // فتح حجز مقدم خدمة محدد إذا جاء الرابط بـ ?provider=ID
-  const providerParam = new URLSearchParams(location.search).get('provider');
-  if (providerParam) {
-    const providerName = new URLSearchParams(location.search).get('providerName') || '';
-    setTimeout(() => openProviderBooking({ id: providerParam, name: providerName }), 600);
+  // وضع embed — يُخفي الـ nav والـ footer ويفتح الحجز مباشرة
+  const params = new URLSearchParams(location.search);
+  if (params.get('embed') === '1') {
+    document.querySelector('nav')?.style.setProperty('display','none','important');
+    document.querySelector('footer')?.style.setProperty('display','none','important');
+    document.getElementById('home-page')?.style.setProperty('display','none','important');
+    const provId   = params.get('provider');
+    const provName = params.get('providerName') || '';
+    if (provId) {
+      setTimeout(() => openProviderBooking({ id: provId, name: provName }), 300);
+    } else {
+      setTimeout(() => openBookingModal(), 300);
+    }
+    // لما الـ modal يتغلق، بلّغ الصفحة الأم
+    const origClose = window.closeBookingModal;
+    window.closeBookingModal = function() {
+      origClose?.();
+      window.parent?.postMessage('malaaz:closeBooking', '*');
+    };
+  } else {
+    // فتح حجز مقدم خدمة محدد إذا جاء الرابط بـ ?provider=ID
+    const providerParam = params.get('provider');
+    if (providerParam) {
+      const providerName = params.get('providerName') || '';
+      setTimeout(() => openProviderBooking({ id: providerParam, name: providerName }), 600);
+    }
   }
 });
 
