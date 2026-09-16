@@ -608,6 +608,17 @@ function updateSEO() {}                    // no-op (index-only)
 function updateSchemaRating() {}           // no-op (index-only)
 function setMeta() {}                      // no-op (index-only)
 
+// Booking state variables (declared at index.html lines 2365-2373, before the JS slice)
+let bmSelectedService  = 'كشف منزلي';
+let bmSelectedSub      = '';
+let bmSelectedGrade    = '';
+let bmSelectedPayment  = 'cash';
+let bmSelectedFamilyMember = null;
+let bmClientLat        = null;
+let bmClientLon        = null;
+let bmSelectedProvider = null;
+let bmSelectedPrice    = null;
+
 // Load coverage areas into #bm-area select (used by openBookingModal)
 async function loadAreas() {
   if (!sb) return;
