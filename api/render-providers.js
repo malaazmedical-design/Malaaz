@@ -417,13 +417,7 @@ __BOOKING_CSS__
     <span class="nav-logo-ar">ملاذ</span>
     <span class="nav-logo-en">MALAAZ</span>
   </a>
-  <div class="nav-links">
-    <a href="/">الرئيسية</a>
-    <a href="/#services">الخدمات</a>
-    <a href="/مقدمو-الخدمة" class="active">مقدمو الخدمة</a>
-    <a href="/#pricing">الأسعار</a>
-    <a href="/#about">من نحن</a>
-  </div>
+  <div class="nav-links"></div>
   <div class="nav-right">
     <button class="nav-provider-btn" onclick="window.open('/provider.html','_blank')">مقدم خدمة؟ سجّل هنا</button>
     <button class="nav-cta" onclick="openBookingModal()">احجز الآن <i class="fas fa-arrow-left" style="margin-right:5px;font-size:12px"></i></button>
