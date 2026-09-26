@@ -1821,10 +1821,15 @@ async function loadHomeServices() {
   const { data } = await sb.from('services').select('*').eq('is_active', true).order('created_at');
   const grid = document.getElementById('home-services-grid');
   if (!grid || !data?.length) return;
+  const order = ['كشف منزلي','تمريض منزلي','أشعة منزلية'];
+  const sorted = [...data].sort((a,b) => {
+    const ai = order.indexOf(a.name), bi = order.indexOf(b.name);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
   const colors = ['#faf4e6','#f4ece8','#e8f0f4'];
-  grid.innerHTML = data.map((s, i) => `
+  grid.innerHTML = sorted.map((s, i) => `
     <div class="svc-card" onclick="openBookingModal('${sanitize(s.name)}')" data-reveal>
-      ${i === 0 ? '<div class="popular-tag">⭐ الأكثر طلباً</div>' : ''}
+      ${s.name === 'كشف منزلي' ? '<div class="popular-tag">⭐ الأكثر طلباً</div>' : ''}
       <div class="svc-ico-wrap" style="background:${colors[i % colors.length]}">${sanitize(s.icon || '🔧')}</div>
       <h3 class="svc-name">${sanitize(s.name)}</h3>
       <p class="svc-desc">${sanitize(s.description || '')}</p>
