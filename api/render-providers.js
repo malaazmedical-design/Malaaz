@@ -578,6 +578,10 @@ async function onServiceChange() {
       }
     } catch(e) { /* keep empty options */ }
   }
+  liveFilter();
+  // Show clear button whenever a specific service is chosen
+  const cb = document.getElementById('clear-search-btn');
+  if (cb) cb.style.display = '';
 }
 
 function doSearch(e) {
@@ -606,7 +610,19 @@ function clearSearch() {
   location.href = '/مقدمو-الخدمة';
 }
 
-// Client-side filter (name/spec/grade) applied after page load
+// Live filter: reads current dropdown values directly (no page reload needed)
+function liveFilter() {
+  const svc = document.getElementById('s-service')?.value || '';
+  document.querySelectorAll('.prov-section').forEach(sec => {
+    const type = sec.querySelector('.prov-grid')?.dataset.type || '';
+    if (svc && type !== svc) { sec.style.display = 'none'; return; }
+    // restore all cards visibility when switching service
+    sec.querySelectorAll('.prov-card').forEach(c => c.style.display = '');
+    sec.style.display = '';
+  });
+}
+
+// Client-side filter (name/spec/grade) applied after page load from URL params
 function clientFilter() {
   const params = new URLSearchParams(location.search);
   const q = (params.get('q')||'').toLowerCase();
