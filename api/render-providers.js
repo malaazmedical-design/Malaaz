@@ -70,9 +70,11 @@ async function viewProfile(id) {
       +'</div>'
     ).join('')+'</div>' : '';
 
-  const stars = provider.reviewCount > 0
-    ? '★'.repeat(Math.round(provider.realRating||0))+'☆'.repeat(5-Math.round(provider.realRating||0))
-      +' <span style="font-size:12px;color:var(--muted)">'+(provider.realRating||0).toFixed(1)+' ('+provider.reviewCount+' تقييم)</span>'
+  const reviewCount = provReviews?.length || 0;
+  const realRating  = reviewCount > 0 ? provReviews.reduce((s,r)=>s+(r.rating||0),0)/reviewCount : 0;
+  const stars = reviewCount > 0
+    ? '★'.repeat(Math.round(realRating))+'☆'.repeat(5-Math.round(realRating))
+      +' <span style="font-size:12px;color:var(--muted)">'+realRating.toFixed(1)+' ('+reviewCount+' تقييم)</span>'
     : '<span style="color:var(--muted);font-size:13px">⭐ مقدم جديد</span>';
   const gradeLabel = provider.grade
     ? '<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px">'+esc(provider.grade)+'</span>' : '';
