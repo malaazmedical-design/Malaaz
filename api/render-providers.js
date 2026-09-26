@@ -378,7 +378,7 @@ nav{position:sticky;top:0;z-index:100;background:var(--dark);display:flex;align-
 .search-field select:focus,.search-field input:focus{border-color:var(--accent)}
 .search-btn{background:var(--dark);color:var(--accent);font-size:14px;font-weight:700;padding:9px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;align-self:flex-end;margin-top:16px;transition:background .2s;flex-shrink:0}
 .search-btn:hover{background:#253438}
-.clear-btn{background:transparent;color:var(--muted);font-size:13px;font-weight:600;padding:9px 14px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;align-self:flex-end;margin-top:16px;transition:all .2s;flex-shrink:0;display:none}
+.clear-btn{background:transparent;color:var(--muted);font-size:13px;font-weight:600;padding:9px 14px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;align-self:flex-end;margin-top:16px;transition:all .2s;flex-shrink:0}
 .clear-btn:hover{border-color:var(--accent);color:var(--accent)}
 #s-dynamic{display:flex;flex:2;gap:10px;min-width:0;flex-wrap:wrap}
 
@@ -579,9 +579,6 @@ async function onServiceChange() {
     } catch(e) { /* keep empty options */ }
   }
   liveFilter();
-  // Show clear button whenever a specific service is chosen
-  const cb = document.getElementById('clear-search-btn');
-  if (cb) cb.style.display = '';
 }
 
 function doSearch(e) {
@@ -717,15 +714,6 @@ function openProviderPage(id, name) {
     if (xrayEl) xrayEl.value = sub;
     const nursingEl = document.getElementById('s-nursing-type');
     if (nursingEl) nursingEl.value = sub;
-  }
-  // Show clear button if any filter is active
-  const hasFilter = params.get('q') || params.get('spec') || params.get('grade') || params.get('sub')
-    || (params.get('service') && params.get('service') !== 'كشف منزلي')
-    || document.getElementById('s-area')?.value
-    || (location.pathname !== '/مقدمو-الخدمة' && location.pathname !== '/مقدمو-الخدمة/');
-  if (hasFilter) {
-    const cb = document.getElementById('clear-search-btn');
-    if (cb) cb.style.display = '';
   }
   clientFilter();
 })();
