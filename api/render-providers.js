@@ -550,7 +550,7 @@ async function loadXray() {
   xrayTypes = (data||[]).map(s=>s.name);
 }
 
-async function onServiceChange() {
+async function onServiceChange(applyFilter = true) {
   const svc = document.getElementById('s-service').value;
   const dyn = document.getElementById('s-dynamic');
   // Render fields immediately (synchronous), then fill options asynchronously
@@ -578,7 +578,7 @@ async function onServiceChange() {
       }
     } catch(e) { /* keep empty options */ }
   }
-  liveFilter();
+  if (applyFilter) liveFilter();
 }
 
 function doSearch(e) {
@@ -708,7 +708,8 @@ function openProviderPage(id, name) {
     const sel = document.getElementById('s-service');
     if (sel) sel.value = svc;
   }
-  await onServiceChange();
+  // applyFilter=true only when URL has a service param (came from a search)
+  await onServiceChange(!!svc);
   if (sub) {
     const xrayEl = document.getElementById('s-xray-type');
     if (xrayEl) xrayEl.value = sub;
