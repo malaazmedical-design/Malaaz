@@ -203,6 +203,7 @@ function buildCard(p) {
 module.exports = async function handler(req, res) {
   const areaParam = decodeURIComponent(req.query.area || '').trim();
   const serviceParam = req.query.service || '';
+  const subParam = req.query.sub ? decodeURIComponent(req.query.sub) : '';
   const today = new Date().toISOString().split('T')[0];
 
   // Build providers query — service_type filtered client-side only
@@ -220,6 +221,21 @@ module.exports = async function handler(req, res) {
     supaFetch(`coverage_areas?select=name,city&is_active=eq.true&order=name`),
     supaFetch(`sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`),
   ]);
+
+  // Sub-service filter (xray type or nursing type)
+  if (subParam && providers && providers.length) {
+    try {
+      const subSvcs = await supaFetch(`sub_services?select=id&name=eq.${encodeURIComponent(subParam)}&is_active=eq.true`);
+      if (subSvcs && subSvcs.length) {
+        const subIds = subSvcs.map(s => s.id);
+        const provSvcRows = await supaFetch(`provider_services?select=provider_id&sub_service_id=in.(${subIds.join(',')})&is_active=eq.true`);
+        const eligibleIds = new Set((provSvcRows || []).map(ps => ps.provider_id));
+        providers = providers.filter(p => eligibleIds.has(p.id));
+      } else {
+        providers = [];
+      }
+    } catch(e) { /* keep all providers if sub-service lookup fails */ }
+  }
 
   // Attach ratings
   const ratingMap = {};
@@ -574,6 +590,10 @@ function doSearch(e) {
   if (spec) params.set('spec', spec);
   const grade = document.getElementById('s-grade')?.value;
   if (grade) params.set('grade', grade);
+  const xrayType = document.getElementById('s-xray-type')?.value;
+  if (xrayType) params.set('sub', xrayType);
+  const nursingType = document.getElementById('s-nursing-type')?.value;
+  if (nursingType) params.set('sub', nursingType);
   const qs = params.toString();
   const url = area ? base + '/' + encodeURIComponent(area) + (qs?'?'+qs:'') : base + (qs?'?'+qs:'');
   location.href = url;
@@ -660,16 +680,23 @@ function openProviderPage(id, name) {
 }
 
 // Init — restore select state from URL then trigger dynamic fields
-(function() {
+(async function() {
   const params = new URLSearchParams(location.search);
   const svc = params.get('service');
+  const sub = params.get('sub');
   if (svc) {
     const sel = document.getElementById('s-service');
     if (sel) sel.value = svc;
   }
+  await onServiceChange();
+  if (sub) {
+    const xrayEl = document.getElementById('s-xray-type');
+    if (xrayEl) xrayEl.value = sub;
+    const nursingEl = document.getElementById('s-nursing-type');
+    if (nursingEl) nursingEl.value = sub;
+  }
+  clientFilter();
 })();
-onServiceChange();
-clientFilter();
 </script>
 </body>
 </html>`;
