@@ -347,16 +347,18 @@ html{scroll-behavior:smooth}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
 /* NAVBAR */
-nav{position:sticky;top:0;z-index:100;background:var(--dark);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;gap:20px}
-.nav-logo{display:flex;flex-direction:column;line-height:1;text-decoration:none;cursor:pointer}
-.nav-logo-ar{font-size:20px;font-weight:800;color:var(--accent);letter-spacing:.02em}
-.nav-logo-en{font-size:9px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.15em}
-.nav-links{display:flex;gap:4px}
-.nav-links a{color:rgba(255,255,255,.65);font-size:14px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;text-decoration:none;transition:color .2s,background .2s}
-.nav-links a:hover,.nav-links a.active{color:#fff;background:rgba(255,255,255,.08)}
-.nav-right{display:flex;align-items:center;gap:10px}
-.nav-provider-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);font-size:13px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap}
-.nav-cta{background:var(--accent);color:var(--dark);font-size:14px;font-weight:700;padding:9px 20px;border-radius:10px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap}
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 60px;height:72px;background:rgba(30,44,47,0.96);backdrop-filter:blur(16px);border-bottom:1px solid rgba(201,168,76,0.15)}
+.nav-logo{display:flex;align-items:baseline;gap:8px;cursor:pointer;text-decoration:none}
+.nav-logo-ar{font-size:26px;font-weight:900;color:#fff;letter-spacing:-1px;font-family:'Tajawal',sans-serif}
+.nav-logo-en{font-size:9px;font-weight:700;color:var(--accent);letter-spacing:5px;opacity:.8}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{color:rgba(255,255,255,.65);font-size:14px;font-weight:600;text-decoration:none;transition:color .2s;cursor:pointer}
+.nav-links a:hover,.nav-links a.active{color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:14px}
+.nav-provider-btn{color:rgba(255,255,255,.5);font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;font-family:'Cairo',sans-serif;white-space:nowrap}
+.nav-provider-btn:hover{color:var(--accent)}
+.nav-cta{background:var(--accent);color:var(--dark);border:none;border-radius:10px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.35)}
 
 /* PAGE HERO */
 .page-hero{background:var(--dark);padding:56px 32px 48px;text-align:center;position:relative;overflow:hidden}
@@ -416,13 +418,22 @@ nav{position:sticky;top:0;z-index:100;background:var(--dark);display:flex;align-
 /* profile modal uses booking .modal-overlay + .modal-panel — no extra CSS needed */
 
 /* FOOTER */
-footer{background:#141e20;color:rgba(255,255,255,.5);text-align:center;padding:32px 20px;font-size:13px}
-footer a{color:rgba(255,255,255,.4);text-decoration:none}
-footer a:hover{color:rgba(255,255,255,.7)}
+footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,255,255,.04)}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px;margin-bottom:40px;align-items:start}
+.footer-brand .fl-logo{font-size:32px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;letter-spacing:-1px}
+.footer-brand .fl-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.9}
+.footer-col h4{font-size:14px;font-weight:800;color:#fff;margin-bottom:16px}
+.footer-col a,.footer-col span{display:block;font-size:13px;color:rgba(255,255,255,.55);text-decoration:none;margin-bottom:11px;transition:color .2s;cursor:pointer}
+.footer-col a:hover,.footer-col span:hover{color:var(--accent)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.07);padding-top:24px;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.25)}
+.footer-app-btn{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:#fff;text-decoration:none;padding:10px 16px;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;transition:all .2s;white-space:nowrap}
+.footer-app-btn:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3)}
+.footer-app-btn small{display:block;font-size:10px;font-weight:400;opacity:.55;margin-bottom:1px}
 
 /* RESPONSIVE */
 @media(max-width:720px){
-  nav{padding:0 16px}
+  nav{padding:0 16px;height:60px}
   .nav-links{display:none}
   .nav-provider-btn{display:none}
   .page-hero{padding:40px 16px 36px}
@@ -431,6 +442,9 @@ footer a:hover{color:rgba(255,255,255,.7)}
   #s-dynamic{flex-direction:column;width:100%}
   .search-btn{width:100%;margin-top:0}
   .prov-content{margin:28px auto}
+  footer{padding:36px 20px 24px}
+  .footer-top{grid-template-columns:1fr 1fr;gap:24px}
+  .footer-bottom{flex-direction:column;align-items:flex-start;gap:16px}
 }
 /* ── Booking modal styles injected at runtime ── */
 __BOOKING_CSS__
@@ -444,9 +458,15 @@ __BOOKING_CSS__
     <span class="nav-logo-ar">ملاذ</span>
     <span class="nav-logo-en">MALAAZ</span>
   </a>
-  <div class="nav-links"></div>
+  <div class="nav-links">
+    <a href="/">الرئيسية</a>
+    <a href="/مقدمو-الخدمة" class="active">مقدمو الخدمة</a>
+    <a href="/blog.html">المقالات</a>
+    <a href="/faq.html">الأسئلة الشائعة</a>
+  </div>
   <div class="nav-right">
     <button class="nav-provider-btn" onclick="window.open('/provider.html','_blank')">مقدم خدمة؟ سجّل هنا</button>
+    <button onclick="window.open('/client.html','_blank')" title="حسابي" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-user"></i></button>
     <button class="nav-cta" onclick="openBookingModal()">احجز الآن <i class="fas fa-arrow-left" style="margin-right:5px;font-size:12px"></i></button>
   </div>
 </nav>
@@ -506,17 +526,45 @@ __BOOKING_HTML__
 
 <!-- FOOTER -->
 <footer>
-  <div style="margin-bottom:12px">
-    <span style="font-size:18px;font-weight:800;color:var(--accent)">ملاذ</span>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="fl-logo">ملاذ</div>
+      <div class="fl-sub">منصة رعاية طبية منزلية متكاملة<br>كشف · تمريض · أشعة في بيتك</div>
+    </div>
+    <div class="footer-col">
+      <h4>الخدمات</h4>
+      <a href="/">كشف منزلي</a>
+      <a href="/">تمريض منزلي</a>
+      <a href="/">أشعة منزلية</a>
+    </div>
+    <div class="footer-col">
+      <h4>المنصة</h4>
+      <a href="/مقدمو-الخدمة">مقدمو الخدمة</a>
+      <a href="/provider.html" target="_blank">انضم كمقدم خدمة</a>
+      <a href="/faq.html">الأسئلة الشائعة</a>
+      <a href="/blog.html">المقالات</a>
+      <a href="/privacy.html">سياسة الخصوصية</a>
+    </div>
+    <div class="footer-col">
+      <h4>تواصل معنا</h4>
+      <a href="tel:+201039091989">📱 01039091989</a>
+      <a href="mailto:malaaz.medical@gmail.com">📧 malaaz.medical@gmail.com</a>
+      <span>⏰ متاحون 24/7</span>
+    </div>
   </div>
-  <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">
-    <a href="/">الرئيسية</a>
-    <a href="/مقدمو-الخدمة">مقدمو الخدمة</a>
-    <a href="/blog.html">المقالات</a>
-    <a href="/faq.html">الأسئلة الشائعة</a>
-    <a href="/privacy.html">سياسة الخصوصية</a>
+  <div class="footer-bottom">
+    <div class="footer-copy">© ${new Date().getFullYear()} ملاذ للرعاية الطبية المنزلية — جميع الحقوق محفوظة</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="https://play.google.com/store/apps/details?id=com.malaaz.app" target="_blank" rel="noopener" class="footer-app-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3.18 23.76c.38.21.82.22 1.22.03l11.62-6.54-2.93-2.93-9.91 9.44z" fill="#EA4335"/><path d="M1.53 3.26C1.2 3.6 1 4.03 1 4.56v14.88c0 .53.2.96.53 1.3l.07.07 8.34-8.34v-.2L1.6 3.19l-.07.07z" fill="#4285F4"/><path d="M18.86 10.89l-2.37-1.34-3.27 3.27 3.27 3.27 2.39-1.35c.68-.38.68-1.01 0-1.39l-.02-.46z" fill="#FBBC05"/><path d="M4.4.21L16.02 6.75l-2.93 2.93L3.18.24C3.58.05 4.02.06 4.4.21z" fill="#34A853"/></svg>
+        <span><small>احصل عليه من</small>Google Play</span>
+      </a>
+      <a href="https://apps.apple.com/app/id6743782700" target="_blank" rel="noopener" class="footer-app-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04l-.08.23zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        <span><small>حمّله من</small>App Store</span>
+      </a>
+    </div>
   </div>
-  <div>© ${new Date().getFullYear()} ملاذ للرعاية الطبية المنزلية — جميع الحقوق محفوظة</div>
 </footer>
 
 <script>
