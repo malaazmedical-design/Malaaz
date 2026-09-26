@@ -15,8 +15,8 @@ function getBookingPartial() {
   const src   = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   const lines = src.split('\n');
 
-  // CSS: from .modal-overlay block to closing </style>
-  const cssStart = lines.findIndex(l => l.includes('.modal-overlay { position: fixed'));
+  // CSS: from .modal-overlay{position:fixed block to closing </style>
+  const cssStart = lines.findIndex(l => l.trim().startsWith('.modal-overlay{position:fixed'));
   const cssEnd   = lines.findIndex((l, i) => i > cssStart && l.trim() === '</style>');
   const css      = lines.slice(cssStart, cssEnd).join('\n');
 
