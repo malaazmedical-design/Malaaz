@@ -360,7 +360,7 @@ nav{position:sticky;top:0;z-index:100;background:var(--dark);display:flex;align-
 .search-field select:focus,.search-field input:focus{border-color:var(--accent)}
 .search-btn{background:var(--dark);color:var(--accent);font-size:14px;font-weight:700;padding:9px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;align-self:flex-end;margin-top:16px;transition:background .2s;flex-shrink:0}
 .search-btn:hover{background:#253438}
-#s-dynamic{display:contents}
+#s-dynamic{display:flex;flex:2;gap:10px;min-width:0;flex-wrap:wrap}
 
 /* CONTENT */
 .prov-content{max-width:1100px;margin:48px auto;padding:0 20px}
@@ -408,7 +408,7 @@ footer a:hover{color:rgba(255,255,255,.7)}
   .page-hero{padding:40px 16px 36px}
   .search-bar{margin:0 12px;border-radius:12px}
   .search-row{flex-direction:column}
-  .dynamic-fields{flex-direction:column;width:100%}
+  #s-dynamic{flex-direction:column;width:100%}
   .search-btn{width:100%;margin-top:0}
   .prov-content{margin:28px auto}
 }
