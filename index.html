@@ -495,7 +495,10 @@ nav.scrolled{height:62px;background:rgba(20,32,35,0.98);}
 h1{font-family:'Tajawal',sans-serif;font-size:clamp(46px,5vw,72px);font-weight:900;line-height:1.1;color:#fff;letter-spacing:-2px;margin-bottom:14px;}
 h1 span.accent{color:var(--accent);}
 .hero-sub{font-size:18px;color:rgba(255,255,255,.55);line-height:1.8;margin-bottom:36px;font-weight:400;max-width:480px;}
-.hero-actions{display:flex;align-items:center;gap:14px;margin-bottom:48px;}
+.hero-actions{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.hero-steps{display:flex;align-items:center;gap:10px;margin-bottom:40px;font-size:13px;font-weight:700;color:rgba(255,255,255,.5);}
+.hero-steps span{display:flex;align-items:center;gap:5px;}
+.hero-steps .hs-arrow{color:rgba(201,168,76,.4);font-size:11px;}
 .btn-primary{background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:16px 32px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .25s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 32px rgba(201,168,76,.3);position:relative;overflow:hidden;}
 .btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);transition:transform .6s;}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 44px rgba(201,168,76,.45);}
@@ -809,8 +812,14 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       <h1><span id="hero-title-l1">رعاية طبية منزلية</span><br><span id="hero-title-l2" class="accent">كشف وتمريض وأشعة</span><br><span id="hero-title-l3">في بيتك</span></h1>
       <p class="hero-sub" id="hero-subtitle"></p>
       <div class="hero-actions">
-        <button class="btn-primary" onclick="openBookingModal()"><i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز موعدك الآن</button>
-        <button class="btn-secondary" onclick="showPage('services')"><i class="fas fa-play-circle" style="margin-left:8px"></i> استعرض الخدمات</button>
+        <a class="btn-primary" href="/مقدمو-الخدمة"><i class="fas fa-search" style="margin-left:8px"></i> احجز دكتورك بنفسك</a>
+      </div>
+      <div class="hero-steps">
+        <span><i class="fas fa-search"></i> اختار</span>
+        <span class="hs-arrow">←</span>
+        <span><i class="fas fa-scale-balanced"></i> قارن</span>
+        <span class="hs-arrow">←</span>
+        <span><i class="fas fa-calendar-check"></i> احجز</span>
       </div>
     </div>
     <div class="hero-visual">
