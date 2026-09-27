@@ -381,7 +381,7 @@ html{scroll-behavior:smooth;}
 body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overflow-x:clip;}
 
 /* ===== NAVBAR ===== */
-nav{position:fixed;top:0;right:0;left:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 60px;height:72px;background:rgba(30,44,47,0.96);backdrop-filter:blur(16px);border-bottom:1px solid rgba(201,168,76,0.15);transition:all .3s;}
+nav{position:fixed;top:0;right:0;left:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 max(60px,calc((100% - 1360px) / 2));height:72px;background:rgba(30,44,47,0.96);backdrop-filter:blur(16px);border-bottom:1px solid rgba(201,168,76,0.15);transition:all .3s;}
 nav.scrolled{height:62px;background:rgba(20,32,35,0.98);}
 .nav-logo{display:flex;align-items:baseline;gap:8px;cursor:pointer;text-decoration:none;}
 .nav-logo-ar{font-size:26px;font-weight:900;color:#fff;letter-spacing:-1px;font-family:'Tajawal',sans-serif;}
@@ -396,7 +396,8 @@ nav.scrolled{height:62px;background:rgba(20,32,35,0.98);}
 .nav-provider-btn:hover{color:var(--accent);}
 
 /* ===== HERO ===== */
-.hero{min-height:100vh;background:var(--dark);display:flex;align-items:center;position:relative;overflow:hidden;padding:100px 60px 60px;}
+.hero{min-height:100vh;background:var(--dark);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:0;}
+.hero-inner{position:relative;width:100%;max-width:1480px;padding:100px max(60px,calc((100% - 1360px) / 2)) 60px;display:flex;align-items:center;}
 /* ===== Animated background slideshow ===== */
 .hero-slides{position:absolute;inset:0;z-index:0;}
 .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;animation:slideShow 18s infinite;}
@@ -478,12 +479,12 @@ h1 span.accent{color:var(--accent);}
 @media(prefers-reduced-motion:reduce){.hero-content > *,.hero-visual{animation:none;opacity:1;}.hero-slide{animation:none;opacity:1;transform:none;}.hero-slide:not(:first-child){opacity:0;}}
 
 /* Trust Bar */
-.trust-bar{background:var(--dark2);padding:18px 60px;display:flex;align-items:center;justify-content:center;gap:50px;border-top:1px solid rgba(201,168,76,.1);}
+.trust-bar{background:var(--dark2);padding:18px max(60px,calc((100% - 1360px) / 2));display:flex;align-items:center;justify-content:center;gap:50px;border-top:1px solid rgba(201,168,76,.1);}
 .trust-item{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.5);font-size:13px;font-weight:600;}
 .trust-item strong{color:var(--accent);}
 
 /* Sections */
-.section{padding:90px 60px;}
+.section{padding:90px max(60px,calc((100% - 1360px) / 2));}
 .section-tag{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;}
 /* ===== SEO: h2 مع كلمات مفتاحية ===== */
 .section-title{font-family:'Tajawal',sans-serif;font-size:clamp(32px,3.5vw,48px);font-weight:900;line-height:1.15;letter-spacing:-1px;margin-bottom:16px;}
@@ -506,7 +507,7 @@ h1 span.accent{color:var(--accent);}
 .popular-tag{position:absolute;top:18px;left:18px;background:var(--accent);color:var(--dark);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;}
 
 /* How It Works */
-.how-section{background:var(--dark);padding:90px 60px;position:relative;overflow:hidden;}
+.how-section{background:var(--dark);padding:90px max(60px,calc((100% - 1360px) / 2));position:relative;overflow:hidden;}
 .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;position:relative;z-index:1;}
 .step-card{text-align:center;padding:28px 20px;}
 .step-num{width:56px;height:56px;border-radius:18px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:var(--accent);margin:0 auto 16px;font-family:'Tajawal',sans-serif;}
@@ -601,7 +602,7 @@ h1 span.accent{color:var(--accent);}
 .faq-item.open .faq-arrow{transform:rotate(180deg);}
 
 /* Filters */
-.filters-bar{background:var(--white);border-bottom:1px solid var(--border);padding:16px 60px;display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none;position:sticky;top:72px;z-index:50;}
+.filters-bar{background:var(--white);border-bottom:1px solid var(--border);padding:16px max(60px,calc((100% - 1360px) / 2));display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none;position:sticky;top:72px;z-index:50;}
 .filter-btn{border:1.5px solid var(--border);border-radius:20px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;background:var(--white);color:var(--text);white-space:nowrap;transition:all .2s;font-family:'Cairo',sans-serif;}
 .filter-btn.active{background:var(--dark);color:#fff;border-color:var(--dark);}
 
@@ -647,7 +648,7 @@ h1 span.accent{color:var(--accent);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* Footer */
-footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,255,255,.04);}
+footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;border-top:1px solid rgba(255,255,255,.04);}
 .footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:28px;margin-bottom:40px;align-items:start;}
 .footer-brand .fl-logo{font-size:32px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;letter-spacing:-1px;}
 .footer-brand .fl-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.9;}
@@ -727,6 +728,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
     </div>
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
+    <div class="hero-inner">
     <div class="hero-content">
       <div class="hero-badge"><i class="fas fa-circle-check"></i> <span id="hero-badge-text">أطباء معتمدون · خدمة 24 ساعة</span></div>
       <!-- SEO: h1 يحتوي على الكلمة المفتاحية الرئيسية -->
@@ -772,6 +774,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
         <div class="float-badge fb-right"><div class="fb-ico">⭐</div><div><div class="fb-txt">4.9 / 5</div><div class="fb-sub">تقييم المرضى</div></div></div>
       </div>
     </div>
+    </div><!-- /.hero-inner -->
   </section>
 
   <!-- TRUST BAR -->
@@ -916,7 +919,7 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
   </script>
 
   <!-- CTA -->
-  <section style="background:#f5f2ec;padding:90px 60px;text-align:center;position:relative;overflow:hidden">
+  <section style="background:#f5f2ec;padding:90px max(60px,calc((100% - 1360px) / 2));text-align:center;position:relative;overflow:hidden">
     <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 50% 50%,rgba(201,168,76,.12) 0%,transparent 70%)"></div>
     <div style="position:relative;z-index:1">
       <div class="section-tag">ابدأ الآن</div>
