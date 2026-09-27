@@ -1,8 +1,11 @@
 const SUPABASE_URL = 'https://omsictbrqlsohrmxeuym.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho';
 
+const BASE_URL = 'https://malaaz-plum.vercel.app';
+
 module.exports = async function handler(req, res) {
   const id = req.query.id;
+  const slug = req.query.slug ? decodeURIComponent(req.query.slug) : null;
   const host = req.headers.host;
   const templateUrl = `https://${host}/blog-post-template.html`;
 
@@ -15,10 +18,15 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  if (id) {
+  // Support both ?slug= (clean URL) and ?id= (legacy) — slug takes priority
+  const lookup = slug
+    ? `slug=eq.${encodeURIComponent(slug)}`
+    : id ? `id=eq.${id}` : null;
+
+  if (lookup) {
     try {
       const supaRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/blog_posts?select=id,title,summary,created_at,updated_at&id=eq.${id}&status=eq.published`,
+        `${SUPABASE_URL}/rest/v1/blog_posts?select=id,title,slug,summary,created_at,updated_at&${lookup}&status=eq.published`,
         { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
       );
       const data = await supaRes.json();
@@ -27,7 +35,10 @@ module.exports = async function handler(req, res) {
       if (post) {
         const title = `${post.title} — ملاذ`;
         const description = (post.summary || '').replace(/"/g, '&quot;');
-        const pageUrl = `https://malaaz-plum.vercel.app/blog-post.html?id=${post.id}`;
+        // Use clean slug URL as canonical; fallback to ?id= for old posts without slug
+        const pageUrl = post.slug
+          ? `${BASE_URL}/مقالات/${encodeURIComponent(post.slug)}`
+          : `${BASE_URL}/blog-post.html?id=${post.id}`;
 
         html = html
           .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)

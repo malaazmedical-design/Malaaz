@@ -1,0 +1,876 @@
+const SUPABASE_URL = 'https://omsictbrqlsohrmxeuym.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho';
+const BASE_URL = 'https://malaaz-plum.vercel.app';
+
+// Profile modal JS — uses String.raw so \' is preserved as \' in client-side output
+const profileModalJs = String.raw`
+let currentProviderId = null;
+let _provCache = {};
+
+function renderProviderAreas(areasStr) {
+  if (!areasStr) return '';
+  return areasStr.split(',').slice(0,4).map(a =>
+    '<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">\u{1F4CD} '+esc(a.trim())+'</span>'
+  ).join('');
+}
+
+async function viewProfile(id) {
+  currentProviderId = id;
+
+  const [provArr, provSvcsRaw, provReviews] = await Promise.all([
+    _provCache[id]
+      ? Promise.resolve([_provCache[id]])
+      : sf('providers?select=*&id=eq.'+encodeURIComponent(id)),
+    sf('provider_services?select=sub_service_id,custom_price,sub_services(name,service_name,duration,price_min,price_min_specialist,price_min_consultant)&provider_id=eq.'+encodeURIComponent(id)+'&is_active=eq.true'),
+    sf('reviews?select=client_name,rating,text&provider_id=eq.'+encodeURIComponent(id)+'&is_approved=eq.true&limit=5'),
+  ]);
+
+  const provider = provArr?.[0];
+  if (!provider) { console.warn('viewProfile: provider not found', id); return; }
+  _provCache[id] = provider;
+
+  const isConsultant = (provider.grade || '') === 'استشاري';
+  const provSvcs = (provSvcsRaw || []).map(ps => {
+    const sub = ps.sub_services; if (!sub) return null;
+    const tierPrice = isConsultant ? sub.price_min_consultant : sub.price_min_specialist;
+    return { sub_name: sub.name, service_name: sub.service_name, duration: sub.duration, price: ps.custom_price ?? tierPrice ?? sub.price_min };
+  }).filter(Boolean);
+
+  let servicesHtml = '';
+  if (provSvcs.length) {
+    const grouped = {};
+    provSvcs.forEach(ps => { const k = ps.service_name||'خدمات'; if(!grouped[k]) grouped[k]=[]; grouped[k].push(ps); });
+    Object.entries(grouped).forEach(([svcName, subs]) => {
+      servicesHtml += '<div style="margin-bottom:14px">'
+        +'<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">'+esc(svcName)+'</div>'
+        +'<div style="display:flex;flex-direction:column;gap:8px">'
+        +subs.map(ps =>
+          '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg);border-radius:12px;cursor:pointer;border:1.5px solid var(--border);transition:border .2s"'
+          +' onmouseover="this.style.borderColor=\'#c9a84c\'" onmouseout="this.style.borderColor=\'var(--border)\'"'
+          +' onclick="doSvcBook(this)" data-id="'+esc(provider.id)+'" data-name="'+esc(provider.name)+'" data-email="'+esc(provider.email||'')+'" data-stype="'+esc(provider.service_type||'')+'" data-sub="'+esc(ps.sub_name)+'">'
+          +'<div><div style="font-size:14px;font-weight:700;color:var(--text)">'+esc(ps.sub_name)+'</div>'
+          +(ps.duration?'<div style="font-size:11px;color:var(--muted);margin-top:2px">⏱ '+esc(ps.duration)+'</div>':'')+'</div>'
+          +'<div style="font-size:17px;font-weight:900;color:var(--dark)">'+(ps.price||'—')+'<span style="font-size:11px;font-weight:400;color:var(--muted)"> ج.م</span></div>'
+          +'</div>'
+        ).join('')
+        +'</div></div>';
+    });
+  } else {
+    servicesHtml = '<div style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px">لم يحدد هذا المقدم خدماته بعد</div>';
+  }
+
+  const reviewsHtml = provReviews?.length ? '<div style="padding:16px 18px;border-top:1px solid rgba(255,255,255,.08)">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px">⭐ آراء العملاء ('+provReviews.length+')</div>'
+    +provReviews.map(r =>
+      '<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-size:12px;font-weight:700">'+esc(r.client_name||'عميل')+'</span>'
+      +'<span style="color:var(--accent);font-size:11px">'+'★'.repeat(r.rating||5)+'</span></div>'
+      +(r.text?'<div style="font-size:12px;color:var(--muted);line-height:1.6">'+esc(r.text)+'</div>':'')
+      +'</div>'
+    ).join('')+'</div>' : '';
+
+  const reviewCount = provReviews?.length || 0;
+  const realRating  = reviewCount > 0 ? provReviews.reduce((s,r)=>s+(r.rating||0),0)/reviewCount : 0;
+  const stars = reviewCount > 0
+    ? '★'.repeat(Math.round(realRating))+'☆'.repeat(5-Math.round(realRating))
+      +' <span style="font-size:12px;color:var(--muted)">'+realRating.toFixed(1)+' ('+reviewCount+' تقييم)</span>'
+    : '<span style="color:var(--muted);font-size:13px">⭐ مقدم جديد</span>';
+  const gradeLabel = provider.grade
+    ? '<span style="background:rgba(201,168,76,.2);color:var(--accent);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px">'+esc(provider.grade)+'</span>' : '';
+  const specText = esc(provider.specialty||provider.service_type||'');
+
+  let modal = document.getElementById('provider-profile-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'provider-profile-modal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = '<div class="modal-panel" style="max-height:88vh;overflow-y:auto;border-radius:20px 20px 0 0"><div id="provider-profile-content"></div></div>';
+    modal.addEventListener('click', e => { if (e.target === modal) closeProfile(); });
+    document.body.appendChild(modal);
+  }
+
+  document.getElementById('provider-profile-content').innerHTML =
+    '<div style="background:#243235;padding:20px;border-radius:20px 20px 0 0">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+    +'<div style="display:flex;gap:14px;align-items:center">'
+    +(provider.photo_url?'<img src="'+esc(provider.photo_url)+'" style="width:64px;height:64px;border-radius:16px;object-fit:cover;border:2px solid rgba(255,255,255,.15);flex-shrink:0">':'')
+    +'<div style="min-width:0;flex:1">'
+    +'<div style="font-size:18px;font-weight:900;color:#fff;font-family:Tajawal,sans-serif;overflow-wrap:break-word">'+esc(provider.name)+'</div>'
+    +'<div style="margin-top:5px">'+gradeLabel+'<span style="font-size:12px;color:rgba(255,255,255,.5)">'+specText+'</span></div>'
+    +'<div style="color:var(--accent);font-size:14px;margin-top:6px">'+stars+'</div>'
+    +'</div></div>'
+    +'<button onclick="closeProfile()" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0">\xD7</button>'
+    +'</div>'
+    +'<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">'+renderProviderAreas(provider.areas||provider.area)
+    +(provider.experience?'<span style="font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:20px">'+esc(String(provider.experience))+' سنة خبرة</span>':'')
+    +'</div>'
+    +(provider.bio?'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.7">'+esc(provider.bio)+'</div>':'')
+    +'<div style="display:flex;gap:8px;margin-top:14px">'
+    +'<a href="https://wa.me/201039091989" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:Cairo,sans-serif"><i class="fab fa-whatsapp" style="font-size:16px"></i> واتساب</a>'
+    +'<a href="tel:01039091989" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;text-decoration:none;font-family:Cairo,sans-serif"><i class="fas fa-phone" style="font-size:14px"></i> اتصال</a>'
+    +'</div></div>'
+    +'<div style="padding:14px 18px 18px">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px">⚙️ الخدمات والأسعار</div>'
+    +servicesHtml
+    +(provider.is_available
+      ?'<button onclick="doMainBook(this)" data-id="'+esc(provider.id)+'" data-name="'+esc(provider.name)+'" data-email="'+esc(provider.email||'')+'" data-stype="'+esc(provider.service_type||'')+'" style="width:100%;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-top:8px"><i class="fas fa-calendar-check" style="margin-left:8px"></i> احجز مع '+esc(provider.name)+'</button>'
+      :'<button disabled style="width:100%;background:#e5e5e5;color:#999;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:not-allowed;font-family:Cairo,sans-serif;margin-top:8px">غير متاح حالياً</button>')
+    +'</div>'
+    +reviewsHtml;
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function doSvcBook(el) {
+  closeProfile();
+  openProviderBooking({ id: el.dataset.id, name: el.dataset.name, email: el.dataset.email, service_type: el.dataset.stype, sub: el.dataset.sub });
+}
+function doMainBook(el) {
+  closeProfile();
+  openProviderBooking({ id: el.dataset.id, name: el.dataset.name, email: el.dataset.email, service_type: el.dataset.stype });
+}
+
+function closeProfile() {
+  const modal = document.getElementById('provider-profile-modal') || document.getElementById('profileModal');
+  if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
+}
+`;
+const { getBookingPartial } = require('./booking-partial');
+
+const H = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
+
+async function supaFetch(path) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: H });
+  return r.ok ? r.json() : [];
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildCard(p) {
+  const icons = { 'كشف منزلي':'fa-stethoscope','تمريض منزلي':'fa-user-nurse','أشعة منزلية':'fa-x-ray' };
+  const icon = icons[p.service_type] || 'fa-user-md';
+
+  let specText = p.grade
+    ? `${esc(p.grade)} ${esc(p.specialty || (p.service_type==='تمريض منزلي'?'تمريض':p.service_type==='أشعة منزلية'?'أشعة':''))}`
+    : esc(p.specialty || (p.service_type==='تمريض منزلي'?'أخصائي تمريض':p.service_type==='أشعة منزلية'?'مركز أشعة':'—'));
+
+  let starsHtml;
+  if (p.reviewCount > 0) {
+    const r = p.realRating;
+    const full = Math.floor(r);
+    const half = (r - full) >= 0.5;
+    const stars = '★'.repeat(full) + (half?'⯨':'') + '☆'.repeat(5-full-(half?1:0));
+    starsHtml = `${stars} <span style="color:#999;font-size:12px">${r.toFixed(1)} (${p.reviewCount} تقييم)</span>`;
+  } else {
+    starsHtml = '<span style="color:#999;font-size:13px">⭐ مقدم جديد</span>';
+  }
+
+  const areas = (p.areas || p.area || '').split(',').map(a=>a.trim()).filter(Boolean);
+  const areaChips = areas.slice(0,3).map(a=>`<span class="prov-area">${esc(a)}</span>`).join('');
+  const moreAreas = areas.length > 3 ? `<span class="prov-area prov-area-more">+${areas.length-3}</span>` : '';
+
+  const photoHtml = p.photo_url
+    ? `<img src="${esc(p.photo_url)}" alt="${esc(p.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:20px">`
+    : `<i class="fas ${icon}" style="font-size:36px;color:rgba(255,255,255,.7)"></i>`;
+
+  const bookBtn = p.is_available
+    ? `<button class="prov-book-btn" onclick="openProviderPage('${esc(p.id)}','${esc(p.name).replace(/'/g,"\\'")}')">احجز الآن <i class="fas fa-arrow-left"></i></button>`
+    : `<button class="prov-book-btn" disabled style="opacity:.5;cursor:not-allowed">غير متاح</button>`;
+
+  return `<div class="prov-card">
+  <div class="prov-card-head">
+    <div class="prov-ava">${photoHtml}</div>
+    <div>
+      <div class="prov-name">${esc(p.name)}</div>
+      <div class="prov-spec">${specText}</div>
+    </div>
+  </div>
+  <div class="prov-stars">${starsHtml}</div>
+  <div class="prov-avail ${p.is_available?'avail-yes':'avail-no'}">${p.is_available?'● متاح الآن':'○ غير متاح حالياً'}</div>
+  <div class="prov-areas-row">${areaChips}${moreAreas}</div>
+  ${p.price ? `<div class="prov-price">ابتداء من <strong>${esc(String(p.price))}</strong> ج.م</div>` : ''}
+  <div class="prov-actions">
+    ${bookBtn}
+    <button class="prov-profile-btn" onclick="viewProfile('${esc(p.id)}')">خدماته وأسعاره</button>
+  </div>
+</div>`;
+}
+
+module.exports = async function handler(req, res) {
+  const areaParam = decodeURIComponent(req.query.area || '').trim();
+  const serviceParam = req.query.service || '';
+  const subParam = req.query.sub ? decodeURIComponent(req.query.sub) : '';
+  const today = new Date().toISOString().split('T')[0];
+
+  // Build providers query — service_type filtered server-side when serviceParam present
+  const buildProvidersQuery = () => {
+    let q = `providers?select=*&status=eq.active`;
+    if (serviceParam) q += `&service_type=eq.${encodeURIComponent(serviceParam)}`;
+    if (areaParam) q += `&areas=ilike.*${encodeURIComponent(areaParam)}*`;
+    q += `&order=is_available.desc,name.asc`;
+    return q;
+  };
+
+  // Parallel fetches
+  let [providers, reviews, areas, xraySubs] = await Promise.all([
+    supaFetch(buildProvidersQuery()),
+    supaFetch(`reviews?select=provider_id,rating&is_approved=eq.true`),
+    supaFetch(`coverage_areas?select=name,city&is_active=eq.true&order=name`),
+    supaFetch(`sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`),
+  ]);
+
+  // Sub-service filter (xray type or nursing type)
+  if (subParam && providers && providers.length) {
+    try {
+      const subSvcs = await supaFetch(`sub_services?select=id&name=eq.${encodeURIComponent(subParam)}&is_active=eq.true`);
+      if (subSvcs && subSvcs.length) {
+        const subIds = subSvcs.map(s => s.id);
+        const provSvcRows = await supaFetch(`provider_services?select=provider_id&sub_service_id=in.(${subIds.join(',')})&is_active=eq.true`);
+        const eligibleIds = new Set((provSvcRows || []).map(ps => ps.provider_id));
+        providers = providers.filter(p => eligibleIds.has(p.id));
+      } else {
+        providers = [];
+      }
+    } catch(e) { /* keep all providers if sub-service lookup fails */ }
+  }
+
+  // Attach ratings
+  const ratingMap = {};
+  (reviews || []).forEach(r => {
+    if (!r.provider_id) return;
+    if (!ratingMap[r.provider_id]) ratingMap[r.provider_id] = { sum: 0, count: 0 };
+    ratingMap[r.provider_id].sum += r.rating;
+    ratingMap[r.provider_id].count++;
+  });
+  (providers || []).forEach(p => {
+    const m = ratingMap[p.id];
+    p.realRating = m ? m.sum / m.count : null;
+    p.reviewCount = m ? m.count : 0;
+  });
+  providers.sort((a,b) => (b.realRating||0)-(a.realRating||0) || (b.reviewCount||0)-(a.reviewCount||0));
+
+  // Group providers by service type
+  const byType = {};
+  (providers || []).forEach(p => {
+    const t = p.service_type || 'أخرى';
+    if (!byType[t]) byType[t] = [];
+    byType[t].push(p);
+  });
+
+  // Build sections — only show types that have providers
+  const typeOrder = ['كشف منزلي','تمريض منزلي','أشعة منزلية'];
+  let sectionsHtml = '';
+  for (const t of typeOrder) {
+    const list = byType[t];
+    if (!list || !list.length) continue;
+    const icons = { 'كشف منزلي':'fa-stethoscope','تمريض منزلي':'fa-user-nurse','أشعة منزلية':'fa-x-ray' };
+    sectionsHtml += `
+<div class="prov-section">
+  <h2 class="prov-section-title"><i class="fas ${icons[t]||'fa-user-md'}"></i> ${esc(t)}</h2>
+  <div class="prov-grid" data-type="${esc(t)}">
+    ${list.map(p => buildCard(p)).join('\n')}
+  </div>
+</div>`;
+  }
+
+  if (!sectionsHtml) {
+    sectionsHtml = `<div class="prov-empty">لا يوجد مقدمو خدمة في هذه المنطقة حالياً</div>`;
+  }
+
+  // Build area options grouped by city
+  const cairo = (areas||[]).filter(a=>a.city==='القاهرة');
+  const giza  = (areas||[]).filter(a=>a.city==='الجيزة');
+  const areaOptions = `<option value="">كل المناطق</option>
+    <optgroup label="القاهرة">${cairo.map(a=>`<option value="${esc(a.name)}"${areaParam===a.name?' selected':''}>${esc(a.name)}</option>`).join('')}</optgroup>
+    <optgroup label="الجيزة">${giza.map(a=>`<option value="${esc(a.name)}"${areaParam===a.name?' selected':''}>${esc(a.name)}</option>`).join('')}</optgroup>`;
+
+  // xray options
+  const xrayOptions = (xraySubs||[]).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('');
+
+  // Detect service type from serviceParam / subParam for smart SEO labels
+  const isNursing = serviceParam === 'تمريض منزلي' || (subParam && subParam.includes('تمريض'));
+  const isXray    = serviceParam === 'أشعة منزلية'  || (subParam && (subParam.includes('أشعة') || subParam.includes('سونار') || subParam.includes('اشعة')));
+  const isVisit   = !isNursing && !isXray; // default: كشف منزلي / doctor visit
+
+  // Build human-readable service label for SEO copy
+  let serviceLabel, serviceShort, schemaSpecialty;
+  if (isNursing) {
+    serviceLabel = 'تمريض منزلي';
+    serviceShort = 'ممرضون';
+    schemaSpecialty = 'Nursing';
+  } else if (isXray) {
+    serviceLabel = 'أشعة منزلية';
+    serviceShort = 'تصوير طبي';
+    schemaSpecialty = 'Radiology';
+  } else if (subParam) {
+    serviceLabel = `دكتور ${subParam} منزلي`;
+    serviceShort = `دكتور ${subParam}`;
+    schemaSpecialty = subParam;
+  } else {
+    serviceLabel = 'كشف منزلي';
+    serviceShort = 'أطباء';
+    schemaSpecialty = 'GeneralPractice';
+  }
+
+  const providerCount = (providers || []).length;
+  const countLabel = providerCount > 0 ? ` (${providerCount} متاح)` : '';
+
+  // Dynamic title
+  let pageTitle;
+  if (subParam && areaParam)      pageTitle = `${serviceLabel} في ${areaParam} | ملاذ`;
+  else if (subParam)              pageTitle = `${serviceLabel} — احجز بدون رسوم | ملاذ`;
+  else if (areaParam)             pageTitle = `مقدمو الخدمة في ${areaParam} — ملاذ`;
+  else                            pageTitle = 'مقدمو الخدمة — أطباء وممرضون معتمدون | ملاذ';
+
+  // Dynamic description
+  let pageDesc;
+  if (subParam && areaParam)
+    pageDesc = `احجز ${serviceLabel} في ${areaParam}${countLabel} — الدفع بعد الخدمة وبدون رسوم خفية`;
+  else if (subParam)
+    pageDesc = `احجز ${serviceLabel} في منزلك بالقاهرة والجيزة${countLabel} — قارن، اختار، واحجز في دقيقة`;
+  else if (areaParam)
+    pageDesc = `أطباء وممرضون وأجهزة أشعة متاحون في ${areaParam}${countLabel} — احجز بدون رسوم والدفع بعد الخدمة`;
+  else
+    pageDesc = 'قارن بين الأطباء والممرضين المتاحين في القاهرة والجيزة واحجز مع اللي يناسبك';
+
+  // Canonical URL — clean paths for main services, params for sub-specialties
+  const serviceSlug = serviceParam === 'كشف منزلي' ? 'كشف-منزلي'
+    : serviceParam === 'تمريض منزلي' ? 'تمريض-منزلي'
+    : serviceParam === 'أشعة منزلية' ? 'أشعة-منزلية'
+    : '';
+  let canonicalUrl;
+  if (serviceSlug && areaParam)
+    canonicalUrl = `${BASE_URL}/${serviceSlug}/${encodeURIComponent(areaParam)}`;
+  else if (serviceSlug)
+    canonicalUrl = `${BASE_URL}/${serviceSlug}`;
+  else if (subParam && areaParam)
+    canonicalUrl = `${BASE_URL}/مقدمو-الخدمة?sub=${encodeURIComponent(subParam)}&area=${encodeURIComponent(areaParam)}`;
+  else if (subParam)
+    canonicalUrl = `${BASE_URL}/مقدمو-الخدمة?sub=${encodeURIComponent(subParam)}`;
+  else if (areaParam)
+    canonicalUrl = `${BASE_URL}/مقدمو-الخدمة/${encodeURIComponent(areaParam)}`;
+  else
+    canonicalUrl = `${BASE_URL}/مقدمو-الخدمة`;
+
+  // Dynamic H1 text (used below in HTML)
+  let h1Text;
+  if (subParam && areaParam)      h1Text = `${serviceLabel} في ${esc(areaParam)}`;
+  else if (subParam)              h1Text = `${serviceLabel} في القاهرة والجيزة`;
+  else if (areaParam)             h1Text = `مقدمو الخدمة في ${esc(areaParam)}`;
+  else                            h1Text = 'أطباء وممرضون معتمدون';
+
+  // JSON-LD Schema
+  const schemaObj = {
+    "@context": "https://schema.org",
+    "@type": "MedicalBusiness",
+    "name": subParam ? `ملاذ — ${serviceLabel}` : "ملاذ للرعاية الطبية المنزلية",
+    "description": pageDesc,
+    "url": canonicalUrl,
+    "telephone": "+201039097982",
+    "areaServed": areaParam || "القاهرة والجيزة",
+    "medicalSpecialty": schemaSpecialty,
+    "availableService": subParam ? { "@type": "MedicalTherapy", "name": serviceLabel } : undefined,
+    "priceRange": "بدون رسوم مسبقة"
+  };
+  // Remove undefined keys
+  Object.keys(schemaObj).forEach(k => schemaObj[k] === undefined && delete schemaObj[k]);
+  const schema = JSON.stringify(schemaObj);
+
+  const booking = getBookingPartial();
+
+  const html = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1112558708398353');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1112558708398353&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(pageTitle)}</title>
+<meta name="description" content="${esc(pageDesc)}">
+<link rel="canonical" href="${canonicalUrl}">
+<meta property="og:title" content="${esc(pageTitle)}">
+<meta property="og:description" content="${esc(pageDesc)}">
+<meta property="og:url" content="${canonicalUrl}">
+<meta property="og:type" content="website">
+<meta name="robots" content="index,follow">
+<script type="application/ld+json">${schema}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+<script>window.addEventListener('load',()=>{if(typeof emailjs!=='undefined')emailjs.init('P2Xy0_OBIWdVXk1gE');});</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --dark:#1e2c2f;
+  --accent:#c9a84c;
+  --bg:#f5f2ec;
+  --white:#fff;
+  --text:#1e2c2f;
+  --muted:#7a8c90;
+  --border:#e0dcd4;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAVBAR */
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 60px;height:72px;background:rgba(30,44,47,0.96);backdrop-filter:blur(16px);border-bottom:1px solid rgba(201,168,76,0.15)}
+.nav-logo{display:flex;align-items:baseline;gap:8px;cursor:pointer;text-decoration:none}
+.nav-logo-ar{font-size:26px;font-weight:900;color:#fff;letter-spacing:-1px;font-family:'Tajawal',sans-serif}
+.nav-logo-en{font-size:9px;font-weight:700;color:var(--accent);letter-spacing:5px;opacity:.8}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{color:rgba(255,255,255,.65);font-size:14px;font-weight:600;text-decoration:none;transition:color .2s;cursor:pointer}
+.nav-links a:hover,.nav-links a.active{color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:14px}
+.nav-provider-btn{color:rgba(255,255,255,.5);font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;font-family:'Cairo',sans-serif;white-space:nowrap}
+.nav-provider-btn:hover{color:var(--accent)}
+.nav-cta{background:var(--accent);color:var(--dark);border:none;border-radius:10px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.35)}
+
+/* PAGE HERO */
+.page-hero{background:var(--dark);padding:56px 32px 48px;text-align:center;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 80% at 50% 50%,rgba(201,168,76,.06) 0%,transparent 70%)}
+.breadcrumb{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:rgba(255,255,255,.4);margin-bottom:16px;position:relative}
+.breadcrumb a{color:rgba(255,255,255,.4);text-decoration:none}
+.breadcrumb a:hover{color:rgba(255,255,255,.7)}
+.breadcrumb .sep{opacity:.4}
+.page-tag{display:inline-block;background:rgba(201,168,76,.15);color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.1em;padding:5px 14px;border-radius:100px;border:1px solid rgba(201,168,76,.25);margin-bottom:16px;position:relative}
+.page-title{font-size:clamp(26px,4vw,40px);font-weight:800;color:#fff;line-height:1.25;margin-bottom:12px;position:relative}
+.page-sub{font-size:16px;color:rgba(255,255,255,.55);max-width:560px;margin:0 auto;line-height:1.7;position:relative}
+
+/* SEARCH BAR */
+.search-bar{background:var(--white);border-radius:16px;box-shadow:0 4px 32px rgba(0,0,0,.1);padding:20px 24px;max-width:1060px;margin:-28px auto 0;position:relative;z-index:10}
+.search-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:nowrap}
+.search-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.search-field label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;white-space:nowrap}
+.search-field select,.search-field input{padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);outline:none;width:100%;transition:border-color .2s}
+.search-field select:focus,.search-field input:focus{border-color:var(--accent)}
+.search-btn{background:var(--dark);color:var(--accent);font-size:14px;font-weight:700;padding:9px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;align-self:flex-end;margin-top:16px;transition:background .2s;flex-shrink:0}
+.search-btn:hover{background:#253438}
+.clear-btn{background:transparent;color:var(--muted);font-size:13px;font-weight:600;padding:9px 14px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;align-self:flex-end;margin-top:16px;transition:all .2s;flex-shrink:0}
+.clear-btn:hover{border-color:var(--accent);color:var(--accent)}
+#s-dynamic{display:flex;flex:2;gap:10px;min-width:0;flex-wrap:wrap}
+
+/* CONTENT */
+.prov-content{max-width:1100px;margin:48px auto;padding:0 20px}
+.prov-section{margin-bottom:56px}
+.prov-section-title{font-size:20px;font-weight:800;color:var(--dark);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.prov-section-title i{color:var(--accent)}
+
+/* GRID */
+.prov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+
+/* CARD */
+.prov-card{background:var(--dark);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px;transition:transform .2s,box-shadow .2s}
+.prov-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.prov-card-head{display:flex;align-items:center;gap:14px}
+.prov-ava{width:56px;height:56px;border-radius:20px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.prov-name{font-size:16px;font-weight:700;color:#fff}
+.prov-spec{font-size:13px;color:rgba(255,255,255,.5);margin-top:2px}
+.prov-stars{font-size:13px;color:var(--accent)}
+.avail-yes{color:#22c55e;font-size:13px}
+.avail-no{color:#888;font-size:13px}
+.prov-areas-row{display:flex;flex-wrap:wrap;gap:5px}
+.prov-area{font-size:11px;color:rgba(255,255,255,.55);background:rgba(255,255,255,.07);padding:3px 10px;border-radius:100px}
+.prov-area-more{color:rgba(201,168,76,.8);background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2)}
+.prov-price{font-size:13px;color:rgba(255,255,255,.6)}
+.prov-price strong{color:var(--accent);font-size:16px}
+.prov-actions{display:flex;gap:8px;margin-top:4px}
+.prov-book-btn{flex:1;background:var(--accent);color:var(--dark);border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .2s}
+.prov-book-btn:hover{opacity:.88}
+.prov-profile-btn{background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;transition:background .2s}
+.prov-profile-btn:hover{background:rgba(255,255,255,.12)}
+.prov-empty{text-align:center;padding:80px 20px;color:var(--muted);font-size:16px}
+
+/* profile modal uses booking .modal-overlay + .modal-panel — no extra CSS needed */
+
+/* FOOTER */
+footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,255,255,.04)}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px;margin-bottom:40px;align-items:start}
+.footer-brand .fl-logo{font-size:32px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;letter-spacing:-1px}
+.footer-brand .fl-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.9}
+.footer-col h4{font-size:14px;font-weight:800;color:#fff;margin-bottom:16px}
+.footer-col a,.footer-col span{display:block;font-size:13px;color:rgba(255,255,255,.55);text-decoration:none;margin-bottom:11px;transition:color .2s;cursor:pointer}
+.footer-col a:hover,.footer-col span:hover{color:var(--accent)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.07);padding-top:24px;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.25)}
+.footer-app-btn{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:#fff;text-decoration:none;padding:10px 16px;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;transition:all .2s;white-space:nowrap}
+.footer-app-btn:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3)}
+.footer-app-btn small{display:block;font-size:10px;font-weight:400;opacity:.55;margin-bottom:1px}
+
+/* RESPONSIVE */
+@media(max-width:720px){
+  nav{padding:0 16px;height:60px}
+  .nav-links{display:none}
+  .nav-provider-btn{display:none}
+  .page-hero{padding:40px 16px 36px}
+  .search-bar{margin:0 12px;border-radius:12px}
+  .search-row{flex-direction:column}
+  #s-dynamic{flex-direction:column;width:100%}
+  .search-btn{width:100%;margin-top:0}
+  .prov-content{margin:28px auto}
+  footer{padding:36px 20px 24px}
+  .footer-top{grid-template-columns:1fr 1fr;gap:24px}
+  .footer-bottom{flex-direction:column;align-items:flex-start;gap:16px}
+}
+/* ── Booking modal styles injected at runtime ── */
+__BOOKING_CSS__
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="nav-logo" href="/">
+    <span class="nav-logo-ar">ملاذ</span>
+    <span class="nav-logo-en">MALAAZ</span>
+  </a>
+  <div class="nav-links">
+    <a href="/">الرئيسية</a>
+    <a href="/مقدمو-الخدمة" class="active">مقدمو الخدمة</a>
+    <a href="/blog.html">المقالات</a>
+    <a href="/faq.html">الأسئلة الشائعة</a>
+  </div>
+  <div class="nav-right">
+    <button class="nav-provider-btn" onclick="window.open('/provider.html','_blank')">مقدم خدمة؟ سجّل هنا</button>
+    <button onclick="window.open('/client.html','_blank')" title="حسابي" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-user"></i></button>
+    <button class="nav-cta" onclick="openBookingModal()">احجز الآن <i class="fas fa-arrow-left" style="margin-right:5px;font-size:12px"></i></button>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="breadcrumb">
+    <a href="/">الرئيسية</a>
+    <span class="sep">/</span>
+    <span>${(areaParam || subParam) ? `<a href="/مقدمو-الخدمة">مقدمو الخدمة</a>` : 'مقدمو الخدمة'}</span>
+    ${subParam ? `<span class="sep">/</span><span>${esc(subParam)}</span>` : ''}
+    ${areaParam ? `<span class="sep">/</span><span>${esc(areaParam)}</span>` : ''}
+  </div>
+  <div class="page-tag">فريقنا الطبي</div>
+  <h1 class="page-title">${h1Text}</h1>
+  <p class="page-sub">${subParam ? `قارن بين ${esc(serviceShort)} المتاحين واحجز مع اللي يناسبك` : 'قارن بين الأطباء والممرضين المتاحين واحجز مع اللي يناسبك'}</p>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="search-bar">
+  <form class="search-row" onsubmit="doSearch(event)">
+    <div class="search-field" style="min-width:160px">
+      <label>الخدمة</label>
+      <select id="s-service" onchange="onServiceChange()">
+        <option value="كشف منزلي">كشف منزلي</option>
+        <option value="تمريض منزلي">تمريض منزلي</option>
+        <option value="أشعة منزلية">أشعة منزلية</option>
+      </select>
+    </div>
+    <div class="dynamic-fields" id="s-dynamic">
+      <!-- يتملأ بـ JS حسب الخدمة -->
+    </div>
+    <div class="search-field" style="min-width:150px">
+      <label>المنطقة</label>
+      <select id="s-area">${areaOptions}</select>
+    </div>
+    <div class="search-field" style="min-width:140px">
+      <label>اسم مقدم الخدمة</label>
+      <input type="text" id="s-name" placeholder="ابحث بالاسم...">
+    </div>
+    <button type="submit" class="search-btn"><i class="fas fa-search" style="margin-left:6px"></i> بحث</button>
+    <button type="button" class="clear-btn" id="clear-search-btn" onclick="clearSearch()"><i class="fas fa-times" style="margin-left:5px"></i> مسح</button>
+  </form>
+</div>
+
+<!-- PROVIDERS -->
+<div class="prov-content" id="prov-content">
+  ${sectionsHtml}
+</div>
+
+<!-- provider-profile-modal injected dynamically by viewProfile() -->
+
+<!-- BOOKING MODAL injected at runtime -->
+__BOOKING_HTML__
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;top:90px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:var(--dark);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;transition:all .3s;pointer-events:none;white-space:nowrap;border:1px solid rgba(201,168,76,.2);"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="fl-logo">ملاذ</div>
+      <div class="fl-sub">منصة رعاية طبية منزلية متكاملة<br>كشف · تمريض · أشعة في بيتك</div>
+    </div>
+    <div class="footer-col">
+      <h4>الخدمات</h4>
+      <a href="/">كشف منزلي</a>
+      <a href="/">تمريض منزلي</a>
+      <a href="/">أشعة منزلية</a>
+    </div>
+    <div class="footer-col">
+      <h4>المنصة</h4>
+      <a href="/مقدمو-الخدمة">مقدمو الخدمة</a>
+      <a href="/provider.html" target="_blank">انضم كمقدم خدمة</a>
+      <a href="/faq.html">الأسئلة الشائعة</a>
+      <a href="/blog.html">المقالات</a>
+      <a href="/privacy.html">سياسة الخصوصية</a>
+    </div>
+    <div class="footer-col">
+      <h4>تواصل معنا</h4>
+      <a href="tel:+201039091989">📱 01039091989</a>
+      <a href="mailto:malaaz.medical@gmail.com">📧 malaaz.medical@gmail.com</a>
+      <span>⏰ متاحون 24/7</span>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© ${new Date().getFullYear()} ملاذ للرعاية الطبية المنزلية — جميع الحقوق محفوظة</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="https://play.google.com/store/apps/details?id=com.malaaz.app" target="_blank" rel="noopener" class="footer-app-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3.18 23.76c.38.21.82.22 1.22.03l11.62-6.54-2.93-2.93-9.91 9.44z" fill="#EA4335"/><path d="M1.53 3.26C1.2 3.6 1 4.03 1 4.56v14.88c0 .53.2.96.53 1.3l.07.07 8.34-8.34v-.2L1.6 3.19l-.07.07z" fill="#4285F4"/><path d="M18.86 10.89l-2.37-1.34-3.27 3.27 3.27 3.27 2.39-1.35c.68-.38.68-1.01 0-1.39l-.02-.46z" fill="#FBBC05"/><path d="M4.4.21L16.02 6.75l-2.93 2.93L3.18.24C3.58.05 4.02.06 4.4.21z" fill="#34A853"/></svg>
+        <span><small>احصل عليه من</small>Google Play</span>
+      </a>
+      <a href="https://apps.apple.com/app/id6743782700" target="_blank" rel="noopener" class="footer-app-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04l-.08.23zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        <span><small>حمّله من</small>App Store</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SUPA_URL = '${SUPABASE_URL}';
+const SUPA_KEY = '${SUPABASE_KEY}';
+
+async function sf(path) {
+  const r = await fetch(SUPA_URL + '/rest/v1/' + path, { headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY } });
+  return r.ok ? r.json() : [];
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Dynamic search fields
+const nursingOptions = ['خدمات سريعة','إقامة 12 ساعة','إقامة 24 ساعة'];
+let specialties = [];
+let xrayTypes = [];
+
+async function loadSpecialties() {
+  if (specialties.length) return;
+  const data = await sf("providers?select=specialty,grade&status=eq.active&service_type=eq.كشف منزلي&specialty=not.is.null");
+  const specs = [...new Set((data||[]).map(p=>p.specialty).filter(Boolean))].sort();
+  specialties = specs;
+}
+
+async function loadXray() {
+  if (xrayTypes.length) return;
+  const data = await sf("sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name");
+  xrayTypes = (data||[]).map(s=>s.name);
+}
+
+async function onServiceChange(applyFilter = true) {
+  const svc = document.getElementById('s-service').value;
+  const dyn = document.getElementById('s-dynamic');
+  // Render fields immediately (synchronous), then fill options asynchronously
+  if (svc === 'كشف منزلي') {
+    dyn.innerHTML =
+      '<div class="search-field"><label>التخصص</label><select id="s-spec"><option value="">كل التخصصات</option></select></div>' +
+      '<div class="search-field"><label>الدرجة العلمية</label><select id="s-grade"><option value="">الكل</option><option>أخصائي</option><option>استشاري</option></select></div>';
+    try {
+      await loadSpecialties();
+      const sel = document.getElementById('s-spec');
+      if (sel && specialties.length) {
+        sel.innerHTML = '<option value="">كل التخصصات</option>' + specialties.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join('');
+      }
+    } catch(e) { /* keep empty options */ }
+  } else if (svc === 'تمريض منزلي') {
+    const opts = nursingOptions.map(o=>'<option>'+esc(o)+'</option>').join('');
+    dyn.innerHTML = '<div class="search-field" style="flex:2"><label>نوع الخدمة</label><select id="s-nursing-type"><option value="">كل الأنواع</option>'+opts+'</select></div>';
+  } else {
+    dyn.innerHTML = '<div class="search-field" style="flex:2"><label>نوع الأشعة</label><select id="s-xray-type"><option value="">كل الأنواع</option></select></div>';
+    try {
+      await loadXray();
+      const sel = document.getElementById('s-xray-type');
+      if (sel && xrayTypes.length) {
+        sel.innerHTML = '<option value="">كل الأنواع</option>' + xrayTypes.map(x=>'<option>'+esc(x)+'</option>').join('');
+      }
+    } catch(e) { /* keep empty options */ }
+  }
+  if (applyFilter) liveFilter();
+}
+
+function doSearch(e) {
+  e.preventDefault();
+  const area = document.getElementById('s-area').value;
+  const base = '/مقدمو-الخدمة';
+  const params = new URLSearchParams();
+  const svc = document.getElementById('s-service').value;
+  const name = document.getElementById('s-name').value.trim();
+  if (svc) params.set('service', svc);
+  if (name) params.set('q', name);
+  const spec = document.getElementById('s-spec')?.value;
+  if (spec) params.set('spec', spec);
+  const grade = document.getElementById('s-grade')?.value;
+  if (grade) params.set('grade', grade);
+  const xrayType = document.getElementById('s-xray-type')?.value;
+  if (xrayType) params.set('sub', xrayType);
+  const nursingType = document.getElementById('s-nursing-type')?.value;
+  if (nursingType) params.set('sub', nursingType);
+  const qs = params.toString();
+  const url = area ? base + '/' + encodeURIComponent(area) + (qs?'?'+qs:'') : base + (qs?'?'+qs:'');
+  location.href = url;
+}
+
+function clearSearch() {
+  location.href = '/مقدمو-الخدمة';
+}
+
+// Live filter: reads current dropdown values directly (no page reload needed)
+function liveFilter() {
+  const svc = document.getElementById('s-service')?.value || '';
+  document.querySelectorAll('.prov-section').forEach(sec => {
+    const type = sec.querySelector('.prov-grid')?.dataset.type || '';
+    if (svc && type !== svc) { sec.style.display = 'none'; return; }
+    // restore all cards visibility when switching service
+    sec.querySelectorAll('.prov-card').forEach(c => c.style.display = '');
+    sec.style.display = '';
+  });
+}
+
+// Client-side filter (name/spec/grade) applied after page load from URL params
+function clientFilter() {
+  const params = new URLSearchParams(location.search);
+  const q = (params.get('q')||'').toLowerCase();
+  const spec = (params.get('spec')||'').toLowerCase();
+  const grade = (params.get('grade')||'').toLowerCase();
+  const svc = params.get('service') || '';
+  if (!q && !spec && !grade && !svc) return;
+  document.querySelectorAll('.prov-section').forEach(sec => {
+    const type = sec.querySelector('.prov-grid')?.dataset.type || '';
+    if (svc && type !== svc) { sec.style.display = 'none'; return; }
+    const cards = sec.querySelectorAll('.prov-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const name = card.querySelector('.prov-name')?.textContent.toLowerCase() || '';
+      const specEl = card.querySelector('.prov-spec')?.textContent.toLowerCase() || '';
+      const show = (!q || name.includes(q) || specEl.includes(q))
+        && (!spec || specEl.includes(spec))
+        && (!grade || specEl.includes(grade));
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    sec.style.display = visible ? '' : 'none';
+  });
+}
+
+__PROFILE_MODAL_JS__
+
+// ── Supabase client (required by booking JS) ──────────────
+const SUPABASE_URL = '${SUPABASE_URL}';
+const SUPABASE_KEY = '${SUPABASE_KEY}';
+let sb;
+try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { sb = null; }
+
+// Shims referenced by booking JS
+let allDocs = [];
+function sanitize(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function sanitizeNum(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+async function loadSiteContentForIndex() {} // no-op (index-only)
+function updateSEO() {}                    // no-op (index-only)
+function updateSchemaRating() {}           // no-op (index-only)
+function setMeta() {}                      // no-op (index-only)
+
+// Load coverage areas into #bm-area select (used by openBookingModal)
+async function loadAreas() {
+  if (!sb) return;
+  try {
+    const { data } = await sb.from('coverage_areas').select('name,city').eq('is_active', true).order('name');
+    if (!data) return;
+    const areaSelect = document.getElementById('bm-area');
+    if (!areaSelect) return;
+    areaSelect.innerHTML = '<option value="">اختر المنطقة *</option>';
+    const cairo = data.filter(a => a.city === 'القاهرة');
+    const giza  = data.filter(a => a.city === 'الجيزة');
+    const addGroup = (label, list) => {
+      if (!list.length) return;
+      const grp = document.createElement('optgroup');
+      grp.label = label;
+      list.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.name;
+        opt.textContent = a.name;
+        grp.appendChild(opt);
+      });
+      areaSelect.appendChild(grp);
+    };
+    addGroup('القاهرة', cairo);
+    addGroup('الجيزة', giza);
+  } catch(e) {}
+}
+
+// ── Booking modal JS injected at runtime ──────────
+__BOOKING_JS__
+
+// Open booking for a specific provider from this page
+function openProviderPage(id, name) {
+  closeProfile();
+  openProviderBooking({ id, name });
+}
+
+// Init — restore select state from URL then trigger dynamic fields
+(async function() {
+  const params = new URLSearchParams(location.search);
+  const svc = params.get('service');
+  const sub = params.get('sub');
+  if (svc) {
+    const sel = document.getElementById('s-service');
+    if (sel) sel.value = svc;
+  }
+  // applyFilter=true only when URL has a service param (came from a search)
+  await onServiceChange(!!svc);
+  if (sub) {
+    const xrayEl = document.getElementById('s-xray-type');
+    if (xrayEl) xrayEl.value = sub;
+    const nursingEl = document.getElementById('s-nursing-type');
+    if (nursingEl) nursingEl.value = sub;
+  }
+  clientFilter();
+})();
+</script>
+</body>
+</html>`;
+
+  // Inject booking partial via replace (not template literal) to avoid
+  // Node.js interpolating backticks and ${...} inside the booking JS/CSS.
+  const finalHtml = html
+    .replace('__BOOKING_CSS__', booking.css)
+    .replace('__BOOKING_HTML__', booking.html)
+    .replace('__BOOKING_JS__', booking.js)
+    .replace('__PROFILE_MODAL_JS__', profileModalJs);
+
+  const buf = Buffer.from(finalHtml, 'utf8');
+  res.writeHead(200, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'public, max-age=180, s-maxage=900',
+    'Content-Length': buf.length
+  });
+  res.end(buf);
+};

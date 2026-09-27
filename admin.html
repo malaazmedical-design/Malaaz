@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1112558708398353');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1112558708398353&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
 <link rel="icon" href="/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <!-- Google Analytics -->
@@ -596,7 +613,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
         </div>
         <div class="form-group">
           <div class="form-label">رقم الشركة (واتساب + انستا باي)</div>
-          <input class="form-input" id="s-phone" value="01039091989">
+          <input class="form-input" id="s-phone" value="01039097982">
         </div>
         <div class="form-group">
           <div class="form-label">وقت تأكيد الحجز (بالدقائق)</div>
@@ -1287,7 +1304,7 @@ async function updateBookingStatus(id, status) {
     try { await emailjs.send('service_tv0w6ov','template_3arzsvv',{
       to_email: bk.patient_email, subject:'✅ تم تأكيد حجزك مع ملاذ', title:'✅ تم تأكيد حجزك!',
       title_color:'#2e7d32', message:`أهلاً ${bk.patient_name||''} 💙 تم تأكيد حجزك بنجاح. سيتم التواصل معك لتنسيق الزيارة.`,
-      details, button_text:'📱 تواصل معنا', button_link:'https://wa.me/201039091989', button_color:'#25D366'
+      details, button_text:'📱 تواصل معنا', button_link:'https://wa.me/201039097982', button_color:'#25D366'
     }); } catch(e){ console.warn(e); }
   }
 
@@ -1713,7 +1730,7 @@ async function notifyProvider(id, type) {
     message: `عزيزي ${p.name||''}، تم إيقاف حسابك مؤقتاً. للاستفسار أو إعادة التفعيل، تواصل معنا.`,
     details: 'حسابك غير ظاهر للعملاء حالياً.',
     button_text: '📱 تواصل معنا',
-    button_link: 'https://wa.me/201039091989',
+    button_link: 'https://wa.me/201039097982',
     button_color: '#25D366',
   };
   try {

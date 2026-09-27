@@ -23,3 +23,4 @@ Allow: /
 
 # Sitemap
 Sitemap: https://malaaz-plum.vercel.app/sitemap.xml
+Sitemap: https://www.malaaz.care/sitemap.xml
