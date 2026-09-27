@@ -290,25 +290,86 @@ module.exports = async function handler(req, res) {
   // xray options
   const xrayOptions = (xraySubs||[]).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('');
 
-  const pageTitle = areaParam
-    ? `مقدمو الخدمة في ${areaParam} — ملاذ`
-    : 'مقدمو الخدمة — ملاذ';
-  const pageDesc = areaParam
-    ? `أطباء وممرضون وأجهزة أشعة متاحون في ${areaParam} — احجز بدون رسوم والدفع بعد الخدمة`
-    : 'قارن بين الأطباء والممرضين المتاحين في القاهرة والجيزة واحجز مع اللي يناسبك';
-  const canonicalUrl = areaParam
-    ? `${BASE_URL}/مقدمو-الخدمة/${encodeURIComponent(areaParam)}`
-    : `${BASE_URL}/مقدمو-الخدمة`;
+  // Detect service type from serviceParam / subParam for smart SEO labels
+  const isNursing = serviceParam === 'تمريض منزلي' || (subParam && subParam.includes('تمريض'));
+  const isXray    = serviceParam === 'أشعة منزلية'  || (subParam && (subParam.includes('أشعة') || subParam.includes('سونار') || subParam.includes('اشعة')));
+  const isVisit   = !isNursing && !isXray; // default: كشف منزلي / doctor visit
 
-  const schema = JSON.stringify({
+  // Build human-readable service label for SEO copy
+  let serviceLabel, serviceShort, schemaSpecialty;
+  if (isNursing) {
+    serviceLabel = 'تمريض منزلي';
+    serviceShort = 'ممرضون';
+    schemaSpecialty = 'Nursing';
+  } else if (isXray) {
+    serviceLabel = 'أشعة منزلية';
+    serviceShort = 'تصوير طبي';
+    schemaSpecialty = 'Radiology';
+  } else if (subParam) {
+    serviceLabel = `دكتور ${subParam} منزلي`;
+    serviceShort = `دكتور ${subParam}`;
+    schemaSpecialty = subParam;
+  } else {
+    serviceLabel = 'كشف منزلي';
+    serviceShort = 'أطباء';
+    schemaSpecialty = 'GeneralPractice';
+  }
+
+  const providerCount = (providers || []).length;
+  const countLabel = providerCount > 0 ? ` (${providerCount} متاح)` : '';
+
+  // Dynamic title
+  let pageTitle;
+  if (subParam && areaParam)      pageTitle = `${serviceLabel} في ${areaParam} | ملاذ`;
+  else if (subParam)              pageTitle = `${serviceLabel} — احجز بدون رسوم | ملاذ`;
+  else if (areaParam)             pageTitle = `مقدمو الخدمة في ${areaParam} — ملاذ`;
+  else                            pageTitle = 'مقدمو الخدمة — أطباء وممرضون معتمدون | ملاذ';
+
+  // Dynamic description
+  let pageDesc;
+  if (subParam && areaParam)
+    pageDesc = `احجز ${serviceLabel} في ${areaParam}${countLabel} — الدفع بعد الخدمة وبدون رسوم خفية`;
+  else if (subParam)
+    pageDesc = `احجز ${serviceLabel} في منزلك بالقاهرة والجيزة${countLabel} — قارن، اختار، واحجز في دقيقة`;
+  else if (areaParam)
+    pageDesc = `أطباء وممرضون وأجهزة أشعة متاحون في ${areaParam}${countLabel} — احجز بدون رسوم والدفع بعد الخدمة`;
+  else
+    pageDesc = 'قارن بين الأطباء والممرضين المتاحين في القاهرة والجيزة واحجز مع اللي يناسبك';
+
+  // Canonical URL
+  let canonicalUrl;
+  if (subParam && areaParam)
+    canonicalUrl = `${BASE_URL}/مقدمو-الخدمة?sub=${encodeURIComponent(subParam)}&area=${encodeURIComponent(areaParam)}`;
+  else if (subParam)
+    canonicalUrl = `${BASE_URL}/مقدمو-الخدمة?sub=${encodeURIComponent(subParam)}`;
+  else if (areaParam)
+    canonicalUrl = `${BASE_URL}/مقدمو-الخدمة/${encodeURIComponent(areaParam)}`;
+  else
+    canonicalUrl = `${BASE_URL}/مقدمو-الخدمة`;
+
+  // Dynamic H1 text (used below in HTML)
+  let h1Text;
+  if (subParam && areaParam)      h1Text = `${serviceLabel} في ${esc(areaParam)}`;
+  else if (subParam)              h1Text = `${serviceLabel} في القاهرة والجيزة`;
+  else if (areaParam)             h1Text = `مقدمو الخدمة في ${esc(areaParam)}`;
+  else                            h1Text = 'أطباء وممرضون معتمدون';
+
+  // JSON-LD Schema
+  const schemaObj = {
     "@context": "https://schema.org",
     "@type": "MedicalBusiness",
-    "name": "ملاذ للرعاية الطبية المنزلية",
+    "name": subParam ? `ملاذ — ${serviceLabel}` : "ملاذ للرعاية الطبية المنزلية",
     "description": pageDesc,
     "url": canonicalUrl,
+    "telephone": "+201039097982",
     "areaServed": areaParam || "القاهرة والجيزة",
-    "medicalSpecialty": "GeneralPractice"
-  });
+    "medicalSpecialty": schemaSpecialty,
+    "availableService": subParam ? { "@type": "MedicalTherapy", "name": serviceLabel } : undefined,
+    "priceRange": "بدون رسوم مسبقة"
+  };
+  // Remove undefined keys
+  Object.keys(schemaObj).forEach(k => schemaObj[k] === undefined && delete schemaObj[k]);
+  const schema = JSON.stringify(schemaObj);
 
   const booking = getBookingPartial();
 
@@ -493,12 +554,13 @@ __BOOKING_CSS__
   <div class="breadcrumb">
     <a href="/">الرئيسية</a>
     <span class="sep">/</span>
-    <span>${areaParam ? `<a href="/مقدمو-الخدمة">مقدمو الخدمة</a>` : 'مقدمو الخدمة'}</span>
+    <span>${(areaParam || subParam) ? `<a href="/مقدمو-الخدمة">مقدمو الخدمة</a>` : 'مقدمو الخدمة'}</span>
+    ${subParam ? `<span class="sep">/</span><span>${esc(subParam)}</span>` : ''}
     ${areaParam ? `<span class="sep">/</span><span>${esc(areaParam)}</span>` : ''}
   </div>
   <div class="page-tag">فريقنا الطبي</div>
-  <h1 class="page-title">${areaParam ? `مقدمو الخدمة في ${esc(areaParam)}` : 'أطباء وممرضون معتمدون'}</h1>
-  <p class="page-sub">قارن بين الأطباء والممرضين المتاحين واحجز مع اللي يناسبك</p>
+  <h1 class="page-title">${h1Text}</h1>
+  <p class="page-sub">${subParam ? `قارن بين ${esc(serviceShort)} المتاحين واحجز مع اللي يناسبك` : 'قارن بين الأطباء والممرضين المتاحين واحجز مع اللي يناسبك'}</p>
 </div>
 
 <!-- SEARCH BAR -->
