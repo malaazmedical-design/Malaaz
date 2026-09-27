@@ -353,6 +353,10 @@
   .modal-overlay { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; }
   .modal-panel { width: 100% !important; max-width: 100% !important; border-radius: 20px 20px 0 0 !important; max-height: 92vh !important; }
   .filters-bar { padding: 12px 16px !important; }
+  .section { padding: 50px 0 !important; }
+  .how-section { padding: 40px 0 !important; }
+  .w { padding: 0 16px !important; }
+  footer { padding: 40px 0 20px !important; }
   .container { padding: 30px 16px !important; }
   .page-hero { padding: 80px 20px 40px !important; }
   .page-title { font-size: 30px !important; }
@@ -484,7 +488,8 @@ h1 span.accent{color:var(--accent);}
 .trust-item strong{color:var(--accent);}
 
 /* Sections */
-.section{padding:90px max(60px,calc((100% - 1360px) / 2));}
+.section{padding:90px 0;}
+.w{max-width:1400px;margin:0 auto;padding:0 60px;}
 .section-tag{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;}
 /* ===== SEO: h2 مع كلمات مفتاحية ===== */
 .section-title{font-family:'Tajawal',sans-serif;font-size:clamp(32px,3.5vw,48px);font-weight:900;line-height:1.15;letter-spacing:-1px;margin-bottom:16px;}
@@ -507,7 +512,7 @@ h1 span.accent{color:var(--accent);}
 .popular-tag{position:absolute;top:18px;left:18px;background:var(--accent);color:var(--dark);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;}
 
 /* How It Works */
-.how-section{background:var(--dark);padding:90px max(60px,calc((100% - 1360px) / 2));position:relative;overflow:hidden;}
+.how-section{background:var(--dark);padding:90px 0;position:relative;overflow:hidden;}
 .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;position:relative;z-index:1;}
 .step-card{text-align:center;padding:28px 20px;}
 .step-num{width:56px;height:56px;border-radius:18px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:var(--accent);margin:0 auto 16px;font-family:'Tajawal',sans-serif;}
@@ -648,7 +653,7 @@ h1 span.accent{color:var(--accent);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* Footer */
-footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;border-top:1px solid rgba(255,255,255,.04);}
+footer{background:#161f22;padding:50px 0 30px;border-top:1px solid rgba(255,255,255,.04);}
 .footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:28px;margin-bottom:40px;align-items:start;}
 .footer-brand .fl-logo{font-size:32px;font-weight:900;color:#fff;font-family:'Tajawal',sans-serif;letter-spacing:-1px;}
 .footer-brand .fl-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.9;}
@@ -787,6 +792,7 @@ footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;
 
   <!-- SERVICES -->
   <section class="section" style="background:var(--white)" aria-labelledby="services-heading">
+    <div class="w">
     <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-end">
       <div>
         <div class="section-tag" id="services-tag">خدماتنا</div>
@@ -801,10 +807,12 @@ footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;
       <div class="svc-card" style="opacity:.4"><div class="svc-ico-wrap" style="background:#f4ece8">👩‍⚕️</div><div class="svc-name">جاري التحميل...</div></div>
       <div class="svc-card" style="opacity:.4"><div class="svc-ico-wrap" style="background:#e8f0f4">🔬</div><div class="svc-name">جاري التحميل...</div></div>
     </div>
+    </div><!-- /.w -->
   </section>
 
   <!-- HOW IT WORKS -->
   <section class="how-section" aria-labelledby="how-heading">
+    <div class="w">
     <div style="text-align:center;margin-bottom:52px;position:relative;z-index:1">
       <div class="section-tag" style="color:var(--accent)" id="how-tag">كيف تعمل المنصة</div>
       <h2 class="section-title" id="how-heading" style="color:#fff;margin:0 auto"><span id="how-title">4 خطوات وطبيبك في بيتك</span></h2>
@@ -831,10 +839,12 @@ footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;
         <div class="step-desc" id="how-step4-desc">الطبيب أو الممرض يصلك — الدفع بعد الانتهاء</div>
       </div>
     </div>
+    </div><!-- /.w -->
   </section>
 
   <!-- DOCTORS -->
   <section class="section" aria-labelledby="doctors-heading">
+    <div class="w">
     <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-end">
       <div>
         <div class="section-tag">مقدمو الخدمة</div>
@@ -847,10 +857,12 @@ footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;
       <div class="doc-card" style="opacity:.3"><div class="doc-header"><div class="doc-ava">👩‍⚕️</div><div class="doc-name">جاري التحميل...</div></div></div>
       <div class="doc-card" style="opacity:.3"><div class="doc-header"><div class="doc-ava">🔬</div><div class="doc-name">جاري التحميل...</div></div></div>
     </div>
+    </div><!-- /.w -->
   </section>
 
   <!-- TESTIMONIALS -->
   <section class="section" style="background:var(--white)" aria-labelledby="reviews-heading">
+    <div class="w">
     <div class="section-header" style="text-align:center">
       <div class="section-tag">آراء العملاء</div>
       <h2 class="section-title" id="reviews-heading" style="margin:0 auto">ماذا قال عنا<br>عملاؤنا في مصر</h2>
@@ -858,6 +870,7 @@ footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;
     <div class="testi-grid" id="testimonials-grid">
       <!-- يُملأ من Supabase -->
     </div>
+    </div><!-- /.w -->
   </section>
 
   <!-- APP DOWNLOAD -->
@@ -919,9 +932,9 @@ footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;
   </script>
 
   <!-- CTA -->
-  <section style="background:#f5f2ec;padding:90px max(60px,calc((100% - 1360px) / 2));text-align:center;position:relative;overflow:hidden">
+  <section style="background:#f5f2ec;padding:90px 0;text-align:center;position:relative;overflow:hidden">
     <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 50% 50%,rgba(201,168,76,.12) 0%,transparent 70%)"></div>
-    <div style="position:relative;z-index:1">
+    <div class="w" style="position:relative;z-index:1">
       <div class="section-tag">ابدأ الآن</div>
       <h2 class="section-title" style="color:#1e2c2f;margin:0 auto 16px">احجز موعدك<br>ودكتورك في بيتك</h2>
       <p style="color:rgba(30,44,47,.55);font-size:16px;margin-bottom:8px">الحجز مجاني · الدفع بعد الخدمة · كاش أو انستا باي</p>
@@ -1290,6 +1303,7 @@ footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;
 
 <!-- ===== SHARED FOOTER ===== -->
 <footer id="main-footer">
+  <div class="w">
   <div class="footer-top">
     <div class="footer-brand">
       <div class="fl-logo">ملاذ</div>
@@ -1340,6 +1354,7 @@ footer{background:#161f22;padding:50px max(60px,calc((100% - 1360px) / 2)) 30px;
       </a>
     </div>
   </div>
+  </div><!-- /.w -->
 </footer>
 
 <!-- ===== BOOKING MODAL ===== -->
