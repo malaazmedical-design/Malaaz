@@ -206,9 +206,10 @@ module.exports = async function handler(req, res) {
   const subParam = req.query.sub ? decodeURIComponent(req.query.sub) : '';
   const today = new Date().toISOString().split('T')[0];
 
-  // Build providers query — service_type filtered client-side only
+  // Build providers query — service_type filtered server-side when serviceParam present
   const buildProvidersQuery = () => {
     let q = `providers?select=*&status=eq.active`;
+    if (serviceParam) q += `&service_type=eq.${encodeURIComponent(serviceParam)}`;
     if (areaParam) q += `&areas=ilike.*${encodeURIComponent(areaParam)}*`;
     q += `&order=is_available.desc,name.asc`;
     return q;
