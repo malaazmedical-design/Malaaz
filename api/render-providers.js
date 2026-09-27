@@ -336,9 +336,17 @@ module.exports = async function handler(req, res) {
   else
     pageDesc = 'قارن بين الأطباء والممرضين المتاحين في القاهرة والجيزة واحجز مع اللي يناسبك';
 
-  // Canonical URL
+  // Canonical URL — clean paths for main services, params for sub-specialties
+  const serviceSlug = serviceParam === 'كشف منزلي' ? 'كشف-منزلي'
+    : serviceParam === 'تمريض منزلي' ? 'تمريض-منزلي'
+    : serviceParam === 'أشعة منزلية' ? 'أشعة-منزلية'
+    : '';
   let canonicalUrl;
-  if (subParam && areaParam)
+  if (serviceSlug && areaParam)
+    canonicalUrl = `${BASE_URL}/${serviceSlug}/${encodeURIComponent(areaParam)}`;
+  else if (serviceSlug)
+    canonicalUrl = `${BASE_URL}/${serviceSlug}`;
+  else if (subParam && areaParam)
     canonicalUrl = `${BASE_URL}/مقدمو-الخدمة?sub=${encodeURIComponent(subParam)}&area=${encodeURIComponent(areaParam)}`;
   else if (subParam)
     canonicalUrl = `${BASE_URL}/مقدمو-الخدمة?sub=${encodeURIComponent(subParam)}`;

@@ -18,6 +18,12 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/blog-post.html", "destination": "/api/render-post" },
+    { "source": "/%D9%83%D8%B4%D9%81-%D9%85%D9%86%D8%B2%D9%84%D9%8A/:area", "destination": "/api/render-providers?service=%D9%83%D8%B4%D9%81+%D9%85%D9%86%D8%B2%D9%84%D9%8A&area=:area" },
+    { "source": "/%D9%83%D8%B4%D9%81-%D9%85%D9%86%D8%B2%D9%84%D9%8A", "destination": "/api/render-providers?service=%D9%83%D8%B4%D9%81+%D9%85%D9%86%D8%B2%D9%84%D9%8A" },
+    { "source": "/%D8%AA%D9%85%D8%B1%D9%8A%D8%B6-%D9%85%D9%86%D8%B2%D9%84%D9%8A/:area", "destination": "/api/render-providers?service=%D8%AA%D9%85%D8%B1%D9%8A%D8%B6+%D9%85%D9%86%D8%B2%D9%84%D9%8A&area=:area" },
+    { "source": "/%D8%AA%D9%85%D8%B1%D9%8A%D8%B6-%D9%85%D9%86%D8%B2%D9%84%D9%8A", "destination": "/api/render-providers?service=%D8%AA%D9%85%D8%B1%D9%8A%D8%B6+%D9%85%D9%86%D8%B2%D9%84%D9%8A" },
+    { "source": "/%D8%A3%D8%B4%D8%B9%D8%A9-%D9%85%D9%86%D8%B2%D9%84%D9%8A%D8%A9/:area", "destination": "/api/render-providers?service=%D8%A3%D8%B4%D8%B9%D8%A9+%D9%85%D9%86%D8%B2%D9%84%D9%8A%D8%A9&area=:area" },
+    { "source": "/%D8%A3%D8%B4%D8%B9%D8%A9-%D9%85%D9%86%D8%B2%D9%84%D9%8A%D8%A9", "destination": "/api/render-providers?service=%D8%A3%D8%B4%D8%B9%D8%A9+%D9%85%D9%86%D8%B2%D9%84%D9%8A%D8%A9" },
     { "source": "/%D9%85%D9%82%D8%AF%D9%85%D9%88-%D8%A7%D9%84%D8%AE%D8%AF%D9%85%D8%A9/:area", "destination": "/api/render-providers?area=:area" },
     { "source": "/%D9%85%D9%82%D8%AF%D9%85%D9%88-%D8%A7%D9%84%D8%AE%D8%AF%D9%85%D8%A9", "destination": "/api/render-providers" }
   ],

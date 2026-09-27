@@ -17,9 +17,12 @@ module.exports = async function handler(req, res) {
   }
 
   const staticPages = [
-    { loc: `${BASE_URL}/`,                    lastmod: '2026-08-17', changefreq: 'weekly',  priority: '1.0' },
-    { loc: `${BASE_URL}/مقدمو-الخدمة`,        lastmod: '2026-09-01', changefreq: 'daily',   priority: '0.95' },
-    { loc: `${BASE_URL}/faq.html`,             lastmod: '2026-08-17', changefreq: 'monthly', priority: '0.9' },
+    { loc: `${BASE_URL}/`,                    lastmod: '2026-09-27', changefreq: 'weekly',  priority: '1.0' },
+    { loc: `${BASE_URL}/مقدمو-الخدمة`,        lastmod: '2026-09-27', changefreq: 'daily',   priority: '0.95' },
+    { loc: `${BASE_URL}/كشف-منزلي`,           lastmod: '2026-09-27', changefreq: 'daily',   priority: '0.95' },
+    { loc: `${BASE_URL}/تمريض-منزلي`,         lastmod: '2026-09-27', changefreq: 'daily',   priority: '0.90' },
+    { loc: `${BASE_URL}/أشعة-منزلية`,         lastmod: '2026-09-27', changefreq: 'daily',   priority: '0.90' },
+    { loc: `${BASE_URL}/faq.html`,             lastmod: '2026-08-17', changefreq: 'monthly', priority: '0.7' },
     { loc: `${BASE_URL}/blog.html`,            lastmod: '2026-08-17', changefreq: 'weekly',  priority: '0.8' },
     { loc: `${BASE_URL}/privacy.html`,         lastmod: '2026-08-17', changefreq: 'yearly',  priority: '0.4' },
     { loc: `${BASE_URL}/delete-account.html`,  lastmod: '2026-08-17', changefreq: 'yearly',  priority: '0.3' },
@@ -34,10 +37,20 @@ module.exports = async function handler(req, res) {
     return `  <url>\n    <loc>${BASE_URL}/blog-post.html?id=${p.id}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
   }).join('\n');
 
-  const areaEntries = areas.map(a => {
-    const lastmod = (a.updated_at || '').split('T')[0] || '2026-09-01';
-    const slug = encodeURIComponent(a.name);
-    return `  <url>\n    <loc>${BASE_URL}/مقدمو-الخدمة/${slug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.85</priority>\n  </url>`;
+  const services = [
+    { slug: 'كشف-منزلي', priority: '0.88' },
+    { slug: 'تمريض-منزلي', priority: '0.85' },
+    { slug: 'أشعة-منزلية', priority: '0.85' },
+  ];
+
+  const areaEntries = areas.flatMap(a => {
+    const lastmod = (a.updated_at || '').split('T')[0] || '2026-09-27';
+    const areaSlug = encodeURIComponent(a.name);
+    const providerAreaUrl = `  <url>\n    <loc>${BASE_URL}/مقدمو-الخدمة/${areaSlug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.82</priority>\n  </url>`;
+    const serviceAreaUrls = services.map(s =>
+      `  <url>\n    <loc>${BASE_URL}/${s.slug}/${areaSlug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${s.priority}</priority>\n  </url>`
+    );
+    return [providerAreaUrl, ...serviceAreaUrls];
   }).join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${staticEntries}\n${areaEntries}\n${postEntries}\n</urlset>`;

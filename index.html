@@ -1831,8 +1831,11 @@ async function loadHomeServices() {
     return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
   });
   const colors = ['#faf4e6','#f4ece8','#e8f0f4'];
-  grid.innerHTML = sorted.map((s, i) => `
-    <div class="svc-card" onclick="openBookingModal('${sanitize(s.name)}')" data-reveal>
+  const serviceUrls = {'كشف منزلي':'/كشف-منزلي','تمريض منزلي':'/تمريض-منزلي','أشعة منزلية':'/أشعة-منزلية'};
+  grid.innerHTML = sorted.map((s, i) => {
+    const url = serviceUrls[s.name] || '/مقدمو-الخدمة';
+    return `
+    <a class="svc-card" href="${url}" data-reveal style="text-decoration:none;color:inherit;display:block;">
       ${s.name === 'كشف منزلي' ? '<div class="popular-tag">⭐ الأكثر طلباً</div>' : ''}
       <div class="svc-ico-wrap" style="background:${colors[i % colors.length]}">${sanitize(s.icon || '🔧')}</div>
       <h3 class="svc-name">${sanitize(s.name)}</h3>
@@ -1842,7 +1845,8 @@ async function loadHomeServices() {
         <span class="svc-num">${s.price_min}</span>
         <span class="svc-cur">ج.م</span>
       </div>
-    </div>`).join('');
+    </a>`;
+  }).join('');
 }
 
 async function loadHomeDoctors() {
