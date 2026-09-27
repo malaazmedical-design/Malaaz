@@ -7,7 +7,7 @@ module.exports = async function handler(req, res) {
   let areas = [];
   try {
     const [postsRes, areasRes] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/blog_posts?select=id,updated_at,created_at&order=created_at.desc`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }),
+      fetch(`${SUPABASE_URL}/rest/v1/blog_posts?select=id,slug,updated_at,created_at&status=eq.published&order=created_at.desc`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }),
       fetch(`${SUPABASE_URL}/rest/v1/coverage_areas?select=name,updated_at&is_active=eq.true&order=name`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }),
     ]);
     if (postsRes.ok) { const d = await postsRes.json(); if (Array.isArray(d)) posts = d; }
@@ -34,7 +34,10 @@ module.exports = async function handler(req, res) {
 
   const postEntries = posts.map(p => {
     const lastmod = (p.updated_at || p.created_at || '').split('T')[0];
-    return `  <url>\n    <loc>${BASE_URL}/blog-post.html?id=${p.id}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
+    const loc = p.slug
+      ? `${BASE_URL}/مقالات/${encodeURIComponent(p.slug)}`
+      : `${BASE_URL}/blog-post.html?id=${p.id}`;
+    return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
   }).join('\n');
 
   const services = [
