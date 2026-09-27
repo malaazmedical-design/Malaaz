@@ -495,8 +495,10 @@ nav.scrolled{height:62px;background:rgba(20,32,35,0.98);}
 h1{font-family:'Tajawal',sans-serif;font-size:clamp(46px,5vw,72px);font-weight:900;line-height:1.1;color:#fff;letter-spacing:-2px;margin-bottom:14px;}
 h1 span.accent{color:var(--accent);}
 .hero-sub{font-size:18px;color:rgba(255,255,255,.55);line-height:1.8;margin-bottom:36px;font-weight:400;max-width:480px;}
-.hero-actions{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
-.hero-steps{display:flex;align-items:center;gap:10px;margin-bottom:40px;font-size:13px;font-weight:700;color:rgba(255,255,255,.5);}
+.hero-cta-block{display:inline-flex;flex-direction:column;align-items:stretch;gap:12px;margin-bottom:40px;}
+.hero-actions{display:flex;align-items:center;gap:14px;margin-bottom:0;}
+.hero-actions .btn-primary{font-size:18px;padding:20px 44px;text-decoration:none;display:flex;align-items:center;justify-content:center;width:100%;border-radius:14px;}
+.hero-steps{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:0;font-size:13px;font-weight:700;color:rgba(255,255,255,.5);}
 .hero-steps span{display:flex;align-items:center;gap:5px;}
 .hero-steps .hs-arrow{color:rgba(201,168,76,.4);font-size:11px;}
 .btn-primary{background:var(--accent);color:var(--dark);border:none;border-radius:14px;padding:16px 32px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .25s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 32px rgba(201,168,76,.3);position:relative;overflow:hidden;}
@@ -811,15 +813,17 @@ footer{background:#161f22;padding:50px 60px 30px;border-top:1px solid rgba(255,2
       <!-- SEO: h1 يحتوي على الكلمة المفتاحية الرئيسية -->
       <h1><span id="hero-title-l1">رعاية طبية منزلية</span><br><span id="hero-title-l2" class="accent">كشف وتمريض وأشعة</span><br><span id="hero-title-l3">في بيتك</span></h1>
       <p class="hero-sub" id="hero-subtitle"></p>
-      <div class="hero-actions">
-        <a class="btn-primary" href="/مقدمو-الخدمة"><i class="fas fa-search" style="margin-left:8px"></i> احجز دكتورك بنفسك</a>
-      </div>
-      <div class="hero-steps">
-        <span><i class="fas fa-search"></i> اختار</span>
-        <span class="hs-arrow">←</span>
-        <span><i class="fas fa-scale-balanced"></i> قارن</span>
-        <span class="hs-arrow">←</span>
-        <span><i class="fas fa-calendar-check"></i> احجز</span>
+      <div class="hero-cta-block">
+        <div class="hero-actions">
+          <a class="btn-primary" href="/مقدمو-الخدمة"><i class="fas fa-search" style="margin-left:8px"></i> احجز دكتورك بنفسك</a>
+        </div>
+        <div class="hero-steps">
+          <span><i class="fas fa-search"></i> اختار</span>
+          <span class="hs-arrow">←</span>
+          <span><i class="fas fa-scale-balanced"></i> قارن</span>
+          <span class="hs-arrow">←</span>
+          <span><i class="fas fa-calendar-check"></i> احجز</span>
+        </div>
       </div>
     </div>
     <div class="hero-visual">
