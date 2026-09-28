@@ -725,12 +725,14 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     </div>
   </div>
 
-  <!-- History placeholder -->
-  <div class="card" style="opacity:.5">
+  <!-- History -->
+  <div class="card">
     <div class="card-header">
       <div class="card-title">سجل الإشعارات المرسلة</div>
     </div>
-    <div class="card-body" style="color:var(--muted);font-size:13px">قريباً — سيظهر هنا تاريخ كل الإشعارات الجماعية المرسلة.</div>
+    <div class="card-body" id="broadcast-log" style="font-size:13px">
+      <div style="color:var(--muted);text-align:center;padding:20px">جاري التحميل...</div>
+    </div>
   </div>
 
 </div>
@@ -1171,7 +1173,7 @@ function showPage(id) {
     providers: loadProviders, accounting: loadAccounting,
     areas: () => { loadGovernorates(); loadAreas(); }, reviews: loadReviews,
     'site-content': loadSiteContent, testimonials: loadTestimonials,
-    blog: loadBlogPosts
+    blog: loadBlogPosts, notifications: loadBroadcastLog
   };
   if(loaders[id]) loaders[id]();
 }
@@ -2583,6 +2585,26 @@ function updateNotifPreview() {
   }
 }
 
+async function loadBroadcastLog() {
+  const el = document.getElementById('broadcast-log');
+  if(!el) return;
+  const { data, error } = await sb.from('broadcast_notifications').select('*').order('created_at', {ascending:false}).limit(50);
+  if(error || !data?.length) { el.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">لا توجد إشعارات مرسلة بعد</div>'; return; }
+  const targetLabel = t => t==='all'?'الكل':t==='clients'?'العملاء':'المزودين';
+  el.innerHTML = data.map(n => `
+    <div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start">
+      <div style="flex:1">
+        <div style="font-weight:700;margin-bottom:3px">${n.title}</div>
+        <div style="color:var(--muted);font-size:12px;margin-bottom:4px">${n.body}</div>
+        <div style="font-size:11px;color:var(--muted)">
+          <span style="background:var(--bg2);padding:2px 8px;border-radius:20px;margin-left:6px">${targetLabel(n.target)}</span>
+          ✅ ${n.sent_count} جهاز ${n.failed_count?`| ❌ فشل: ${n.failed_count}`:''}
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);white-space:nowrap">${new Date(n.created_at).toLocaleDateString('ar-EG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+    </div>`).join('');
+}
+
 async function sendBroadcast() {
   const title  = document.getElementById('notif-title').value.trim();
   const body   = document.getElementById('notif-body').value.trim();
@@ -2609,9 +2631,12 @@ async function sendBroadcast() {
     if (!res.ok) throw new Error(data.error || 'فشل الإرسال');
     result.innerHTML = `<span style="color:#2ecc71;font-weight:700">✅ تم الإرسال</span> — وصل لـ <strong>${data.sent}</strong> جهاز${data.failed ? ` | فشل: ${data.failed}` : ''}`;
     showToast(`تم الإرسال لـ ${data.sent} جهاز ✅`);
+    // حفظ في السجل
+    await sb.from('broadcast_notifications').insert([{ title, body, target, sent_count: data.sent||0, failed_count: data.failed||0 }]);
     document.getElementById('notif-title').value = '';
     document.getElementById('notif-body').value  = '';
     document.getElementById('notif-preview').style.display = 'none';
+    loadBroadcastLog();
   } catch(e) {
     result.innerHTML = `<span style="color:#e74c3c">❌ ${e.message}</span>`;
     showToast(e.message, 'error');
