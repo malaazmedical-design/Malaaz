@@ -3293,7 +3293,8 @@ function showToast(msg, type) {
   const t = document.getElementById('toast');
   if(!t) return;
   t.textContent = msg;
-  t.className = type === 'error' ? 'show' : 'show';
+  t.style.background = type === 'error' ? '#c0392b' : type === 'success' ? '#16a34a' : 'var(--dark)';
+  t.style.borderColor = type === 'error' ? 'rgba(192,57,43,.4)' : type === 'success' ? 'rgba(22,163,74,.4)' : 'rgba(201,168,76,.2)';
   t.style.opacity = '1';
   t.style.transform = 'translateX(-50%) translateY(0)';
   clearTimeout(t._timer);
