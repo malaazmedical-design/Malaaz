@@ -223,9 +223,10 @@ async function loadPost() {
   const id = params.get('id');
 
   // Support slug-based URLs: /مقالات/:slug (slug is in pathname, rewrite is server-side)
-  const pathParts = window.location.pathname.split('/').filter(Boolean);
-  const slugFromPath = pathParts[0] === decodeURIComponent('%D9%85%D9%82%D8%A7%D9%84%D8%A7%D8%AA') ? pathParts[1] : null;
-  const slug = params.get('slug') || slugFromPath;
+  const decodedPath = decodeURIComponent(window.location.pathname);
+  const pathParts = decodedPath.split('/').filter(Boolean);
+  const slugFromPath = pathParts[0] === 'مقالات' ? decodeURIComponent(pathParts[1] || '') : null;
+  const slug = params.get('slug') || slugFromPath || null;
 
   if(!id && !slug) { showError(); return; }
 
