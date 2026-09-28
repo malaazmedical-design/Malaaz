@@ -2110,6 +2110,7 @@ function renderDocCard(p, i) {
         ${p.experience ? `<span class="doc-badge">${sanitize(String(p.experience))} سنة خبرة</span>` : ''}
         <span class="doc-badge">${sanitize(p.service_type || '')}</span>
       </div>
+      ${p.bio ? `<div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:10px;padding-top:2px">${sanitize(p.bio)}</div>` : ''}
       <div class="doc-price-row">
         <div>
           <div class="doc-from">ابتداء من</div>
