@@ -2111,7 +2111,7 @@ function renderDocCard(p, i) {
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
           ${p.is_available
-            ? `<button class="doc-btn" onclick='openProviderBooking(${JSON.stringify({id:p.id,name:p.name,email:p.email,service_type:p.service_type,price:p.price,area:p.area})})'>
+            ? `<button class="doc-btn" data-pid="${sanitize(String(p.id))}" onclick="openProviderBookingById(this)">
                 احجز <i class="fas fa-arrow-left" style="margin-right:3px;font-size:10px"></i>
                </button>`
             : `<button class="doc-btn" disabled style="background:#ccc;color:#888;cursor:not-allowed;opacity:.6" title="غير متاح حالياً">
@@ -2119,7 +2119,7 @@ function renderDocCard(p, i) {
                </button>`
           }
           <button class="doc-btn" style="background:rgba(201,168,76,.15);color:var(--accent);font-size:11px"
-            onclick="viewProviderProfile('${p.id}')">
+            onclick="viewProviderProfile('${sanitize(String(p.id))}')">
             خدماته وأسعاره
           </button>
         </div>
@@ -2955,6 +2955,12 @@ function selectPayment(el, method) {
 // حجز من مقدم الخدمة مباشرة (لوجيك 1)
 // يحدد الخدمة والسعر المحدد من مقدم الخدمة
 // ============================================================
+function openProviderBookingById(btn) {
+  const id = btn.getAttribute('data-pid');
+  const p = allDocs.find(d => String(d.id) === id);
+  if (p) openProviderBooking({id:p.id,name:p.name,email:p.email,service_type:p.service_type,price:p.price,area:p.area});
+}
+
 async function openProviderBooking(provData) {
   const provider = allDocs.find(p => p.id === provData.id) || provData;
   try { if(typeof fbq==='function') fbq('track','ViewContent',{content_name: provider.name, content_category: provider.service_type||'provider', value: provider.price||0, currency:'EGP'}); } catch(e){}
