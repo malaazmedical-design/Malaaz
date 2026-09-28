@@ -2094,7 +2094,7 @@ function renderDocCard(p, i) {
       ${availHtml}
       <div class="doc-stats">
         ${(() => {
-          const raw = (p.areas||'').split(/[,،\/\n]/).map(a=>a.trim()).filter(Boolean);
+          const raw = (p.areas||'').split(/[,،\/\n\.\*؛;_]/).map(a=>a.trim()).filter(a=>a.length>1);
           if(!raw.length) return '';
           const shown = raw.slice(0,3).map(a=>`<span class="doc-badge"><i class="fas fa-map-marker-alt" style="margin-left:2px;font-size:9px"></i>${sanitize(a.length>15?a.slice(0,13)+'..':a)}</span>`).join('');
           const more = raw.length > 3 ? `<span class="doc-badge" style="background:rgba(201,168,76,.15);color:var(--accent)">+${raw.length-3} أخرى</span>` : '';
