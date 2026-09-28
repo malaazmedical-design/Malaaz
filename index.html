@@ -3304,6 +3304,9 @@ function setupRealtime() {
   sb.channel('idx-areas')
     .on('postgres_changes', {event:'*',schema:'public',table:'coverage_areas'}, () => {
       loadAreas();
+    })
+    .on('postgres_changes', {event:'*',schema:'public',table:'governorates'}, () => {
+      loadAreas();
     }).subscribe();
 
   sb.channel('idx-reviews')
