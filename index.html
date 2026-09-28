@@ -2093,7 +2093,13 @@ function renderDocCard(p, i) {
       <div class="doc-stars">${stars}</div>
       ${availHtml}
       <div class="doc-stats">
-        ${(p.areas || p.area) ? `<span class="doc-badge"><i class="fas fa-map-marker-alt" style="margin-left:2px;font-size:9px"></i> ${sanitize((p.areas || p.area).split(',').slice(0,2).map(a=>a.trim()).join('، '))}${(p.areas||'').split(',').length > 2 ? ' +' : ''}</span>` : ''}
+        ${(() => {
+          const areaList = (p.areas||'').split(',').map(a=>a.trim()).filter(Boolean);
+          if(!areaList.length) return '';
+          const shown = areaList.slice(0,3).map(a=>`<span class="doc-badge"><i class="fas fa-map-marker-alt" style="margin-left:2px;font-size:9px"></i>${sanitize(a)}</span>`).join('');
+          const more = areaList.length > 3 ? `<span class="doc-badge" style="background:rgba(201,168,76,.15);color:var(--accent)">+${areaList.length-3} أخرى</span>` : '';
+          return shown + more;
+        })()}
         ${p.experience ? `<span class="doc-badge">${sanitize(String(p.experience))} سنة خبرة</span>` : ''}
         <span class="doc-badge">${sanitize(p.service_type || '')}</span>
       </div>
