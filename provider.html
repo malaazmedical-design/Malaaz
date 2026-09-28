@@ -418,8 +418,8 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
           <input class="form-input" id="p-exp" type="number" placeholder="مثال: 10">
         </div>
         <div class="form-group">
-          <div class="form-label">السعر المبدئي (ج.م) — يظهر على كارتك</div>
-          <input class="form-input" id="p-price" type="number" placeholder="مثال: 200">
+          <div class="form-label">السعر المبدئي (ج.م) — يُحسب تلقائياً من أقل خدمة مفعّلة</div>
+          <input class="form-input" id="p-price" type="number" placeholder="يُملأ تلقائياً" readonly style="opacity:.7;cursor:not-allowed">
         </div>
         <div class="form-group">
           <div class="form-label">مناطق التغطية (اختر منطقة أو أكثر)</div>
@@ -1318,6 +1318,18 @@ async function saveMyServices() {
   if(toSave.length) {
     const { error } = await sb.from('provider_services').insert(toSave);
     if(error) { showToast('❌ '+error.message,'error'); return; }
+  }
+
+  // احسب أقل سعر من الخدمات المفعّلة وحدّث السعر المبدئي تلقائياً
+  if(toSave.length) {
+    const prices = toSave.map(s => s.custom_price).filter(p => p > 0);
+    if(prices.length) {
+      const minPrice = Math.min(...prices);
+      await sb.from('providers').update({ price: minPrice }).eq('id', currentProvider.id);
+      currentProvider.price = minPrice;
+      const priceEl = document.getElementById('p-price');
+      if(priceEl) priceEl.value = minPrice;
+    }
   }
 
   showToast('✅ تم حفظ خدماتك وأسعارك','success');
