@@ -536,14 +536,37 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 </div>
 
 <div class="page" id="page-areas">
+  <!-- Governorates Toggle Card -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header">
+      <div>
+        <div class="card-title">المحافظات المفعّلة</div>
+        <div class="card-sub">فعّل أو أوقف تغطية محافظة بأكملها</div>
+      </div>
+      <button class="topbar-btn" style="background:var(--surface2);color:var(--text)" onclick="loadGovernorates()"><i class="fas fa-sync-alt" style="margin-left:6px"></i> تحديث</button>
+    </div>
+    <div class="card-body">
+      <div id="governorates-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div style="text-align:center;padding:20px;color:var(--muted);grid-column:1/-1">جاري التحميل...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Areas Table Card -->
   <div class="card">
     <div class="card-header">
-      <div><div class="card-title">مناطق التغطية</div></div>
+      <div><div class="card-title">المناطق داخل المحافظات</div></div>
       <button class="topbar-btn accent" onclick="openAreaModal()"><i class="fas fa-plus" style="margin-left:6px"></i> إضافة منطقة</button>
     </div>
     <div class="card-body" style="padding:0">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
+        <label style="font-size:13px;color:var(--muted);margin-left:8px">فلتر:</label>
+        <select id="areas-filter-city" class="form-input" style="max-width:200px;padding:6px 10px;font-size:13px" onchange="loadAreas()">
+          <option value="">كل المحافظات</option>
+        </select>
+      </div>
       <table class="tbl">
-        <thead><tr><th>اسم المنطقة</th><th>المدينة</th><th>الحالة</th><th>إجراء</th></tr></thead>
+        <thead><tr><th>اسم المنطقة</th><th>المحافظة</th><th>الحالة</th><th>إجراء</th></tr></thead>
         <tbody id="areas-body"><tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
       </table>
     </div>
@@ -998,6 +1021,31 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
         <select class="form-input" id="area-city">
           <option value="القاهرة">القاهرة</option>
           <option value="الجيزة">الجيزة</option>
+          <option value="الإسكندرية">الإسكندرية</option>
+          <option value="الدقهلية">الدقهلية</option>
+          <option value="البحر الأحمر">البحر الأحمر</option>
+          <option value="البحيرة">البحيرة</option>
+          <option value="الفيوم">الفيوم</option>
+          <option value="الغربية">الغربية</option>
+          <option value="الإسماعيلية">الإسماعيلية</option>
+          <option value="المنوفية">المنوفية</option>
+          <option value="المنيا">المنيا</option>
+          <option value="القليوبية">القليوبية</option>
+          <option value="الوادي الجديد">الوادي الجديد</option>
+          <option value="السويس">السويس</option>
+          <option value="اسوان">اسوان</option>
+          <option value="اسيوط">اسيوط</option>
+          <option value="بني سويف">بني سويف</option>
+          <option value="بورسعيد">بورسعيد</option>
+          <option value="دمياط">دمياط</option>
+          <option value="جنوب سيناء">جنوب سيناء</option>
+          <option value="كفر الشيخ">كفر الشيخ</option>
+          <option value="مطروح">مطروح</option>
+          <option value="الأقصر">الأقصر</option>
+          <option value="قنا">قنا</option>
+          <option value="شمال سيناء">شمال سيناء</option>
+          <option value="سوهاج">سوهاج</option>
+          <option value="الشرقية">الشرقية</option>
         </select>
       </div>
     </div>
@@ -1121,7 +1169,7 @@ function showPage(id) {
     bookings: loadBookings, services: loadServices,
     'sub-services': loadSubServices, 'grade-prices': loadGradePrices,
     providers: loadProviders, accounting: loadAccounting,
-    areas: loadAreas, reviews: loadReviews,
+    areas: () => { loadGovernorates(); loadAreas(); }, reviews: loadReviews,
     'site-content': loadSiteContent, testimonials: loadTestimonials,
     blog: loadBlogPosts
   };
@@ -1746,8 +1794,49 @@ async function deleteProvider(id){ if(!confirm('حذف هذا المقدم؟'))r
 // ============================================================
 // AREAS
 // ============================================================
+const ALL_GOVERNORATES = [
+  'القاهرة','الجيزة','الإسكندرية','الدقهلية','البحر الأحمر','البحيرة','الفيوم',
+  'الغربية','الإسماعيلية','المنوفية','المنيا','القليوبية','الوادي الجديد','السويس',
+  'اسوان','اسيوط','بني سويف','بورسعيد','دمياط','جنوب سيناء','كفر الشيخ',
+  'مطروح','الأقصر','قنا','شمال سيناء','سوهاج','الشرقية'
+];
+
+async function loadGovernorates() {
+  const grid = document.getElementById('governorates-grid');
+  const { data } = await sb.from('governorates').select('*');
+  const map = {};
+  (data||[]).forEach(g => { map[g.name] = g; });
+
+  // Populate filter dropdown
+  const filter = document.getElementById('areas-filter-city');
+  filter.innerHTML = '<option value="">كل المحافظات</option>' +
+    ALL_GOVERNORATES.map(g => `<option value="${g}">${g}</option>`).join('');
+
+  grid.innerHTML = ALL_GOVERNORATES.map(gov => {
+    const rec = map[gov];
+    const active = rec ? rec.is_active : true;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">
+      <span style="font-size:13px;font-weight:600">${gov}</span>
+      <label class="toggle"><input type="checkbox" ${active?'checked':''} onchange="toggleGovernorate('${gov}',this.checked)"><span class="toggle-slider"></span></label>
+    </div>`;
+  }).join('');
+}
+
+async function toggleGovernorate(name, val) {
+  const { data } = await sb.from('governorates').select('id').eq('name', name).single();
+  if (data) {
+    await sb.from('governorates').update({ is_active: val }).eq('id', data.id);
+  } else {
+    await sb.from('governorates').insert([{ name, is_active: val }]);
+  }
+  showToast(val ? '✅ تم تفعيل المحافظة' : '⏸ تم إيقاف المحافظة', 'success');
+}
+
 async function loadAreas() {
-  const { data } = await sb.from('coverage_areas').select('*').order('city').order('name');
+  const city = document.getElementById('areas-filter-city')?.value || '';
+  let query = sb.from('coverage_areas').select('*').order('city').order('name');
+  if (city) query = query.eq('city', city);
+  const { data } = await query;
   const tbody = document.getElementById('areas-body');
   if(!data?.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted)">لا يوجد مناطق</td></tr>'; return; }
   tbody.innerHTML = data.map(a => `
