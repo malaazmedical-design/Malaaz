@@ -207,7 +207,7 @@ module.exports = async function handler(req, res) {
 
   // Build providers query — service_type filtered server-side when serviceParam present
   const buildProvidersQuery = () => {
-    let q = `providers?select=*,provider_services(custom_price,sub_services(price_min,price_min_specialist,price_min_consultant))&status=eq.active&provider_services.is_active=eq.true`;
+    let q = `providers?select=*&status=eq.active`;
     if (serviceParam) q += `&service_type=eq.${encodeURIComponent(serviceParam)}`;
     if (areaParam) q += `&areas=ilike.*${encodeURIComponent(areaParam)}*`;
     q += `&order=is_available.desc,name.asc`;
@@ -215,11 +215,12 @@ module.exports = async function handler(req, res) {
   };
 
   // Parallel fetches
-  let [providers, reviews, areas, xraySubs] = await Promise.all([
+  let [providers, reviews, areas, xraySubs, activeSvcPrices] = await Promise.all([
     supaFetch(buildProvidersQuery()),
     supaFetch(`reviews?select=provider_id,rating&is_approved=eq.true`),
     supaFetch(`coverage_areas?select=name,city&is_active=eq.true&order=name`),
     supaFetch(`sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`),
+    supaFetch(`provider_services?select=provider_id,custom_price,sub_services(price_min,price_min_specialist,price_min_consultant)&is_active=eq.true`),
   ]);
 
   // Sub-service filter (xray type or nursing type)
@@ -237,21 +238,20 @@ module.exports = async function handler(req, res) {
     } catch(e) { /* keep all providers if sub-service lookup fails */ }
   }
 
-  // Compute minimum price from nested provider_services (already joined in the providers query)
+  // Compute minimum price from active provider_services only
+  const minPriceMap = {};
+  (activeSvcPrices || []).forEach(ps => {
+    if (!ps.provider_id) return;
+    const sub = ps.sub_services;
+    // price_min_specialist/consultant resolved later per provider grade
+    const basePrice = ps.custom_price ?? sub?.price_min_specialist ?? sub?.price_min;
+    if (basePrice == null) return;
+    if (minPriceMap[ps.provider_id] == null || basePrice < minPriceMap[ps.provider_id]) {
+      minPriceMap[ps.provider_id] = basePrice;
+    }
+  });
   (providers || []).forEach(p => {
-    if (p.price) return; // already set on the providers row
-    const svcs = p.provider_services || [];
-    const isConsultant = (p.grade || '') === 'استشاري';
-    let min = null;
-    svcs.forEach(ps => {
-      const sub = ps.sub_services;
-      const tierPrice = sub
-        ? (isConsultant ? sub.price_min_consultant : sub.price_min_specialist) ?? sub.price_min
-        : null;
-      const price = ps.custom_price ?? tierPrice;
-      if (price != null && (min === null || price < min)) min = price;
-    });
-    p.price = min;
+    if (!p.price) p.price = minPriceMap[p.id] ?? null;
   });
 
   // Attach ratings
