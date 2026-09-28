@@ -265,14 +265,17 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
       <input class="login-input" type="email" id="r-email" placeholder="البريد الإلكتروني *">
       <input class="login-input" type="password" id="r-pass" placeholder="كلمة المرور *">
       <input class="login-input" type="tel" id="r-phone" placeholder="رقم الموبايل *" dir="ltr">
-      <select class="login-input" id="r-service-type" style="color:#fff;background:rgba(255,255,255,.05)">
+      <select class="login-input" id="r-service-type" style="color:#fff;background:rgba(255,255,255,.05)" onchange="onServiceTypeChange(this.value)">
         <option value="">نوع الخدمة *</option>
         <option value="كشف منزلي">كشف منزلي</option>
         <option value="تمريض منزلي">تمريض منزلي</option>
         <option value="أشعة منزلية">أشعة منزلية</option>
       </select>
-      <input class="login-input" type="text" id="r-specialty" placeholder="التخصص (مثال: باطنة، أطفال، تمريض) *">
-      <input class="login-input" type="text" id="r-area" placeholder="مناطق الخدمة (افصل بينها بفاصلة) *">
+      <div id="r-specialty-wrap" style="display:none">
+        <select class="login-input" id="r-specialty" style="color:#fff;background:rgba(255,255,255,.05)">
+          <option value="">التخصص *</option>
+        </select>
+      </div>
       <div id="register-err" style="color:#ff6b6b;font-size:12px;margin-bottom:8px;display:none"></div>
       <button class="login-btn" onclick="doRegister()"><i class="fas fa-user-plus" style="margin-left:8px"></i> إنشاء حساب</button>
       <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:12px">سيتم مراجعة طلبك من الأدمن قبل التفعيل</div>
@@ -417,12 +420,12 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
           <input class="form-input" id="p-exp" type="number" placeholder="مثال: 10">
         </div>
         <div class="form-group">
-          <div class="form-label">السعر المبدئي (ج.م) — يظهر على كارتك</div>
-          <input class="form-input" id="p-price" type="number" placeholder="مثال: 200">
+          <div class="form-label">السعر المبدئي (ج.م) — يُحسب تلقائياً من أقل خدمة مفعّلة</div>
+          <input class="form-input" id="p-price" type="number" placeholder="يُملأ تلقائياً" readonly style="opacity:.7;cursor:not-allowed">
         </div>
         <div class="form-group">
           <div class="form-label">مناطق التغطية (اختر منطقة أو أكثر)</div>
-          <div id="p-areas-box" style="display:flex;flex-wrap:wrap;gap:8px;padding:12px;border:1.5px solid var(--border);border-radius:12px;max-height:160px;overflow-y:auto;background:var(--bg)"></div>
+          <div id="p-areas-box" style="border:1.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg)"></div>
         </div>
       </div>
 
@@ -562,6 +565,35 @@ function switchLoginTab(tab, btn) {
   btn.classList.add('active');
   document.getElementById('tab-login').style.display    = tab==='login'?'block':'none';
   document.getElementById('tab-register').style.display = tab==='register'?'block':'none';
+  if(tab === 'register') {
+    document.getElementById('r-specialty-wrap').style.display = 'none';
+    document.getElementById('r-service-type').value = '';
+  }
+}
+
+function onServiceTypeChange(val) {
+  const wrap = document.getElementById('r-specialty-wrap');
+  if(val === 'كشف منزلي') {
+    wrap.style.display = '';
+    loadSpecialtyOptions();
+  } else {
+    wrap.style.display = 'none';
+    const sel = document.getElementById('r-specialty');
+    if(sel) sel.value = '';
+  }
+}
+
+async function loadSpecialtyOptions() {
+  const sel = document.getElementById('r-specialty');
+  if(!sel || sel.options.length > 1) return;
+  const { data } = await sb.from('sub_services').select('name').eq('is_active', true).eq('group_name', 'specialty').order('name');
+  if(!data?.length) return;
+  data.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.name;
+    opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
 }
 
 // ============================================================
@@ -637,11 +669,11 @@ async function doRegister() {
   const phone       = document.getElementById('r-phone').value.trim();
   const serviceType = document.getElementById('r-service-type').value;
   const specialty   = document.getElementById('r-specialty').value.trim();
-  const area        = document.getElementById('r-area').value.trim();
   const err   = document.getElementById('register-err');
   const btn   = document.querySelector('#tab-register .login-btn');
 
-  if(!name||!email||!pass||!phone||!serviceType||!specialty||!area) { err.textContent='يرجى ملء كل الحقول'; err.style.display='block'; return; }
+  const needSpecialty = serviceType === 'كشف منزلي';
+  if(!name||!email||!pass||!phone||!serviceType||(needSpecialty&&!specialty)) { err.textContent='يرجى ملء كل الحقول'; err.style.display='block'; return; }
   if(pass.length < 6)              { err.textContent='كلمة المرور 6 أحرف على الأقل'; err.style.display='block'; return; }
 
   err.style.display = 'none';
@@ -659,15 +691,13 @@ async function doRegister() {
   const userId = authData?.user?.id || authData?.session?.user?.id;
   if(!userId) {
     showToast('✅ تم إنشاء الحساب — تحقق من بريدك الإلكتروني لتأكيد الحساب');
-    ['r-name','r-email','r-pass','r-phone','r-specialty','r-area'].forEach(id => document.getElementById(id).value = '');
+    ['r-name','r-email','r-pass','r-phone','r-specialty'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('r-service-type').value = '';
     switchLoginTab('login', document.querySelector('.login-tab'));
     return;
   }
 
   // 2) إنشاء row في providers مرتبط بالـ user_id
-  // المناطق: نص متعدد + أول منطقة للتوافق
-  const areasList = area.split(',').map(a=>a.trim()).filter(Boolean);
   const { error: provErr } = await sb.from('providers').insert([{
     user_id:      userId,
     name,
@@ -675,8 +705,6 @@ async function doRegister() {
     phone,
     service_type: serviceType,
     specialty,
-    area:         areasList[0] || area,
-    areas:        areasList.join(', '),
     status:       'pending',
     is_available: false,
     rating:       5
@@ -1310,6 +1338,18 @@ async function saveMyServices() {
     if(error) { showToast('❌ '+error.message,'error'); return; }
   }
 
+  // احسب أقل سعر من الخدمات المفعّلة وحدّث السعر المبدئي تلقائياً
+  if(toSave.length) {
+    const prices = toSave.map(s => s.custom_price).filter(p => p > 0);
+    if(prices.length) {
+      const minPrice = Math.min(...prices);
+      await sb.from('providers').update({ price: minPrice }).eq('id', currentProvider.id);
+      currentProvider.price = minPrice;
+      const priceEl = document.getElementById('p-price');
+      if(priceEl) priceEl.value = minPrice;
+    }
+  }
+
   showToast('✅ تم حفظ خدماتك وأسعارك','success');
 }
 
@@ -1321,28 +1361,67 @@ async function loadSubServicesAll() {
   allSubServices = data || [];
 }
 async function loadAreas() {
-  const { data } = await sb.from('coverage_areas').select('*').eq('is_active',true).order('name');
-  allAreas = data || [];
+  const [areasRes, govRes] = await Promise.all([
+    sb.from('coverage_areas').select('*').eq('is_active', true).order('city').order('name'),
+    sb.from('governorates').select('name, is_active')
+  ]);
+  const disabledGovs = new Set((govRes.data || []).filter(g => g.is_active === false).map(g => g.name));
+  allAreas = (areasRes.data || []).filter(a => !disabledGovs.has(a.city));
   renderAreaCheckboxes();
 }
 
 function renderAreaCheckboxes(selectedAreas) {
   const box = document.getElementById('p-areas-box');
   if(!box) return;
-  // المناطق المختارة حالياً (من areas النصي أو area القديم)
   let selected = selectedAreas;
   if(!selected) {
     const raw = currentProvider?.areas || currentProvider?.area || '';
     selected = raw.split(',').map(a=>a.trim()).filter(Boolean);
   }
-  if(!allAreas.length) { box.innerHTML = '<span style="font-size:12px;color:var(--muted)">جاري التحميل...</span>'; return; }
-  box.innerHTML = allAreas.map(a => {
-    const checked = selected.includes(a.name) ? 'checked' : '';
-    return `<label style="display:inline-flex;align-items:center;gap:6px;background:var(--white);padding:7px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;font-size:13px">
-      <input type="checkbox" class="area-cb" value="${san(a.name)}" ${checked} style="cursor:pointer;accent-color:var(--accent)">
-      ${san(a.name)}
-    </label>`;
+  if(!allAreas.length) { box.innerHTML = '<span style="font-size:12px;color:var(--muted);padding:12px;display:block">جاري التحميل...</span>'; return; }
+
+  // Group by city
+  const byCity = {};
+  allAreas.forEach(a => {
+    if(!byCity[a.city]) byCity[a.city] = [];
+    byCity[a.city].push(a);
+  });
+
+  box.innerHTML = Object.keys(byCity).sort().map(city => {
+    const areas = byCity[city];
+    const cityId = 'gov-' + city.replace(/\s/g,'_');
+    const allChecked = areas.every(a => selected.includes(a.name));
+    const checkboxes = areas.map(a => {
+      const checked = selected.includes(a.name) ? 'checked' : '';
+      return `<label style="display:inline-flex;align-items:center;gap:5px;background:var(--white);padding:6px 11px;border-radius:16px;border:1px solid var(--border);cursor:pointer;font-size:12.5px">
+        <input type="checkbox" class="area-cb" value="${san(a.name)}" data-city="${san(city)}" ${checked} style="cursor:pointer;accent-color:var(--accent)" onchange="updateGovToggle('${cityId}')">
+        ${san(a.name)}
+      </label>`;
+    }).join('');
+    return `<details style="border-bottom:1px solid var(--border)">
+      <summary style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;list-style:none;font-size:13px;font-weight:700;color:var(--dark)">
+        <span>📍 ${san(city)} <span style="font-weight:400;color:var(--muted);font-size:12px">(${areas.length} منطقة)</span></span>
+        <label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;color:var(--muted);cursor:pointer">
+          <input type="checkbox" id="${cityId}" ${allChecked?'checked':''} style="cursor:pointer;accent-color:var(--accent)" onchange="toggleGov('${san(city)}',this.checked)">
+          اختر الكل
+        </label>
+      </summary>
+      <div style="padding:10px 14px 14px;display:flex;flex-wrap:wrap;gap:7px">${checkboxes}</div>
+    </details>`;
   }).join('');
+}
+
+function toggleGov(city, checked) {
+  document.querySelectorAll(`.area-cb[data-city="${city}"]`).forEach(cb => cb.checked = checked);
+}
+
+function updateGovToggle(cityId) {
+  const el = document.getElementById(cityId);
+  if(!el) return;
+  const city = el.closest('details')?.querySelector('.area-cb')?.dataset.city;
+  if(!city) return;
+  const cbs = document.querySelectorAll(`.area-cb[data-city="${city}"]`);
+  el.checked = [...cbs].every(cb => cb.checked);
 }
 
 function getSelectedAreas() {
