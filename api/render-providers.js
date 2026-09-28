@@ -207,7 +207,7 @@ module.exports = async function handler(req, res) {
 
   // Build providers query — service_type filtered server-side when serviceParam present
   const buildProvidersQuery = () => {
-    let q = `providers?select=*&status=eq.active`;
+    let q = `providers?select=*,provider_services(custom_price,sub_services(price_min))&status=eq.active`;
     if (serviceParam) q += `&service_type=eq.${encodeURIComponent(serviceParam)}`;
     if (areaParam) q += `&areas=ilike.*${encodeURIComponent(areaParam)}*`;
     q += `&order=is_available.desc,name.asc`;
@@ -215,12 +215,11 @@ module.exports = async function handler(req, res) {
   };
 
   // Parallel fetches
-  let [providers, reviews, areas, xraySubs, provSvcPrices] = await Promise.all([
+  let [providers, reviews, areas, xraySubs] = await Promise.all([
     supaFetch(buildProvidersQuery()),
     supaFetch(`reviews?select=provider_id,rating&is_approved=eq.true`),
     supaFetch(`coverage_areas?select=name,city&is_active=eq.true&order=name`),
     supaFetch(`sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`),
-    supaFetch(`provider_services?select=provider_id,custom_price,sub_services(price_min)&is_active=eq.true`),
   ]);
 
   // Sub-service filter (xray type or nursing type)
@@ -238,18 +237,16 @@ module.exports = async function handler(req, res) {
     } catch(e) { /* keep all providers if sub-service lookup fails */ }
   }
 
-  // Attach minimum price per provider
-  const minPriceMap = {};
-  (provSvcPrices || []).forEach(ps => {
-    if (!ps.provider_id) return;
-    const price = ps.custom_price ?? ps.sub_services?.price_min;
-    if (price == null) return;
-    if (!minPriceMap[ps.provider_id] || price < minPriceMap[ps.provider_id]) {
-      minPriceMap[ps.provider_id] = price;
-    }
-  });
+  // Compute minimum price from nested provider_services (already joined in the providers query)
   (providers || []).forEach(p => {
-    if (!p.price) p.price = minPriceMap[p.id] ?? null;
+    if (p.price) return; // already set on the providers row
+    const svcs = p.provider_services || [];
+    let min = null;
+    svcs.forEach(ps => {
+      const price = ps.custom_price ?? ps.sub_services?.price_min;
+      if (price != null && (min === null || price < min)) min = price;
+    });
+    p.price = min;
   });
 
   // Attach ratings
