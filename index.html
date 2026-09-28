@@ -2554,6 +2554,7 @@ async function openBookingModal(service, sub, provider) {
 
   document.getElementById('booking-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  try { if(typeof fbq==='function') fbq('track','InitiateCheckout',{content_name: service||'كشف منزلي', content_category:'booking'}); } catch(e){}
 
   // ملء بيانات العميل المحفوظة تلقائياً
   prefillClientData();
@@ -3083,6 +3084,16 @@ function trackBookingConversion(service, price, isDirect) {
         value: price || 0,
         currency: 'EGP',
         booking_type: isDirect ? 'direct' : 'general'
+      });
+    }
+  } catch(e) {}
+  try {
+    if(typeof fbq === 'function') {
+      fbq('track', 'Purchase', {
+        value: price || 0,
+        currency: 'EGP',
+        content_name: service || 'unknown',
+        content_category: isDirect ? 'direct_booking' : 'general_booking'
       });
     }
   } catch(e) {}
@@ -3759,6 +3770,7 @@ async function openQuickBooking() {
   renderQbServices();
   document.getElementById('quick-booking-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  try { if(typeof fbq==='function') fbq('track','InitiateCheckout',{content_name:'quick_booking',content_category:'booking'}); } catch(e){}
   if(document.getElementById('bm-area')?.options.length <= 1) await loadAreas();
 }
 
