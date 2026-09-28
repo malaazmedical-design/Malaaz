@@ -222,14 +222,14 @@ async function loadPost() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
 
-  if(!id) { showError(); return; }
+  // Support slug-based URLs (/مقالات/:slug → ?slug=... via vercel.json rewrite)
+  const slug = params.get('slug');
+
+  if(!id && !slug) { showError(); return; }
 
   try {
-    const { data, error } = await sb
-      .from('blog_posts')
-      .select('*')
-      .eq('id', id)
-      .eq('status', 'published')
+    const baseQ = sb.from('blog_posts').select('*').eq('status', 'published');
+    const { data, error } = await (slug ? baseQ.eq('slug', slug) : baseQ.eq('id', id))
       .single();
 
     if(error || !data) { showError(); return; }
@@ -237,7 +237,8 @@ async function loadPost() {
     // حدّث الـ meta tags
     document.title = data.title + ' — ملاذ';
     document.querySelector('meta[name="description"]').content = data.summary || '';
-    document.querySelector('link[rel="canonical"]').href = `https://malaaz-plum.vercel.app/blog-post.html?id=${id}`;
+    const canonicalUrl = data.slug ? `https://malaaz-plum.vercel.app/مقالات/${data.slug}` : `https://malaaz-plum.vercel.app/blog-post.html?id=${data.id}`;
+    document.querySelector('link[rel="canonical"]').href = canonicalUrl;
 
     // Article Schema للـ GEO
     const schema = {
@@ -249,7 +250,7 @@ async function loadPost() {
       "publisher": {"@type":"Organization","name":"ملاذ","logo":{"@type":"ImageObject","url":"https://malaaz-plum.vercel.app/og-image.jpg"}},
       "datePublished": data.created_at,
       "dateModified": data.updated_at || data.created_at,
-      "mainEntityOfPage": `https://malaaz-plum.vercel.app/blog-post.html?id=${id}`,
+      "mainEntityOfPage": canonicalUrl,
       "image": "https://malaaz-plum.vercel.app/og-image.jpg"
     };
     document.getElementById('article-schema').textContent = JSON.stringify(schema);
@@ -283,7 +284,7 @@ async function loadRelated(currentId, category) {
   try {
     const { data } = await sb
       .from('blog_posts')
-      .select('id, title, category, emoji, read_time')
+      .select('id, title, slug, category, emoji, read_time')
       .eq('status', 'published')
       .neq('id', currentId)
       .limit(3);
@@ -292,7 +293,7 @@ async function loadRelated(currentId, category) {
 
     const grid = document.getElementById('related-grid');
     grid.innerHTML = data.map(p => `
-      <a href="/blog-post.html?id=${p.id}" class="related-card">
+      <a href="${p.slug ? '/مقالات/' + p.slug : '/blog-post.html?id=' + p.id}" class="related-card">
         <span>${p.emoji || '📝'}</span>
         <div>
           <h4>${p.title}</h4>
