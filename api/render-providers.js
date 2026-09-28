@@ -169,9 +169,7 @@ function buildCard(p) {
     starsHtml = '<span style="color:#999;font-size:13px">⭐ مقدم جديد</span>';
   }
 
-  const areas = (p.areas || p.area || '').split(',').map(a=>a.trim()).filter(Boolean);
-  const areaChips = areas.slice(0,3).map(a=>`<span class="prov-area">${esc(a)}</span>`).join('');
-  const moreAreas = areas.length > 3 ? `<span class="prov-area prov-area-more">+${areas.length-3}</span>` : '';
+  const bioText = (p.bio || '').replace(/\n/g, ' ').trim();
 
   const photoHtml = p.photo_url
     ? `<img src="${esc(p.photo_url)}" alt="${esc(p.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:20px">`
@@ -191,7 +189,8 @@ function buildCard(p) {
   </div>
   <div class="prov-stars">${starsHtml}</div>
   <div class="prov-avail ${p.is_available?'avail-yes':'avail-no'}">${p.is_available?'● متاح الآن':'○ غير متاح حالياً'}</div>
-  <div class="prov-areas-row">${areaChips}${moreAreas}</div>
+  ${bioText ? `<div class="prov-bio">${esc(bioText)}</div>` : ''}
+  <div style="flex:1"></div>
   ${p.price ? `<div class="prov-price">ابتداء من <strong>${esc(String(p.price))}</strong> ج.م</div>` : ''}
   <div class="prov-actions">
     ${bookBtn}
@@ -490,9 +489,7 @@ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-co
 .prov-stars{font-size:13px;color:var(--accent)}
 .avail-yes{color:#22c55e;font-size:13px}
 .avail-no{color:#888;font-size:13px}
-.prov-areas-row{display:flex;flex-wrap:wrap;gap:5px}
-.prov-area{font-size:11px;color:rgba(255,255,255,.55);background:rgba(255,255,255,.07);padding:3px 10px;border-radius:100px}
-.prov-area-more{color:rgba(201,168,76,.8);background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2)}
+.prov-bio{font-size:12px;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prov-price{font-size:13px;color:rgba(255,255,255,.6)}
 .prov-price strong{color:var(--accent);font-size:16px}
 .prov-actions{display:flex;gap:8px;margin-top:4px}
