@@ -30,10 +30,10 @@ function getBookingPartial() {
   }
   const html = lines.slice(htmlStart, htmlEnd + 1).join('\n');
 
-  // JS: from bmSelectedService declaration to closing </script>
-  const jsStart = lines.findIndex(l => l.includes('let bmSelectedService'));
-  const jsEnd   = lines.findIndex((l, i) => i > jsStart + 100 && l.trim() === '</script>');
-  const js      = lines.slice(jsStart, jsEnd).join('\n');
+  // JS: between /* BOOKING_JS_START */ and /* BOOKING_JS_END */ sentinels
+  const jsStart = lines.findIndex(l => l.includes('/* BOOKING_JS_START */'));
+  const jsEnd   = lines.findIndex((l, i) => i > jsStart && l.includes('/* BOOKING_JS_END */'));
+  const js      = lines.slice(jsStart + 1, jsEnd).join('\n');
 
   _cache = { css, html, js };
   return _cache;
