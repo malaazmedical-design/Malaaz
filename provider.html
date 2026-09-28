@@ -1331,8 +1331,12 @@ async function loadSubServicesAll() {
   allSubServices = data || [];
 }
 async function loadAreas() {
-  const { data } = await sb.from('coverage_areas').select('*').eq('is_active',true).order('name');
-  allAreas = data || [];
+  const [areasRes, govRes] = await Promise.all([
+    sb.from('coverage_areas').select('*').eq('is_active', true).order('city').order('name'),
+    sb.from('governorates').select('name, is_active')
+  ]);
+  const disabledGovs = new Set((govRes.data || []).filter(g => g.is_active === false).map(g => g.name));
+  allAreas = (areasRes.data || []).filter(a => !disabledGovs.has(a.city));
   renderAreaCheckboxes();
 }
 
