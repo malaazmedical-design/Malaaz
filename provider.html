@@ -977,16 +977,16 @@ async function sendRejectionEmail(booking) {
   if(!booking.patient_email) return;
   if(await clientHasApp(booking.phone)) return;
   const details =
-    `⚕️ الخدمة: ${booking.service_type||'—'}<br>` +
-    `📍 المنطقة: ${booking.area||'—'}<br>` +
-    `🕐 الميعاد: ${booking.appointment_time||'—'}`;
+    `⚕️ الخدمة: ${san(booking.service_type||'—')}<br>` +
+    `📍 المنطقة: ${san(booking.area||'—')}<br>` +
+    `🕐 الميعاد: ${san(booking.appointment_time||'—')}`;
   try {
     await emailjs.send('service_tv0w6ov', 'template_3arzsvv', {
       to_email:     booking.patient_email,
       subject:      'تحديث بخصوص حجزك مع ملاذ',
       title:        '⚠️ تعذّر تأكيد حجزك',
       title_color:  '#c62828',
-      message:      `عزيزي ${booking.patient_name||''}، نعتذر — تعذّر تأكيد حجزك في الوقت المحدد. يمكنك اختيار مقدم آخر أو التواصل معنا.`,
+      message:      `عزيزي ${san(booking.patient_name||'')}، نعتذر — تعذّر تأكيد حجزك في الوقت المحدد. يمكنك اختيار مقدم آخر أو التواصل معنا.`,
       details,
       button_text:  '🔍 اختر مقدم خدمة آخر',
       button_link:  'https://malaaz-plum.vercel.app',
@@ -1002,17 +1002,17 @@ async function sendConfirmationEmail(booking) {
   if(!booking.patient_email) return;
   if(await clientHasApp(booking.phone)) return;
   const details =
-    `⚕️ الخدمة: ${booking.service_type||'—'}<br>` +
-    `📍 المنطقة: ${booking.area||'—'}<br>` +
-    `🕐 الميعاد: ${booking.appointment_time||'—'}<br>` +
-    `👨‍⚕️ مقدم الخدمة: ${currentProvider?.name||'سيتم التواصل معك'}`;
+    `⚕️ الخدمة: ${san(booking.service_type||'—')}<br>` +
+    `📍 المنطقة: ${san(booking.area||'—')}<br>` +
+    `🕐 الميعاد: ${san(booking.appointment_time||'—')}<br>` +
+    `👨‍⚕️ مقدم الخدمة: ${san(currentProvider?.name||'سيتم التواصل معك')}`;
   try {
     await emailjs.send('service_tv0w6ov', 'template_3arzsvv', {
       to_email:     booking.patient_email,
       subject:      '✅ تم تأكيد حجزك مع ملاذ',
       title:        '✅ تم تأكيد حجزك!',
       title_color:  '#2e7d32',
-      message:      `أهلاً ${booking.patient_name||''} 💙 تم تأكيد حجزك بنجاح. سيتم التواصل معك لتنسيق الزيارة.`,
+      message:      `أهلاً ${san(booking.patient_name||'')} 💙 تم تأكيد حجزك بنجاح. سيتم التواصل معك لتنسيق الزيارة.`,
       details,
       button_text:  '📱 تواصل معنا',
       button_link:  'https://wa.me/201039097982',

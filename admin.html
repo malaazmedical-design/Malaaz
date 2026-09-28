@@ -1788,10 +1788,10 @@ async function notifyProvider(id, type) {
   } catch(e) { console.warn('provider notify error:', e); }
 }
 
-async function approveProvider(id){ await sb.from('providers').update({status:'active'}).eq('id',id); await notifyProvider(id,'approve'); showToast('✅ تم القبول','success'); loadProviders(); }
-async function suspendProvider(id){ await sb.from('providers').update({status:'suspended'}).eq('id',id); await notifyProvider(id,'suspend'); showToast('⏸ تم الإيقاف'); loadProviders(); }
-async function activateProvider(id){ await sb.from('providers').update({status:'active'}).eq('id',id); showToast('✅ تم التفعيل','success'); loadProviders(); }
-async function deleteProvider(id){ if(!confirm('حذف هذا المقدم؟'))return; await sb.from('providers').delete().eq('id',id); showToast('🗑 تم الحذف'); loadProviders(); }
+async function approveProvider(id){ try{ await sb.from('providers').update({status:'active'}).eq('id',id); await notifyProvider(id,'approve'); showToast('✅ تم القبول','success'); loadProviders(); }catch(e){ showToast('حدث خطأ، حاول مجدداً','error'); } }
+async function suspendProvider(id){ try{ await sb.from('providers').update({status:'suspended'}).eq('id',id); await notifyProvider(id,'suspend'); showToast('⏸ تم الإيقاف'); loadProviders(); }catch(e){ showToast('حدث خطأ، حاول مجدداً','error'); } }
+async function activateProvider(id){ try{ await sb.from('providers').update({status:'active'}).eq('id',id); showToast('✅ تم التفعيل','success'); loadProviders(); }catch(e){ showToast('حدث خطأ، حاول مجدداً','error'); } }
+async function deleteProvider(id){ if(!confirm('حذف هذا المقدم؟'))return; try{ await sb.from('providers').delete().eq('id',id); showToast('🗑 تم الحذف'); loadProviders(); }catch(e){ showToast('حدث خطأ، حاول مجدداً','error'); } }
 
 // ============================================================
 // AREAS
@@ -2400,8 +2400,9 @@ function showAdminAlert(alert) {
   box.style.background = alert.level >= 2 ? '#b91c1c' : '#c2410c';
   box.style.color = '#fff'; box.style.padding = '14px 16px'; box.style.borderRadius = '12px';
   box.style.boxShadow = '0 8px 24px rgba(0,0,0,.3)'; box.style.fontSize = '13px'; box.style.fontWeight = '600';
-  box.innerHTML = `<div style="margin-bottom:8px">${alert.level >= 2 ? '🚨' : '⚠️'} ${alert.message}</div>
-    <a href="${alert.whatsapp_link}" target="_blank" style="display:inline-block;background:#22c55e;color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:12px">إرسال واتساب الآن</a>
+  const safeLink = /^https:\/\/wa\.me\//.test(alert.whatsapp_link||'') ? alert.whatsapp_link : '#';
+  box.innerHTML = `<div style="margin-bottom:8px">${alert.level >= 2 ? '🚨' : '⚠️'} ${s(alert.message)}</div>
+    <a href="${safeLink}" target="_blank" rel="noopener" style="display:inline-block;background:#22c55e;color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:12px">إرسال واتساب الآن</a>
     <button onclick="this.closest('div').parentElement.remove()" style="margin-right:8px;background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">إغلاق</button>`;
   document.body.appendChild(box);
 }
@@ -2480,7 +2481,7 @@ async function loadBlogPosts() {
     }
     body.innerHTML = data.map(p => `
       <tr>
-        <td><b>${p.title}</b></td>
+        <td><b>${s(p.title)}</b></td>
         <td><span style="background:rgba(201,168,76,.1);color:var(--accent);padding:2px 8px;border-radius:8px;font-size:11px">${p.category||'—'}</span></td>
         <td><span style="color:${p.status==='published'?'#22c55e':'#f59e0b'}">${p.status==='published'?'✅ منشور':'📝 مسودة'}</span></td>
         <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('ar-EG') : '—'}</td>
