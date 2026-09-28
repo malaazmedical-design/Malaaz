@@ -422,7 +422,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
         </div>
         <div class="form-group">
           <div class="form-label">مناطق التغطية (اختر منطقة أو أكثر)</div>
-          <div id="p-areas-box" style="display:flex;flex-wrap:wrap;gap:8px;padding:12px;border:1.5px solid var(--border);border-radius:12px;max-height:160px;overflow-y:auto;background:var(--bg)"></div>
+          <div id="p-areas-box" style="border:1.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg)"></div>
         </div>
       </div>
 
@@ -1329,20 +1329,55 @@ async function loadAreas() {
 function renderAreaCheckboxes(selectedAreas) {
   const box = document.getElementById('p-areas-box');
   if(!box) return;
-  // المناطق المختارة حالياً (من areas النصي أو area القديم)
   let selected = selectedAreas;
   if(!selected) {
     const raw = currentProvider?.areas || currentProvider?.area || '';
     selected = raw.split(',').map(a=>a.trim()).filter(Boolean);
   }
-  if(!allAreas.length) { box.innerHTML = '<span style="font-size:12px;color:var(--muted)">جاري التحميل...</span>'; return; }
-  box.innerHTML = allAreas.map(a => {
-    const checked = selected.includes(a.name) ? 'checked' : '';
-    return `<label style="display:inline-flex;align-items:center;gap:6px;background:var(--white);padding:7px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;font-size:13px">
-      <input type="checkbox" class="area-cb" value="${san(a.name)}" ${checked} style="cursor:pointer;accent-color:var(--accent)">
-      ${san(a.name)}
-    </label>`;
+  if(!allAreas.length) { box.innerHTML = '<span style="font-size:12px;color:var(--muted);padding:12px;display:block">جاري التحميل...</span>'; return; }
+
+  // Group by city
+  const byCity = {};
+  allAreas.forEach(a => {
+    if(!byCity[a.city]) byCity[a.city] = [];
+    byCity[a.city].push(a);
+  });
+
+  box.innerHTML = Object.keys(byCity).sort().map(city => {
+    const areas = byCity[city];
+    const cityId = 'gov-' + city.replace(/\s/g,'_');
+    const allChecked = areas.every(a => selected.includes(a.name));
+    const checkboxes = areas.map(a => {
+      const checked = selected.includes(a.name) ? 'checked' : '';
+      return `<label style="display:inline-flex;align-items:center;gap:5px;background:var(--white);padding:6px 11px;border-radius:16px;border:1px solid var(--border);cursor:pointer;font-size:12.5px">
+        <input type="checkbox" class="area-cb" value="${san(a.name)}" data-city="${san(city)}" ${checked} style="cursor:pointer;accent-color:var(--accent)" onchange="updateGovToggle('${cityId}')">
+        ${san(a.name)}
+      </label>`;
+    }).join('');
+    return `<details style="border-bottom:1px solid var(--border)">
+      <summary style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;list-style:none;font-size:13px;font-weight:700;color:var(--dark)">
+        <span>📍 ${san(city)} <span style="font-weight:400;color:var(--muted);font-size:12px">(${areas.length} منطقة)</span></span>
+        <label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;color:var(--muted);cursor:pointer">
+          <input type="checkbox" id="${cityId}" ${allChecked?'checked':''} style="cursor:pointer;accent-color:var(--accent)" onchange="toggleGov('${san(city)}',this.checked)">
+          اختر الكل
+        </label>
+      </summary>
+      <div style="padding:10px 14px 14px;display:flex;flex-wrap:wrap;gap:7px">${checkboxes}</div>
+    </details>`;
   }).join('');
+}
+
+function toggleGov(city, checked) {
+  document.querySelectorAll(`.area-cb[data-city="${city}"]`).forEach(cb => cb.checked = checked);
+}
+
+function updateGovToggle(cityId) {
+  const el = document.getElementById(cityId);
+  if(!el) return;
+  const city = el.closest('details')?.querySelector('.area-cb')?.dataset.city;
+  if(!city) return;
+  const cbs = document.querySelectorAll(`.area-cb[data-city="${city}"]`);
+  el.checked = [...cbs].every(cb => cb.checked);
 }
 
 function getSelectedAreas() {
