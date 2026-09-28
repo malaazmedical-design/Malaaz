@@ -2076,9 +2076,16 @@ function renderDocCard(p, i) {
   }
   const stars = starsHtml;
   // التخصص مع الدرجة
-  const specText = p.grade
-    ? `${sanitize(p.grade)} ${sanitize(p.specialty || (p.service_type==='تمريض منزلي'?'تمريض':p.service_type==='أشعة منزلية'?'أشعة':''))}`
-    : sanitize(p.specialty || (p.service_type==='تمريض منزلي'?'أخصائي تمريض':p.service_type==='أشعة منزلية'?'مركز أشعة':'—'));
+  let specText;
+  if(p.service_type === 'تمريض منزلي') {
+    specText = 'تمريض منزلي';
+  } else if(p.service_type === 'أشعة منزلية') {
+    specText = 'أشعة منزلية';
+  } else {
+    const grade = p.grade ? sanitize(p.grade) : '';
+    const spec  = p.specialty ? sanitize(p.specialty) : '';
+    specText = [grade, spec].filter(Boolean).join(' ') || 'كشف منزلي';
+  }
   // الإتاحة الديناميكية
   const availHtml = p.is_available
     ? '<div class="doc-avail" style="color:#22c55e">● متاح الآن</div>'
