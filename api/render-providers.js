@@ -207,7 +207,7 @@ module.exports = async function handler(req, res) {
 
   // Build providers query — service_type filtered server-side when serviceParam present
   const buildProvidersQuery = () => {
-    let q = `providers?select=*,provider_services(custom_price,sub_services(price_min))&status=eq.active`;
+    let q = `providers?select=*,provider_services(custom_price,sub_services(price_min,price_min_specialist,price_min_consultant))&status=eq.active&provider_services.is_active=eq.true`;
     if (serviceParam) q += `&service_type=eq.${encodeURIComponent(serviceParam)}`;
     if (areaParam) q += `&areas=ilike.*${encodeURIComponent(areaParam)}*`;
     q += `&order=is_available.desc,name.asc`;
@@ -241,9 +241,14 @@ module.exports = async function handler(req, res) {
   (providers || []).forEach(p => {
     if (p.price) return; // already set on the providers row
     const svcs = p.provider_services || [];
+    const isConsultant = (p.grade || '') === 'استشاري';
     let min = null;
     svcs.forEach(ps => {
-      const price = ps.custom_price ?? ps.sub_services?.price_min;
+      const sub = ps.sub_services;
+      const tierPrice = sub
+        ? (isConsultant ? sub.price_min_consultant : sub.price_min_specialist) ?? sub.price_min
+        : null;
+      const price = ps.custom_price ?? tierPrice;
       if (price != null && (min === null || price < min)) min = price;
     });
     p.price = min;
