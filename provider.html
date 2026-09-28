@@ -1529,6 +1529,14 @@ function showToast(msg,type='') {
   setTimeout(()=>t.classList.remove('show'),3500);
 }
 
+window.addEventListener('unhandledrejection', e => {
+  const msg = e.reason?.message || '';
+  if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+    showToast('تعذر الاتصال بالخادم، تحقق من الإنترنت', 'error');
+  }
+  e.preventDefault();
+});
+
 // ============================================================
 // INIT
 // ============================================================

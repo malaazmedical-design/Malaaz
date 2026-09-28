@@ -3287,6 +3287,16 @@ function showBmError(msg) {
 
 
 // ============================================================
+// GLOBAL ERROR HANDLERS
+window.addEventListener('unhandledrejection', e => {
+  const msg = e.reason?.message || '';
+  // تجاهل أخطاء الشبكة الصامتة وأخطاء Supabase غير الحرجة
+  if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+    showToast('تعذر الاتصال بالخادم، تحقق من الإنترنت', 'error');
+  }
+  e.preventDefault();
+});
+
 // TOAST & HELPERS
 // ============================================================
 function showToast(msg, type) {
@@ -3598,8 +3608,14 @@ function closeTrackingMap() {
 // متابعة حالة الحجز العام — لحد ما مقدم خدمة قريب يوافق
 // ============================================================
 function pollBookingStatus(bookingId, phone) {
-  // يفضل يستمر للأبد لغاية ما نوفر مقدم خدمة — مفيش رسالة فشل تظهر للعميل أبداً
+  const MAX_ATTEMPTS = 24; // 2 دقيقة (24 × 5 ثواني)
+  let attempts = 0;
   const interval = setInterval(async () => {
+    attempts++;
+    if (attempts > MAX_ATTEMPTS) {
+      clearInterval(interval);
+      return;
+    }
     try {
       const { data } = await sb.rpc('get_booking_status', { p_booking_id: bookingId, p_phone: phone });
       if (data?.found && data.provider) {
@@ -3612,7 +3628,6 @@ function pollBookingStatus(bookingId, phone) {
         document.getElementById('bm-confirmed-price').textContent =
           data.provider.price ? `${data.provider.price} ج.م` : '';
       }
-      // لو status == cancelled أو لسه pending: نسيب رسالة "جاري توفير مقدم خدمة" ظاهرة وما نوقفش المحاولة
     } catch(e) {}
   }, 5000);
 }
