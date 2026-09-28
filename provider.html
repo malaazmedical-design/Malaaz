@@ -265,15 +265,17 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
       <input class="login-input" type="email" id="r-email" placeholder="البريد الإلكتروني *">
       <input class="login-input" type="password" id="r-pass" placeholder="كلمة المرور *">
       <input class="login-input" type="tel" id="r-phone" placeholder="رقم الموبايل *" dir="ltr">
-      <select class="login-input" id="r-service-type" style="color:#fff;background:rgba(255,255,255,.05)">
+      <select class="login-input" id="r-service-type" style="color:#fff;background:rgba(255,255,255,.05)" onchange="onServiceTypeChange(this.value)">
         <option value="">نوع الخدمة *</option>
         <option value="كشف منزلي">كشف منزلي</option>
         <option value="تمريض منزلي">تمريض منزلي</option>
         <option value="أشعة منزلية">أشعة منزلية</option>
       </select>
-      <select class="login-input" id="r-specialty" style="color:#fff;background:rgba(255,255,255,.05)">
-        <option value="">التخصص *</option>
-      </select>
+      <div id="r-specialty-wrap" style="display:none">
+        <select class="login-input" id="r-specialty" style="color:#fff;background:rgba(255,255,255,.05)">
+          <option value="">التخصص *</option>
+        </select>
+      </div>
       <div id="register-err" style="color:#ff6b6b;font-size:12px;margin-bottom:8px;display:none"></div>
       <button class="login-btn" onclick="doRegister()"><i class="fas fa-user-plus" style="margin-left:8px"></i> إنشاء حساب</button>
       <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:12px">سيتم مراجعة طلبك من الأدمن قبل التفعيل</div>
@@ -563,7 +565,22 @@ function switchLoginTab(tab, btn) {
   btn.classList.add('active');
   document.getElementById('tab-login').style.display    = tab==='login'?'block':'none';
   document.getElementById('tab-register').style.display = tab==='register'?'block':'none';
-  if(tab === 'register') loadSpecialtyOptions();
+  if(tab === 'register') {
+    document.getElementById('r-specialty-wrap').style.display = 'none';
+    document.getElementById('r-service-type').value = '';
+  }
+}
+
+function onServiceTypeChange(val) {
+  const wrap = document.getElementById('r-specialty-wrap');
+  if(val === 'كشف منزلي') {
+    wrap.style.display = '';
+    loadSpecialtyOptions();
+  } else {
+    wrap.style.display = 'none';
+    const sel = document.getElementById('r-specialty');
+    if(sel) sel.value = '';
+  }
 }
 
 async function loadSpecialtyOptions() {
@@ -655,7 +672,8 @@ async function doRegister() {
   const err   = document.getElementById('register-err');
   const btn   = document.querySelector('#tab-register .login-btn');
 
-  if(!name||!email||!pass||!phone||!serviceType||!specialty) { err.textContent='يرجى ملء كل الحقول'; err.style.display='block'; return; }
+  const needSpecialty = serviceType === 'كشف منزلي';
+  if(!name||!email||!pass||!phone||!serviceType||(needSpecialty&&!specialty)) { err.textContent='يرجى ملء كل الحقول'; err.style.display='block'; return; }
   if(pass.length < 6)              { err.textContent='كلمة المرور 6 أحرف على الأقل'; err.style.display='block'; return; }
 
   err.style.display = 'none';
