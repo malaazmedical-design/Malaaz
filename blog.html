@@ -179,8 +179,8 @@ const sb = supabase.createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tc2ljdGJycWxzb2hybXhldXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTc1NzcsImV4cCI6MjA5NTI5MzU3N30.tbFL_7mWZ6qVUtgFkagfSwWdgni5JKRuCR8nbwqIqho'
 );
 
-function goToPost(id) {
-  window.location.href = '/blog-post.html?id=' + id;
+function goToPost(id, slug) {
+  window.location.href = slug ? '/مقالات/' + slug : '/blog-post.html?id=' + id;
 }
 
 function formatDate(d) {
@@ -202,7 +202,7 @@ async function loadPosts() {
     if(data?.length) {
       const f = data[0];
       featWrap.innerHTML = `
-        <a href="/blog-post.html?id=${f.id}" class="featured-card">
+        <a href="${f.slug ? '/مقالات/' + f.slug : '/blog-post.html?id=' + f.id}" class="featured-card">
           <div class="feat-img">${f.emoji || '📝'}</div>
           <div class="feat-body">
             <span class="feat-tag">${f.category || 'طبي'}</span>
@@ -223,7 +223,7 @@ async function loadPosts() {
     const grid = document.getElementById('articles-grid');
     if(data?.length > 1) {
       grid.innerHTML = data.slice(1).map(p => `
-        <a href="/blog-post.html?id=${p.id}" class="article-card">
+        <a href="${p.slug ? '/مقالات/' + p.slug : '/blog-post.html?id=' + p.id}" class="article-card">
           <div class="art-thumb">
             ${p.emoji || '📝'}
             <span class="art-tag">${p.category || 'طبي'}</span>
@@ -249,8 +249,8 @@ async function loadPosts() {
   }
 }
 
-function sharePost(id, title) {
-  const url  = window.location.origin + '/blog-post.html?id=' + id;
+function sharePost(id, title, slug) {
+  const url  = window.location.origin + (slug ? '/مقالات/' + slug : '/blog-post.html?id=' + id);
   const text = '📖 ' + title + '\n' + url;
   if (navigator.share) {
     navigator.share({ title, url });

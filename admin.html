@@ -2497,6 +2497,12 @@ async function loadBlogPosts() {
   }
 }
 
+function autoSlug() {
+  const title = document.getElementById('bm-title').value;
+  const slug = title.trim().replace(/\s+/g,'-').replace(/[^؀-ۿa-z0-9\-]/gi,'').toLowerCase();
+  document.getElementById('bm-slug').value = slug;
+}
+
 function openBlogModal(post) {
   post = post || null;
   document.getElementById('bm-id').value = post?.id || '';
@@ -2507,6 +2513,7 @@ function openBlogModal(post) {
   document.getElementById('bm-content').value = post?.content || '';
   document.getElementById('bm-status').value = post?.status || 'published';
   document.getElementById('bm-emoji').value = post?.emoji || '📝';
+  document.getElementById('bm-slug').value = post?.slug || '';
   document.getElementById('blog-modal-title').textContent = post ? 'تعديل المقال' : 'مقال جديد';
   document.getElementById('blog-modal').style.display = 'flex';
 }
@@ -2537,7 +2544,8 @@ async function saveBlogPost() {
     return;
   }
 
-  const payload = { title, category, read_time: readTime, summary, content, status, emoji };
+  const slug = document.getElementById('bm-slug').value.trim() || title.replace(/\s+/g,'-').replace(/[^؀-ۿa-z0-9\-]/gi,'').toLowerCase();
+  const payload = { title, slug, category, read_time: readTime, summary, content, status, emoji };
 
   try {
     if(id) {
@@ -2660,7 +2668,12 @@ async function sendBroadcast() {
       <div class="form-grid">
         <div class="form-group" style="grid-column:1/-1">
           <div class="form-label">عنوان المقال *</div>
-          <input class="form-input" id="bm-title" placeholder="مثال: متى يجب استدعاء طبيب للمنزل؟">
+          <input class="form-input" id="bm-title" placeholder="مثال: متى يجب استدعاء طبيب للمنزل؟" oninput="autoSlug()">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <div class="form-label">الرابط (Slug) — للـ SEO</div>
+          <input class="form-input" id="bm-slug" placeholder="مثال: متى-يجب-استدعاء-طبيب-للمنزل" dir="ltr" style="font-family:monospace;font-size:13px">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">يتملأ تلقائياً من العنوان — يمكنك تعديله</div>
         </div>
         <div class="form-group">
           <div class="form-label">الفئة *</div>
