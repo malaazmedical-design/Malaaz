@@ -584,7 +584,7 @@ h1 span.accent{color:var(--accent);}
 .svc-range-val{font-size:15px;font-weight:900;color:var(--accent);margin-top:2px;}
 
 /* Coverage */
-.coverage-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.coverage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
 .coverage-card{background:linear-gradient(180deg,#fff,#fdfcfa);border:1px solid var(--border);border-radius:24px;padding:28px;box-shadow:0 4px 24px rgba(58,74,78,.04);}
 .coverage-card-head{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px dashed var(--border);margin-bottom:18px;}
 .coverage-city-icon{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#d4b65e);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 4px 12px rgba(201,168,76,.3);}
@@ -871,6 +871,20 @@ footer{background:#161f22;padding:50px 0 30px;border-top:1px solid rgba(255,255,
       <!-- يُملأ من Supabase -->
     </div>
     </div><!-- /.w -->
+  </section>
+
+  <!-- COVERAGE -->
+  <section class="section" id="coverage-section" aria-labelledby="coverage-heading">
+    <div class="w">
+      <div class="section-header" style="text-align:center">
+        <div class="section-tag">مناطق التغطية</div>
+        <h2 class="section-title" id="coverage-heading">نصلك أينما كنت<br><span>في مصر</span></h2>
+        <p style="color:var(--muted);font-size:15px;margin-top:8px">اختر محافظتك واستعرض المناطق المغطاة</p>
+      </div>
+      <div id="coverage-grid" class="coverage-grid" style="margin-top:32px">
+        <div style="text-align:center;padding:40px;color:var(--muted);grid-column:1/-1">جاري التحميل...</div>
+      </div>
+    </div>
   </section>
 
   <!-- APP DOWNLOAD -->
@@ -1805,35 +1819,65 @@ async function loadHomeDoctors() {
 }
 
 async function loadAreas() {
-  const { data } = await sb.from('coverage_areas').select('*').eq('is_active', true).order('name');
-  if (!data) return;
-  const cairo = data.filter(a => a.city === 'القاهرة');
-  const giza  = data.filter(a => a.city === 'الجيزة');
-  function renderAreaGroup(list, el, countEl) {
-    if (!el) return;
-    if (!list.length) { el.innerHTML = '<span style="color:var(--muted)">لا توجد مناطق</span>'; return; }
-    const SHOW = 5;
-    const vis  = list.slice(0, SHOW);
-    const rest = list.slice(SHOW);
-    let html = vis.map(a => `<span class="area-tag">${sanitize(a.name)}</span>`).join('');
-    if (rest.length) {
-      html += rest.map(a => `<span class="area-tag area-tag-extra" style="display:none">${sanitize(a.name)}</span>`).join('');
-      html += `<button class="area-more-btn" onclick="toggleAreas(this,${rest.length})">+ عرض المزيد (${rest.length}) ▼</button>`;
+  const [areasRes, govRes] = await Promise.all([
+    sb.from('coverage_areas').select('*').eq('is_active', true).order('city').order('name'),
+    sb.from('governorates').select('*')
+  ]);
+  const data = areasRes.data || [];
+
+  // Build set of disabled governorates
+  const disabledGovs = new Set(
+    (govRes.data || []).filter(g => g.is_active === false).map(g => g.name)
+  );
+
+  // Group areas by city, excluding disabled governorates
+  const byCity = {};
+  data.forEach(a => {
+    if (disabledGovs.has(a.city)) return;
+    if (!byCity[a.city]) byCity[a.city] = [];
+    byCity[a.city].push(a);
+  });
+
+  // Render coverage section
+  const grid = document.getElementById('coverage-grid');
+  const cities = Object.keys(byCity).sort();
+  if (grid) {
+    if (!cities.length) {
+      grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);grid-column:1/-1">لا توجد مناطق مفعّلة حالياً</div>';
+    } else {
+      const SHOW = 6;
+      grid.innerHTML = cities.map(city => {
+        const list = byCity[city];
+        const vis  = list.slice(0, SHOW);
+        const rest = list.slice(SHOW);
+        const govKey = city.replace(/\s/g,'_');
+        let areasHtml = vis.map(a => `<span class="area-tag">${sanitize(a.name)}</span>`).join('');
+        if (rest.length) {
+          areasHtml += rest.map(a => `<span class="area-tag area-tag-extra" style="display:none">${sanitize(a.name)}</span>`).join('');
+          areasHtml += `<button class="area-more-btn" onclick="toggleAreas(this,${rest.length})">+ عرض المزيد (${rest.length}) ▼</button>`;
+        }
+        return `<div class="coverage-card">
+          <div class="coverage-card-head">
+            <div class="coverage-city-icon">📍</div>
+            <div>
+              <div class="coverage-city-name">${sanitize(city)}</div>
+              <div class="coverage-city-count">${list.length} منطقة تغطية</div>
+            </div>
+          </div>
+          <div class="coverage-areas">${areasHtml}</div>
+        </div>`;
+      }).join('');
     }
-    el.innerHTML = html;
-    if (countEl) countEl.textContent = `${list.length} منطقة تغطية`;
   }
-  renderAreaGroup(cairo, document.getElementById('lp-areas-cairo'), document.getElementById('lp-count-cairo'));
-  renderAreaGroup(giza,  document.getElementById('lp-areas-giza'),  document.getElementById('lp-count-giza'));
 
   // ملء مناطق الـ booking modal
   const areaSelect = document.getElementById('bm-area');
   if (areaSelect) {
     areaSelect.innerHTML = '<option value="">اختر المنطقة *</option>';
-    data.forEach(a => {
+    data.filter(a => !disabledGovs.has(a.city)).forEach(a => {
       const opt = document.createElement('option');
       opt.value = sanitize(a.name);
-      opt.textContent = sanitize(a.name);
+      opt.textContent = `${sanitize(a.name)} — ${sanitize(a.city)}`;
       areaSelect.appendChild(opt);
     });
   }
