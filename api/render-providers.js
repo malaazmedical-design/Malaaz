@@ -215,11 +215,12 @@ module.exports = async function handler(req, res) {
   };
 
   // Parallel fetches
-  let [providers, reviews, areas, xraySubs] = await Promise.all([
+  let [providers, reviews, areas, xraySubs, provSvcPrices] = await Promise.all([
     supaFetch(buildProvidersQuery()),
     supaFetch(`reviews?select=provider_id,rating&is_approved=eq.true`),
     supaFetch(`coverage_areas?select=name,city&is_active=eq.true&order=name`),
     supaFetch(`sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`),
+    supaFetch(`provider_services?select=provider_id,custom_price,sub_services(price_min)&is_active=eq.true`),
   ]);
 
   // Sub-service filter (xray type or nursing type)
@@ -236,6 +237,20 @@ module.exports = async function handler(req, res) {
       }
     } catch(e) { /* keep all providers if sub-service lookup fails */ }
   }
+
+  // Attach minimum price per provider
+  const minPriceMap = {};
+  (provSvcPrices || []).forEach(ps => {
+    if (!ps.provider_id) return;
+    const price = ps.custom_price ?? ps.sub_services?.price_min;
+    if (price == null) return;
+    if (!minPriceMap[ps.provider_id] || price < minPriceMap[ps.provider_id]) {
+      minPriceMap[ps.provider_id] = price;
+    }
+  });
+  (providers || []).forEach(p => {
+    if (!p.price) p.price = minPriceMap[p.id] ?? null;
+  });
 
   // Attach ratings
   const ratingMap = {};
