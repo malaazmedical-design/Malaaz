@@ -1801,6 +1801,8 @@ async function loadHomeDoctors() {
   } catch(e){}
   docs.sort((a,b) => (b.realRating||0)-(a.realRating||0) || (b.reviewCount||0)-(a.reviewCount||0));
   docs = docs.slice(0, 3);
+  // merge into allDocs so button handlers (openProviderBookingById / viewProviderProfile) can find them
+  docs.forEach(p => { if (!allDocs.find(d => d.id === p.id)) allDocs.push(p); });
   grid.innerHTML = docs.map((p, i) => renderDocCard(p, i)).join('');
 }
 
