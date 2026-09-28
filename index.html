@@ -2950,6 +2950,7 @@ function selectPayment(el, method) {
 // ============================================================
 async function openProviderBooking(provData) {
   const provider = allDocs.find(p => p.id === provData.id) || provData;
+  try { if(typeof fbq==='function') fbq('track','ViewContent',{content_name: provider.name, content_category: provider.service_type||'provider', value: provider.price||0, currency:'EGP'}); } catch(e){}
 
   // جلب الخدمات الفرعية التي يقدمها هذا المقدم وأسعاره الخاصة
   let provSvcs = [];
@@ -3123,6 +3124,8 @@ async function bmSubmit() {
   if (!area)    { showBmError('⚠️ اختر منطقتك'); return; }
   if (!address) { showBmError('⚠️ أدخل العنوان أو اضغط "📍 موقعي"'); return; }
   if (!time)    { showBmError('⚠️ اختر الفترة المناسبة'); return; }
+
+  try { if(typeof fbq==='function') fbq('track','Lead',{content_name: bmSelectedService||'booking', content_category:'booking_form'}); } catch(e){}
 
   const btn = document.getElementById('bm-submit-btn');
   btn.disabled = true;
