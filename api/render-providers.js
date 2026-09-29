@@ -767,23 +767,34 @@ async function onServiceChange(applyFilter = true) {
 function doSearch(e) {
   e.preventDefault();
   const area = document.getElementById('s-area').value;
+  const svc  = document.getElementById('s-service').value;
+  const name = document.getElementById('s-name').value.trim();
+  const spec = document.getElementById('s-spec')?.value || '';
+  const grade = document.getElementById('s-grade')?.value || '';
+  const xrayType = document.getElementById('s-xray-type')?.value || '';
+  const nursingType = document.getElementById('s-nursing-type')?.value || '';
+
+  const areaSlug = area ? area.replace(/\s+/g, '-') : '';
+  const svcSlug = svc === 'كشف منزلي' ? 'كشف-منزلي'
+    : svc === 'تمريض منزلي' ? 'تمريض-منزلي'
+    : svc === 'أشعة منزلية' ? 'أشعة-منزلية' : '';
+
+  // Clean URL for main services (no extra filters)
+  if (svcSlug && !name && !spec && !grade && !xrayType && !nursingType) {
+    location.href = areaSlug ? `/${svcSlug}/${areaSlug}` : `/${svcSlug}`;
+    return;
+  }
+
+  // Fallback: query params for sub-specialties / extra filters
   const base = '/مقدمو-الخدمة';
   const params = new URLSearchParams();
-  const svc = document.getElementById('s-service').value;
-  const name = document.getElementById('s-name').value.trim();
   if (svc) params.set('service', svc);
   if (name) params.set('q', name);
-  const spec = document.getElementById('s-spec')?.value;
   if (spec) params.set('spec', spec);
-  const grade = document.getElementById('s-grade')?.value;
   if (grade) params.set('grade', grade);
-  const xrayType = document.getElementById('s-xray-type')?.value;
-  if (xrayType) params.set('sub', xrayType);
-  const nursingType = document.getElementById('s-nursing-type')?.value;
-  if (nursingType) params.set('sub', nursingType);
+  if (xrayType || nursingType) params.set('sub', xrayType || nursingType);
   const qs = params.toString();
-  const url = area ? base + '/' + encodeURIComponent(area) + (qs?'?'+qs:'') : base + (qs?'?'+qs:'');
-  location.href = url;
+  location.href = areaSlug ? `${base}/${areaSlug}${qs?'?'+qs:''}` : `${base}${qs?'?'+qs:''}`;
 }
 
 function clearSearch() {
