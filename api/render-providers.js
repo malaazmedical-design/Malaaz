@@ -624,8 +624,16 @@ __BOOKING_CSS__
 ${serviceSlug && areas && areas.length ? (() => {
   const cairoAreas = areas.filter(a=>a.city==='القاهرة'&&a.name!==areaParam);
   const gizaAreas  = areas.filter(a=>a.city==='الجيزة'&&a.name!==areaParam);
-  const chipStyle  = 'display:inline-block;padding:7px 16px;background:#fff;border:1px solid rgba(45,59,62,.15);border-radius:20px;font-size:13px;color:#2d3b3e;text-decoration:none;font-weight:500;white-space:nowrap;transition:border-color .2s;';
-  const renderChips = (list) => list.map(a=>`<a href="/${serviceSlug}/${encodeURIComponent(a.name)}" style="${chipStyle}">${esc(a.name)}</a>`).join('');
+  const SHOW = 3;
+  const chipStyle = 'display:inline-block;padding:7px 16px;background:#fff;border:1px solid rgba(45,59,62,.15);border-radius:20px;font-size:13px;color:#2d3b3e;text-decoration:none;font-weight:500;white-space:nowrap;';
+  const renderGroup = (list, id) => {
+    const visible = list.slice(0, SHOW);
+    const hidden  = list.slice(SHOW);
+    const chips = (arr) => arr.map(a=>`<a href="/${serviceSlug}/${encodeURIComponent(a.name)}" style="${chipStyle}">${esc(a.name)}</a>`).join('');
+    return `${chips(visible)}${hidden.length ? `
+      <span id="${id}-more" style="display:none;">${chips(hidden)}</span>
+      <button onclick="var m=document.getElementById('${id}-more');var b=document.getElementById('${id}-btn');m.style.display=m.style.display==='none'?'contents':'none';b.textContent=m.style.display==='none'?'عرض المزيد (${hidden.length}+)':'عرض أقل';" id="${id}-btn" style="display:inline-block;padding:7px 16px;background:transparent;border:1px dashed rgba(45,59,62,.3);border-radius:20px;font-size:13px;color:#8a9499;cursor:pointer;font-weight:500;white-space:nowrap;">عرض المزيد (${hidden.length}+)</button>` : ''}`;
+  };
   return `
 <section style="padding:36px 20px 40px;background:#f7f8f9;border-top:1px solid rgba(45,59,62,.07);">
   <div style="max-width:960px;margin:0 auto;">
@@ -633,12 +641,12 @@ ${serviceSlug && areas && areas.length ? (() => {
     ${cairoAreas.length ? `
     <div style="margin-bottom:18px;">
       <div style="font-size:12px;font-weight:600;color:#8a9499;text-align:right;margin-bottom:10px;letter-spacing:.5px;">القاهرة</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;">${renderChips(cairoAreas)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;">${renderGroup(cairoAreas,'cairo')}</div>
     </div>` : ''}
     ${gizaAreas.length ? `
     <div>
       <div style="font-size:12px;font-weight:600;color:#8a9499;text-align:right;margin-bottom:10px;letter-spacing:.5px;">الجيزة</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;">${renderChips(gizaAreas)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;">${renderGroup(gizaAreas,'giza')}</div>
     </div>` : ''}
   </div>
 </section>`;
