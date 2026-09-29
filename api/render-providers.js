@@ -781,7 +781,7 @@ function doSearch(e) {
 
   // Clean URL for main services (no extra filters)
   if (svcSlug && !name && !spec && !grade && !xrayType && !nursingType) {
-    location.href = areaSlug ? `/${svcSlug}/${areaSlug}` : `/${svcSlug}`;
+    location.href = areaSlug ? '/' + svcSlug + '/' + areaSlug : '/' + svcSlug;
     return;
   }
 
@@ -794,7 +794,7 @@ function doSearch(e) {
   if (grade) params.set('grade', grade);
   if (xrayType || nursingType) params.set('sub', xrayType || nursingType);
   const qs = params.toString();
-  location.href = areaSlug ? `${base}/${areaSlug}${qs?'?'+qs:''}` : `${base}${qs?'?'+qs:''}`;
+  location.href = areaSlug ? base + '/' + areaSlug + (qs ? '?' + qs : '') : base + (qs ? '?' + qs : '');
 }
 
 function clearSearch() {
