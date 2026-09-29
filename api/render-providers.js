@@ -215,12 +215,13 @@ module.exports = async function handler(req, res) {
   };
 
   // Parallel fetches
-  let [providers, reviews, areas, xraySubs, activeSvcPrices] = await Promise.all([
+  let [providers, reviews, areas, xraySubs, activeSvcPrices, doctorSubs] = await Promise.all([
     supaFetch(buildProvidersQuery()),
     supaFetch(`reviews?select=provider_id,rating&is_approved=eq.true`),
     supaFetch(`coverage_areas?select=name,city&is_active=eq.true&order=name`),
     supaFetch(`sub_services?select=name&service_name=eq.أشعة منزلية&is_active=eq.true&order=name`),
     supaFetch(`provider_services?select=provider_id,custom_price,sub_services(price_min,price_min_specialist,price_min_consultant)&is_active=eq.true`),
+    supaFetch(`sub_services?select=name&service_name=eq.كشف منزلي&is_active=eq.true&order=name`),
   ]);
 
   // Sub-service filter (xray type or nursing type)
@@ -649,6 +650,29 @@ ${serviceSlug && areas && areas.length ? (() => {
       <div style="font-size:12px;font-weight:600;color:#8a9499;text-align:right;margin-bottom:10px;letter-spacing:.5px;">الجيزة</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;">${renderGroup(gizaAreas,'giza')}</div>
     </div>` : ''}
+  </div>
+</section>`;
+})() : ''}
+
+<!-- INTERNAL SPECIALTY LINKS (SEO crawlable) -->
+${isVisit && doctorSubs && doctorSubs.length ? (() => {
+  const SHOW = 5;
+  const chipStyle = 'display:inline-block;padding:7px 16px;background:#fff;border:1px solid rgba(45,59,62,.15);border-radius:20px;font-size:13px;color:#2d3b3e;text-decoration:none;font-weight:500;white-space:nowrap;';
+  const makeUrl = (sub) => areaParam
+    ? '/مقدمو-الخدمة/' + encodeURIComponent(areaParam) + '?service=' + encodeURIComponent('كشف منزلي') + '&sub=' + encodeURIComponent(sub.name)
+    : '/مقدمو-الخدمة?service=' + encodeURIComponent('كشف منزلي') + '&sub=' + encodeURIComponent(sub.name);
+  const visible = doctorSubs.slice(0, SHOW);
+  const hidden  = doctorSubs.slice(SHOW);
+  const chips = (arr) => arr.map(s=>'<a href="' + makeUrl(s) + '" style="' + chipStyle + '">د. ' + esc(s.name) + '</a>').join('');
+  return `
+<section style="padding:36px 20px 40px;background:#fff;border-top:1px solid rgba(45,59,62,.07);">
+  <div style="max-width:960px;margin:0 auto;">
+    <h2 style="font-size:16px;font-weight:700;color:#2d3b3e;margin:0 0 16px;text-align:right;">احجز دكتور حسب التخصص</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;">
+      ${chips(visible)}${hidden.length ? `
+      <span id="spec-more" style="display:none;">${chips(hidden)}</span>
+      <button onclick="var m=document.getElementById('spec-more');var b=document.getElementById('spec-btn');m.style.display=m.style.display==='none'?'contents':'none';b.textContent=m.style.display==='none'?'عرض المزيد (${hidden.length}+)':'عرض أقل';" id="spec-btn" style="display:inline-block;padding:7px 16px;background:transparent;border:1px dashed rgba(45,59,62,.3);border-radius:20px;font-size:13px;color:#8a9499;cursor:pointer;font-weight:500;white-space:nowrap;">عرض المزيد (${hidden.length}+)</button>` : ''}
+    </div>
   </div>
 </section>`;
 })() : ''}
