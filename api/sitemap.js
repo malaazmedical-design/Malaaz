@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
     { loc: `${BASE_URL}/تمريض-منزلي`,         lastmod: '2026-09-29', changefreq: 'daily',   priority: '0.90' },
     { loc: `${BASE_URL}/أشعة-منزلية`,         lastmod: '2026-09-29', changefreq: 'daily',   priority: '0.90' },
     { loc: `${BASE_URL}/faq.html`,             lastmod: '2026-08-17', changefreq: 'monthly', priority: '0.7' },
-    { loc: `${BASE_URL}/blog.html`,            lastmod: '2026-08-17', changefreq: 'weekly',  priority: '0.8' },
+    { loc: `${BASE_URL}/%D9%85%D9%82%D8%A7%D9%84%D8%A7%D8%AA`,  lastmod: '2026-09-29', changefreq: 'weekly',  priority: '0.8' },
     { loc: `${BASE_URL}/privacy.html`,         lastmod: '2026-08-17', changefreq: 'yearly',  priority: '0.4' },
     { loc: `${BASE_URL}/delete-account.html`,  lastmod: '2026-08-17', changefreq: 'yearly',  priority: '0.3' },
   ];
