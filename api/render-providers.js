@@ -620,6 +620,17 @@ __BOOKING_CSS__
 
 <!-- provider-profile-modal injected dynamically by viewProfile() -->
 
+<!-- INTERNAL AREA LINKS (SEO crawlable) -->
+${serviceSlug && areas && areas.length ? `
+<section class="area-links-section" style="padding:40px 20px;background:var(--off-white,#f8f9fa);border-top:1px solid rgba(45,59,62,.08);">
+  <div style="max-width:960px;margin:0 auto;">
+    <h2 style="font-size:17px;font-weight:700;color:var(--dark);margin:0 0 18px;text-align:right;">${serviceLabel} في مناطق أخرى</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;">
+      ${areas.filter(a=>a.name!==areaParam).map(a=>`<a href="/${serviceSlug}/${encodeURIComponent(a.name)}" style="display:inline-block;padding:8px 16px;background:#fff;border:1px solid rgba(45,59,62,.18);border-radius:20px;font-size:14px;color:var(--dark);text-decoration:none;font-weight:500;">${esc(a.name)}</a>`).join('')}
+    </div>
+  </div>
+</section>` : ''}
+
 <!-- BOOKING MODAL injected at runtime -->
 __BOOKING_HTML__
 
@@ -635,9 +646,9 @@ __BOOKING_HTML__
     </div>
     <div class="footer-col">
       <h4>الخدمات</h4>
-      <a href="/">كشف منزلي</a>
-      <a href="/">تمريض منزلي</a>
-      <a href="/">أشعة منزلية</a>
+      <a href="/كشف-منزلي">كشف منزلي</a>
+      <a href="/تمريض-منزلي">تمريض منزلي</a>
+      <a href="/أشعة-منزلية">أشعة منزلية</a>
     </div>
     <div class="footer-col">
       <h4>المنصة</h4>
