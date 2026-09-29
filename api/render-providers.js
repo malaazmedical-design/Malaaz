@@ -622,60 +622,48 @@ __BOOKING_CSS__
 
 <!-- provider-profile-modal injected dynamically by viewProfile() -->
 
-<!-- INTERNAL AREA LINKS (SEO crawlable) -->
-${serviceSlug && areas && areas.length ? (() => {
-  const cairoAreas = areas.filter(a=>a.city==='القاهرة'&&a.name!==areaParam);
-  const gizaAreas  = areas.filter(a=>a.city==='الجيزة'&&a.name!==areaParam);
-  const SHOW = 3;
-  const chipStyle = 'display:inline-block;padding:7px 16px;background:#fff;border:1px solid rgba(45,59,62,.15);border-radius:20px;font-size:13px;color:#2d3b3e;text-decoration:none;font-weight:500;white-space:nowrap;';
-  const renderGroup = (list, id) => {
-    const visible = list.slice(0, SHOW);
-    const hidden  = list.slice(SHOW);
-    const chips = (arr) => arr.map(a=>`<a href="/${serviceSlug}/${areaSlug(a.name)}" style="${chipStyle}">${esc(a.name)}</a>`).join('');
-    return `${chips(visible)}${hidden.length ? `
-      <span id="${id}-more" style="display:none;">${chips(hidden)}</span>
-      <button onclick="var m=document.getElementById('${id}-more');var b=document.getElementById('${id}-btn');m.style.display=m.style.display==='none'?'contents':'none';b.textContent=m.style.display==='none'?'عرض المزيد (${hidden.length}+)':'عرض أقل';" id="${id}-btn" style="display:inline-block;padding:7px 16px;background:transparent;border:1px dashed rgba(45,59,62,.3);border-radius:20px;font-size:13px;color:#8a9499;cursor:pointer;font-weight:500;white-space:nowrap;">عرض المزيد (${hidden.length}+)</button>` : ''}`;
-  };
-  return `
-<section style="padding:36px 20px 40px;background:#f7f8f9;border-top:1px solid rgba(45,59,62,.07);">
-  <div style="max-width:960px;margin:0 auto;">
-    <h2 style="font-size:16px;font-weight:700;color:#2d3b3e;margin:0 0 20px;text-align:right;">${serviceLabel} في مناطق أخرى</h2>
-    ${cairoAreas.length ? `
-    <div style="margin-bottom:18px;">
-      <div style="font-size:12px;font-weight:600;color:#8a9499;text-align:right;margin-bottom:10px;letter-spacing:.5px;">القاهرة</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;">${renderGroup(cairoAreas,'cairo')}</div>
-    </div>` : ''}
-    ${gizaAreas.length ? `
-    <div>
-      <div style="font-size:12px;font-weight:600;color:#8a9499;text-align:right;margin-bottom:10px;letter-spacing:.5px;">الجيزة</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;">${renderGroup(gizaAreas,'giza')}</div>
-    </div>` : ''}
-  </div>
-</section>`;
-})() : ''}
+<!-- INTERNAL LINKS: AREAS + SPECIALTIES SIDE BY SIDE -->
+${(() => {
+  const chipStyle = 'display:inline-block;padding:7px 14px;background:#fff;border:1px solid rgba(45,59,62,.15);border-radius:20px;font-size:13px;color:#2d3b3e;text-decoration:none;font-weight:500;white-space:nowrap;';
+  const moreBtn = (id, count) => '<button onclick="var m=document.getElementById(\'' + id + '-more\');var b=document.getElementById(\'' + id + '-btn\');m.style.display=m.style.display===\'none\'?\'contents\':\'none\';b.textContent=m.style.display===\'none\'?\'عرض المزيد (' + count + '+)\':\'عرض أقل\';" id="' + id + '-btn" style="display:inline-block;padding:7px 14px;background:transparent;border:1px dashed rgba(45,59,62,.3);border-radius:20px;font-size:13px;color:#8a9499;cursor:pointer;font-weight:500;white-space:nowrap;">عرض المزيد (' + count + '+)</button>';
 
-<!-- INTERNAL SPECIALTY LINKS (SEO crawlable) -->
-${isVisit && doctorSubs && doctorSubs.length ? (() => {
-  const SHOW = 5;
-  const chipStyle = 'display:inline-block;padding:7px 16px;background:#fff;border:1px solid rgba(45,59,62,.15);border-radius:20px;font-size:13px;color:#2d3b3e;text-decoration:none;font-weight:500;white-space:nowrap;';
-  const makeUrl = (sub) => areaParam
-    ? '/مقدمو-الخدمة/' + encodeURIComponent(areaParam) + '?service=' + encodeURIComponent('كشف منزلي') + '&sub=' + encodeURIComponent(sub.name)
-    : '/مقدمو-الخدمة?service=' + encodeURIComponent('كشف منزلي') + '&sub=' + encodeURIComponent(sub.name);
-  const visible = doctorSubs.slice(0, SHOW);
-  const hidden  = doctorSubs.slice(SHOW);
-  const chips = (arr) => arr.map(s=>'<a href="' + makeUrl(s) + '" style="' + chipStyle + '">د. ' + esc(s.name) + '</a>').join('');
+  // AREAS column
+  let areasHtml = '';
+  if (serviceSlug && areas && areas.length) {
+    const SHOW = 4;
+    const cairoAreas = areas.filter(a=>a.city==='القاهرة'&&a.name!==areaParam);
+    const gizaAreas  = areas.filter(a=>a.city==='الجيزة'&&a.name!==areaParam);
+    const aChips = (arr) => arr.map(a=>'<a href="/' + serviceSlug + '/' + areaSlug(a.name) + '" style="' + chipStyle + '">' + esc(a.name) + '</a>').join('');
+    const renderGroup = (list, id, label) => {
+      if (!list.length) return '';
+      const vis = list.slice(0,SHOW), hid = list.slice(SHOW);
+      return '<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:600;color:#8a9499;text-align:right;margin-bottom:8px;">' + label + '</div><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;align-items:center;">' + aChips(vis) + (hid.length ? '<span id="' + id + '-more" style="display:none;">' + aChips(hid) + '</span>' + moreBtn(id, hid.length) : '') + '</div></div>';
+    };
+    areasHtml = '<div><h2 style="font-size:15px;font-weight:700;color:#2d3b3e;margin:0 0 16px;text-align:right;">' + serviceLabel + ' في مناطق أخرى</h2>' + renderGroup(cairoAreas,'cairo','القاهرة') + renderGroup(gizaAreas,'giza','الجيزة') + '</div>';
+  }
+
+  // SPECIALTIES column
+  let specsHtml = '';
+  if (isVisit && doctorSubs && doctorSubs.length) {
+    const SHOW = 6;
+    const makeUrl = (s) => areaParam
+      ? '/مقدمو-الخدمة/' + encodeURIComponent(areaParam) + '?service=كشف+منزلي&sub=' + encodeURIComponent(s.name)
+      : '/مقدمو-الخدمة?service=كشف+منزلي&sub=' + encodeURIComponent(s.name);
+    const sChips = (arr) => arr.map(s=>'<a href="' + makeUrl(s) + '" style="' + chipStyle + '">د. ' + esc(s.name) + '</a>').join('');
+    const vis = doctorSubs.slice(0,SHOW), hid = doctorSubs.slice(SHOW);
+    specsHtml = '<div><h2 style="font-size:15px;font-weight:700;color:#2d3b3e;margin:0 0 16px;text-align:right;">احجز حسب التخصص</h2><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;align-items:center;">' + sChips(vis) + (hid.length ? '<span id="spec-more" style="display:none;">' + sChips(hid) + '</span>' + moreBtn('spec', hid.length) : '') + '</div></div>';
+  }
+
+  if (!areasHtml && !specsHtml) return '';
+  const bothCols = areasHtml && specsHtml;
   return `
-<section style="padding:36px 20px 40px;background:#fff;border-top:1px solid rgba(45,59,62,.07);">
-  <div style="max-width:960px;margin:0 auto;">
-    <h2 style="font-size:16px;font-weight:700;color:#2d3b3e;margin:0 0 16px;text-align:right;">احجز دكتور حسب التخصص</h2>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;">
-      ${chips(visible)}${hidden.length ? `
-      <span id="spec-more" style="display:none;">${chips(hidden)}</span>
-      <button onclick="var m=document.getElementById('spec-more');var b=document.getElementById('spec-btn');m.style.display=m.style.display==='none'?'contents':'none';b.textContent=m.style.display==='none'?'عرض المزيد (${hidden.length}+)':'عرض أقل';" id="spec-btn" style="display:inline-block;padding:7px 16px;background:transparent;border:1px dashed rgba(45,59,62,.3);border-radius:20px;font-size:13px;color:#8a9499;cursor:pointer;font-weight:500;white-space:nowrap;">عرض المزيد (${hidden.length}+)</button>` : ''}
-    </div>
+<section style="padding:36px 20px 44px;background:#f7f8f9;border-top:1px solid rgba(45,59,62,.07);">
+  <div style="max-width:960px;margin:0 auto;${bothCols ? 'display:grid;grid-template-columns:1fr 1fr;gap:40px;' : ''}">
+    ${specsHtml}
+    ${areasHtml}
   </div>
 </section>`;
-})() : ''}
+})()}
 
 <!-- BOOKING MODAL injected at runtime -->
 __BOOKING_HTML__
