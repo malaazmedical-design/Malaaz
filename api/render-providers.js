@@ -200,7 +200,7 @@ function buildCard(p) {
 }
 
 module.exports = async function handler(req, res) {
-  const areaParam = decodeURIComponent(req.query.area || '').trim();
+  const areaParam = decodeURIComponent(req.query.area || '').trim().replace(/-/g, ' ');
   const serviceParam = req.query.service || '';
   const subParam = req.query.sub ? decodeURIComponent(req.query.sub) : '';
   const today = new Date().toISOString().split('T')[0];
@@ -358,9 +358,10 @@ module.exports = async function handler(req, res) {
     : serviceParam === 'تمريض منزلي' ? 'تمريض-منزلي'
     : serviceParam === 'أشعة منزلية' ? 'أشعة-منزلية'
     : '';
+  const areaSlug = (name) => encodeURIComponent(name.replace(/\s+/g, '-'));
   let canonicalUrl;
   if (serviceSlug && areaParam)
-    canonicalUrl = `${BASE_URL}/${serviceSlug}/${encodeURIComponent(areaParam)}`;
+    canonicalUrl = `${BASE_URL}/${serviceSlug}/${areaSlug(areaParam)}`;
   else if (serviceSlug)
     canonicalUrl = `${BASE_URL}/${serviceSlug}`;
   else if (subParam && areaParam)
@@ -629,7 +630,7 @@ ${serviceSlug && areas && areas.length ? (() => {
   const renderGroup = (list, id) => {
     const visible = list.slice(0, SHOW);
     const hidden  = list.slice(SHOW);
-    const chips = (arr) => arr.map(a=>`<a href="/${serviceSlug}/${encodeURIComponent(a.name)}" style="${chipStyle}">${esc(a.name)}</a>`).join('');
+    const chips = (arr) => arr.map(a=>`<a href="/${serviceSlug}/${areaSlug(a.name)}" style="${chipStyle}">${esc(a.name)}</a>`).join('');
     return `${chips(visible)}${hidden.length ? `
       <span id="${id}-more" style="display:none;">${chips(hidden)}</span>
       <button onclick="var m=document.getElementById('${id}-more');var b=document.getElementById('${id}-btn');m.style.display=m.style.display==='none'?'contents':'none';b.textContent=m.style.display==='none'?'عرض المزيد (${hidden.length}+)':'عرض أقل';" id="${id}-btn" style="display:inline-block;padding:7px 16px;background:transparent;border:1px dashed rgba(45,59,62,.3);border-radius:20px;font-size:13px;color:#8a9499;cursor:pointer;font-weight:500;white-space:nowrap;">عرض المزيد (${hidden.length}+)</button>` : ''}`;

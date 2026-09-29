@@ -48,7 +48,7 @@ module.exports = async function handler(req, res) {
 
   const areaEntries = areas.flatMap(a => {
     const lastmod = (a.updated_at || '').split('T')[0] || '2026-09-27';
-    const areaSlug = encodeURIComponent(a.name);
+    const areaSlug = encodeURIComponent(a.name.replace(/\s+/g, '-'));
     const providerAreaUrl = `  <url>\n    <loc>${BASE_URL}/مقدمو-الخدمة/${areaSlug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.82</priority>\n  </url>`;
     const serviceAreaUrls = services.map(s =>
       `  <url>\n    <loc>${BASE_URL}/${s.slug}/${areaSlug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${s.priority}</priority>\n  </url>`
