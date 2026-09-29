@@ -17,11 +17,11 @@ module.exports = async function handler(req, res) {
   }
 
   const staticPages = [
-    { loc: `${BASE_URL}/`,                    lastmod: '2026-09-27', changefreq: 'weekly',  priority: '1.0' },
-    { loc: `${BASE_URL}/مقدمو-الخدمة`,        lastmod: '2026-09-27', changefreq: 'daily',   priority: '0.95' },
-    { loc: `${BASE_URL}/كشف-منزلي`,           lastmod: '2026-09-27', changefreq: 'daily',   priority: '0.95' },
-    { loc: `${BASE_URL}/تمريض-منزلي`,         lastmod: '2026-09-27', changefreq: 'daily',   priority: '0.90' },
-    { loc: `${BASE_URL}/أشعة-منزلية`,         lastmod: '2026-09-27', changefreq: 'daily',   priority: '0.90' },
+    { loc: `${BASE_URL}/`,                    lastmod: '2026-09-29', changefreq: 'weekly',  priority: '1.0' },
+    { loc: `${BASE_URL}/مقدمو-الخدمة`,        lastmod: '2026-09-29', changefreq: 'daily',   priority: '0.95' },
+    { loc: `${BASE_URL}/كشف-منزلي`,           lastmod: '2026-09-29', changefreq: 'daily',   priority: '0.95' },
+    { loc: `${BASE_URL}/تمريض-منزلي`,         lastmod: '2026-09-29', changefreq: 'daily',   priority: '0.90' },
+    { loc: `${BASE_URL}/أشعة-منزلية`,         lastmod: '2026-09-29', changefreq: 'daily',   priority: '0.90' },
     { loc: `${BASE_URL}/faq.html`,             lastmod: '2026-08-17', changefreq: 'monthly', priority: '0.7' },
     { loc: `${BASE_URL}/blog.html`,            lastmod: '2026-08-17', changefreq: 'weekly',  priority: '0.8' },
     { loc: `${BASE_URL}/privacy.html`,         lastmod: '2026-08-17', changefreq: 'yearly',  priority: '0.4' },
