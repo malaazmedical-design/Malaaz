@@ -625,7 +625,7 @@ __BOOKING_CSS__
 <!-- INTERNAL LINKS: AREAS + SPECIALTIES SIDE BY SIDE -->
 ${(() => {
   const chipStyle = 'display:inline-block;padding:7px 14px;background:#fff;border:1px solid rgba(45,59,62,.15);border-radius:20px;font-size:13px;color:#2d3b3e;text-decoration:none;font-weight:500;white-space:nowrap;';
-  const moreBtn = (id, count) => '<button onclick="var m=document.getElementById(\'' + id + '-more\');var b=document.getElementById(\'' + id + '-btn\');m.style.display=m.style.display===\'none\'?\'contents\':\'none\';b.textContent=m.style.display===\'none\'?\'عرض المزيد (' + count + '+)\':\'عرض أقل\';" id="' + id + '-btn" style="display:inline-block;padding:7px 14px;background:transparent;border:1px dashed rgba(45,59,62,.3);border-radius:20px;font-size:13px;color:#8a9499;cursor:pointer;font-weight:500;white-space:nowrap;">عرض المزيد (' + count + '+)</button>';
+  const moreBtn = (id) => '<button onclick="var m=document.getElementById(\'' + id + '-more\');var b=document.getElementById(\'' + id + '-btn\');m.style.display=m.style.display===\'none\'?\'contents\':\'none\';b.textContent=m.style.display===\'none\'?\'عرض المزيد\':\'عرض أقل\';" id="' + id + '-btn" style="display:inline-block;padding:7px 14px;background:transparent;border:1px dashed rgba(45,59,62,.3);border-radius:20px;font-size:13px;color:#8a9499;cursor:pointer;font-weight:500;white-space:nowrap;">عرض المزيد</button>';
 
   // AREAS column
   let areasHtml = '';
@@ -637,7 +637,7 @@ ${(() => {
     const renderGroup = (list, id, label) => {
       if (!list.length) return '';
       const vis = list.slice(0,SHOW), hid = list.slice(SHOW);
-      return '<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:600;color:#8a9499;text-align:right;margin-bottom:8px;">' + label + '</div><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;align-items:center;">' + aChips(vis) + (hid.length ? '<span id="' + id + '-more" style="display:none;">' + aChips(hid) + '</span>' + moreBtn(id, hid.length) : '') + '</div></div>';
+      return '<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:600;color:#8a9499;text-align:right;margin-bottom:8px;">' + label + '</div><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;align-items:center;">' + aChips(vis) + (hid.length ? '<span id="' + id + '-more" style="display:none;">' + aChips(hid) + '</span>' + moreBtn(id) : '') + '</div></div>';
     };
     areasHtml = '<div><h2 style="font-size:15px;font-weight:700;color:#2d3b3e;margin:0 0 16px;text-align:right;">' + serviceLabel + ' في مناطق أخرى</h2>' + renderGroup(cairoAreas,'cairo','القاهرة') + renderGroup(gizaAreas,'giza','الجيزة') + '</div>';
   }
@@ -651,7 +651,7 @@ ${(() => {
       : '/مقدمو-الخدمة?service=كشف+منزلي&sub=' + encodeURIComponent(s.name);
     const sChips = (arr) => arr.map(s=>'<a href="' + makeUrl(s) + '" style="' + chipStyle + '">د. ' + esc(s.name) + '</a>').join('');
     const vis = doctorSubs.slice(0,SHOW), hid = doctorSubs.slice(SHOW);
-    specsHtml = '<div><h2 style="font-size:15px;font-weight:700;color:#2d3b3e;margin:0 0 16px;text-align:right;">احجز حسب التخصص</h2><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;align-items:center;">' + sChips(vis) + (hid.length ? '<span id="spec-more" style="display:none;">' + sChips(hid) + '</span>' + moreBtn('spec', hid.length) : '') + '</div></div>';
+    specsHtml = '<div><h2 style="font-size:15px;font-weight:700;color:#2d3b3e;margin:0 0 16px;text-align:right;">احجز حسب التخصص</h2><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;align-items:center;">' + sChips(vis) + (hid.length ? '<span id="spec-more" style="display:none;">' + sChips(hid) + '</span>' + moreBtn('spec') : '') + '</div></div>';
   }
 
   if (!areasHtml && !specsHtml) return '';
