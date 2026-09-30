@@ -1211,6 +1211,7 @@ async function loadOverviewBookings() {
       <td>${s(b.service_type)}</td>
       <td>${s(b.area)}</td>
       <td>${s(b.appointment_time)}</td>
+      <td style="font-size:12px;color:var(--muted);white-space:nowrap">${b.created_at ? new Date(b.created_at).toLocaleString('ar-EG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}</td>
       <td>${statusBadge(b.status)}</td>
       <td><div class="act-btns">
         <button class="act-btn edit" onclick="showBookingDetail('${b.id}')">عرض</button>
@@ -1300,6 +1301,7 @@ function renderBookings(data) {
       <td style="font-weight:700">${b.price ? b.price+' <span style="font-size:11px;color:var(--muted)">ج.م</span>' : '<span style="color:var(--muted)">—</span>'}</td>
       <td>${s(b.area)}</td>
       <td>${s(b.appointment_time)}</td>
+      <td style="font-size:12px;color:var(--muted);white-space:nowrap">${b.created_at ? new Date(b.created_at).toLocaleString('ar-EG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}</td>
       <td>${payBadge(b.payment_method)}</td>
       <td>${bookingType}</td>
       <td>${statusBadge(b.status)}</td>
@@ -1416,6 +1418,7 @@ function showBookingDetail(id) {
       <div><div class="form-label">الخدمة الفرعية</div><div style="font-weight:700;margin-top:4px">${s(b.sub_option)||'—'}</div></div>
       <div><div class="form-label">المنطقة</div><div style="font-weight:700;margin-top:4px">${s(b.area)}</div></div>
       <div><div class="form-label">الفترة</div><div style="font-weight:700;margin-top:4px">${s(b.appointment_time)}</div></div>
+      <div><div class="form-label">وقت الحجز</div><div style="font-weight:700;margin-top:4px;font-size:13px">${b.created_at ? new Date(b.created_at).toLocaleString('ar-EG',{weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</div></div>
       <div style="grid-column:1/-1"><div class="form-label">العنوان</div><div style="font-weight:700;margin-top:4px">${s(b.address)||'—'}</div></div>
       <div><div class="form-label">الدفع</div><div style="font-weight:700;margin-top:4px">${payBadge(b.payment_method)}</div></div>
       <div><div class="form-label">الحالة</div><div style="font-weight:700;margin-top:4px">${statusBadge(b.status)}</div></div>
