@@ -244,6 +244,12 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     <div class="nav-item active" onclick="showPage('overview')"><i class="fas fa-chart-pie"></i><span>نظرة عامة</span></div>
     <div class="nav-item" onclick="showPage('bookings')"><i class="fas fa-calendar-check"></i><span>الحجوزات</span><span class="badge" id="pending-badge">0</span></div>
 
+    <div class="nav-section">الاستشارات الأونلاين</div>
+    <div class="nav-item" onclick="showPage('rv-consults')"><i class="fas fa-video"></i><span>الاستشارات</span></div>
+    <div class="nav-item" onclick="showPage('rv-asks')"><i class="fas fa-comment-medical"></i><span>أسئلة المرضى</span></div>
+    <div class="nav-item" onclick="showPage('rv-sources')"><i class="fas fa-chart-line"></i><span>مصدر التثبيت</span></div>
+    <div class="nav-item" onclick="showPage('rv-names')"><i class="fas fa-language"></i><span>الأسماء بالإنجليزي</span></div>
+
     <div class="nav-section">إدارة الخدمات</div>
     <div class="nav-item" onclick="showPage('services')"><i class="fas fa-layer-group"></i><span>الخدمات الرئيسية</span></div>
     <div class="nav-item" onclick="showPage('sub-services')"><i class="fas fa-list-ul"></i><span>الخدمات الفرعية</span></div>
@@ -693,6 +699,15 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     </div>
   </div>
 </div>
+
+<!-- ======= REVOICE PAGES (admin-revoice.js) ======= -->
+<div class="page" id="page-rv-consults"><div id="rv-body-consults"></div></div>
+
+<div class="page" id="page-rv-asks"><div id="rv-body-asks"></div></div>
+
+<div class="page" id="page-rv-sources"><div id="rv-body-sources"></div></div>
+
+<div class="page" id="page-rv-names"><div id="rv-body-names"></div></div>
 
 <!-- ======= NOTIFICATIONS PAGE ======= -->
 <div class="page" id="page-notifications">
@@ -1173,7 +1188,8 @@ const pageTitles = {
   'site-content':'محتوى الموقع', testimonials:'آراء العملاء', settings:'الإعدادات',
   blog:'المقالات',
   notifications:'الإشعارات',
-  clients:'العملاء'
+  clients:'العملاء',
+  'rv-consults':'الاستشارات الأونلاين', 'rv-asks':'أسئلة المرضى', 'rv-sources':'مصدر التثبيت', 'rv-names':'الأسماء بالإنجليزي'
 };
 
 function showPage(id) {
@@ -1193,7 +1209,9 @@ function showPage(id) {
     areas: () => { loadGovernorates(); loadAreas(); }, reviews: loadReviews,
     'site-content': loadSiteContent, testimonials: loadTestimonials,
     blog: loadBlogPosts, notifications: loadBroadcastLog,
-    clients: loadClients
+    clients: loadClients,
+    'rv-consults': () => window.RV && RV.load('consults'), 'rv-asks': () => window.RV && RV.load('asks'),
+    'rv-sources': () => window.RV && RV.load('sources'), 'rv-names': () => window.RV && RV.load('names')
   };
   if(loaders[id]) loaders[id]();
 }
@@ -2793,5 +2811,6 @@ async function deleteClient(clientId, email) {
   </div>
 </div>
 
+<script src="admin-revoice.js"></script>
 </body>
 </html>
