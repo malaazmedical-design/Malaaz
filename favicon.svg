@@ -1,4 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="22" fill="#1a4d2b"/>
-  <text x="50" y="72" font-family="'Noto Naskh Arabic','Traditional Arabic','Arial Unicode MS',Arial,sans-serif" font-size="60" font-weight="900" fill="#c9a84c" text-anchor="middle">م</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="220" fill="#1e2530"/>
+
+  <!-- ملا in white/cream -->
+  <text
+    x="590"
+    y="660"
+    font-family="'Noto Naskh Arabic', 'Traditional Arabic', 'Arial Unicode MS', Arial, sans-serif"
+    font-size="480"
+    font-weight="900"
+    fill="#F0EDE8"
+    text-anchor="middle"
+    direction="rtl"
+  >ملا</text>
+
+  <!-- ذ in gold — positioned upper-left -->
+  <text
+    x="185"
+    y="590"
+    font-family="'Noto Naskh Arabic', 'Traditional Arabic', 'Arial Unicode MS', Arial, sans-serif"
+    font-size="380"
+    font-weight="900"
+    fill="#C9911A"
+    text-anchor="middle"
+    direction="rtl"
+  >ذ</text>
 </svg>
