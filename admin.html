@@ -246,6 +246,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 
     <div class="nav-section">الاستشارات الأونلاين</div>
     <div class="nav-item" onclick="showPage('rv-consults')"><i class="fas fa-video"></i><span>الاستشارات</span></div>
+    <div class="nav-item" onclick="showPage('rv-late')"><i class="fas fa-clock"></i><span>حجوزات متأخرة</span></div>
     <div class="nav-item" onclick="showPage('rv-asks')"><i class="fas fa-comment-medical"></i><span>أسئلة المرضى</span></div>
     <div class="nav-item" onclick="showPage('rv-sources')"><i class="fas fa-chart-line"></i><span>مصدر التثبيت</span></div>
     <div class="nav-item" onclick="showPage('rv-names')"><i class="fas fa-language"></i><span>الأسماء بالإنجليزي</span></div>
@@ -702,6 +703,8 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 
 <!-- ======= REVOICE PAGES (admin-revoice.js) ======= -->
 <div class="page" id="page-rv-consults"><div id="rv-body-consults"></div></div>
+
+<div class="page" id="page-rv-late"><div id="rv-body-late"></div></div>
 
 <div class="page" id="page-rv-asks"><div id="rv-body-asks"></div></div>
 
@@ -1189,7 +1192,7 @@ const pageTitles = {
   blog:'المقالات',
   notifications:'الإشعارات',
   clients:'العملاء',
-  'rv-consults':'الاستشارات الأونلاين', 'rv-asks':'أسئلة المرضى', 'rv-sources':'مصدر التثبيت', 'rv-names':'الأسماء بالإنجليزي'
+  'rv-consults':'الاستشارات الأونلاين', 'rv-late':'حجوزات متأخرة', 'rv-asks':'أسئلة المرضى', 'rv-sources':'مصدر التثبيت', 'rv-names':'الأسماء بالإنجليزي'
 };
 
 function showPage(id) {
@@ -1209,8 +1212,8 @@ function showPage(id) {
     areas: () => { loadGovernorates(); loadAreas(); }, reviews: loadReviews,
     'site-content': loadSiteContent, testimonials: loadTestimonials,
     blog: loadBlogPosts, notifications: loadBroadcastLog,
-    clients: loadClients,
-    'rv-consults': () => window.RV && RV.load('consults'), 'rv-asks': () => window.RV && RV.load('asks'),
+    clients: () => (window.RV && RV.loadClients ? RV.loadClients() : loadClients()),
+    'rv-consults': () => window.RV && RV.load('consults'), 'rv-late': () => window.RV && RV.load('late'), 'rv-asks': () => window.RV && RV.load('asks'),
     'rv-sources': () => window.RV && RV.load('sources'), 'rv-names': () => window.RV && RV.load('names')
   };
   if(loaders[id]) loaders[id]();

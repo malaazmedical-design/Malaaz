@@ -70,7 +70,7 @@
       if (!(await ensureAdmin())) return root.replaceChildren(h("div", { class: "rv-empty rv-bad" }, "هذا الحساب ليس أدمن (جدول admin_users)."));
       const body = h("div");
       root.replaceChildren(body);
-      await { consults: renderConsults, asks: renderAsks, sources: renderSources, names: renderNames }[name](body);
+      await { consults: renderConsults, asks: renderAsks, sources: renderSources, names: renderNames, late: renderLate }[name](body);
     } catch (e) {
       root.replaceChildren(h("div", { class: "rv-empty rv-bad" }, "حدث خطأ: " + (e?.message || e)));
     }
@@ -168,6 +168,7 @@
   // ───────── الاستشارات الأونلاين ─────────
   const PERIODS = { morning: "صباحًا (8-12)", noon: "ظهرًا (12-4)", evening: "مساءً (4-9)", asap: "أسرع وقت ممكن" };
   const ALERTS = {
+    doctor_declined: "🔴 الدكتور اعتذر · اختر بديلًا", doctor_expired: "🔴 الدكتور لم يرد · اختر بديلًا", doctor_silent: "⚠ الدكتور لم يرد منذ 30 دقيقة",
     deadline: "⏰ انتهت مهلة الدفع", no_proposal: "⚠ الطبيب لم يحدد موعدًا", client_silent: "⚠ العميل لم يرد على الموعد",
     client_rejected: "⚠ العميل رفض الموعد", doctor_late: "🔴 الطبيب متأخر عن الموعد", rating: "★ تقييم بانتظار الاعتماد", no_show: "العميل لم يحضر",
   };
@@ -199,7 +200,7 @@
   }
 
   async function renderConsults(root) {
-    const filters = [["pay", "في انتظار الدفع"], ["paid", "تم الدفع"], ["alerts", "تنبيهات"], ["live", "جارية"], ["ended", "منتهية"], ["cancelled", "ملغية"], ["all", "الكل"]];
+    const filters = [["doctor", "بانتظار الدكتور"], ["pay", "في انتظار الدفع"], ["paid", "تم الدفع"], ["alerts", "تنبيهات"], ["live", "جارية"], ["ended", "منتهية"], ["cancelled", "ملغية"], ["all", "الكل"]];
     const gauge = await rtcGauge();
     if (gauge) root.append(gauge);
     root.append(h("div", { class: "rv-chips" }, filters.map(([k, n]) => h("button", { class: "rv-chip" + (state.conFilter === k ? " on" : ""), onclick: () => { state.conFilter = k; refresh(); } }, n))));
@@ -209,7 +210,7 @@
     if (error) return list.replaceChildren(h("div", { class: "rv-empty" }, "خطأ: " + error.message));
     const f = state.conFilter;
     const rows = data.filter((c) =>
-      f === "all" ? true : f === "pay" ? c.pay_status === "pending" : f === "paid" ? c.pay_status === "paid" && c.state === "wait" :
+      f === "all" ? true : f === "doctor" ? c.pay_status === "pending" && c.doctor_status !== "accepted" : f === "pay" ? c.pay_status === "pending" && c.doctor_status === "accepted" : f === "paid" ? c.pay_status === "paid" && c.state === "wait" :
       f === "alerts" ? c.alerts.length > 0 : f === "live" ? c.state === "live" : f === "ended" ? c.state === "ended" : c.pay_status === "cancelled");
     if (!rows.length) return list.replaceChildren(h("div", { class: "rv-empty" }, "لا توجد استشارات"));
     const act = async (fn, args) => {
@@ -218,13 +219,14 @@
       refresh();
     };
     list.replaceChildren(...rows.map((c) => {
-      const st = c.pay_status === "cancelled" ? (c.refunded ? "ملغي · تم الاسترداد" : "ملغي") : c.pay_status === "pending" ? "في انتظار الدفع" : c.state === "live" ? "جارية" : c.state === "ended" ? (c.no_show ? (c.refunded ? "لم يحضر المريض · تم الاسترداد" : "لم يحضر المريض") : "منتهية") : "تم الدفع";
+      const st = c.pay_status === "cancelled" ? (c.refunded ? "ملغي · تم الاسترداد" : "ملغي") : c.pay_status === "pending" ? (c.doctor_status === "pending" ? "بانتظار رد الدكتور" : c.doctor_status === "declined" ? "الدكتور اعتذر" : c.doctor_status === "expired" ? "الدكتور لم يرد" : c.prop_status === "ok" ? "في انتظار الدفع" : "بانتظار الموعد") : c.state === "live" ? "جارية" : c.state === "ended" ? (c.no_show ? (c.refunded ? "لم يحضر المريض · تم الاسترداد" : "لم يحضر المريض") : "منتهية") : "تم الدفع";
       const wa = "https://wa.me/20" + (c.client_phone || "").replace(/\D/g, "").replace(/^0/, "");
       const reason = h("select", { class: "rv-in" }, CANCEL_REASONS.map((r) => h("option", { value: r }, r)));
       const card = h("div", { class: "rv-card" },
         h("div", { class: "rv-row" }, h("b", {}, c.case_number), badge(st), h("span", { class: "rv-sp" }), h("span", { class: "rv-mu" }, fmt(c.created_at))),
         h("div", { class: "rv-row", style: "margin-top:6px" }, h("span", {}, "العميل: " + c.client_name), h("a", { href: wa, target: "_blank", rel: "noopener", style: "color:#8a6a14;font-weight:800" }, c.client_phone || ""), h("span", { class: "rv-sp" }), h("span", {}, "الطبيب: " + c.provider_name)),
         h("div", { class: "rv-mu" }, `${{ chat: "شات", voice: "صوت", video: "فيديو" }[c.channel]} · ${c.duration_min} د · ${c.price} ج.م · ${c.pay_method === "wallet" ? "محفظة" : "إنستاباي"} · ${c.period === "asap" ? PERIODS.asap : c.period_date + " " + PERIODS[c.period]}`),
+        c.prev_provider_name ? h("div", { class: "rv-mu" }, "الطبيب السابق (اعتذر / لم يرد): " + c.prev_provider_name) : null,
         c.appt_at ? h("div", { class: "rv-mu" }, "الموعد المعتمد: " + fmt(c.appt_at)) : c.prop_at ? h("div", { class: "rv-mu" }, "موعد مقترح: " + fmt(c.prop_at)) : null,
         c.pay_status === "pending" && c.pay_deadline ? h("div", { class: "rv-mu" }, "مهلة الدفع: " + fmt(c.pay_deadline)) : null,
         c.cancel_reason ? h("div", { class: "rv-mu rv-bad" }, "سبب الإلغاء: " + c.cancel_reason) : null,
@@ -238,11 +240,20 @@
         c.rating ? h("div", { class: "rv-msg" }, "★".repeat(c.rating) + (c.rating_text ? " — " + c.rating_text : ""), " ", c.rating_ok ? badge("تم الاعتماد · منشور في صفحة الدكتور", OK) : c.rating_hidden ? badge("تم إلغاء النشر", BAD) : badge("بانتظار الاعتماد")) : null);
       const bar = h("div", { class: "rv-row", style: "margin-top:10px" });
       if (c.state === "wait" && c.pay_status !== "cancelled") {
-        if (c.pay_status === "pending") bar.append(h("button", { class: "rv-btn ok", onclick: () => act("admin_set_payment", { p_id: c.id, p_status: "paid" }) }, "تم الدفع"));
+        if (c.pay_status === "pending" && c.doctor_status === "accepted" && c.prop_status === "ok") bar.append(h("button", { class: "rv-btn ok", onclick: () => act("admin_set_payment", { p_id: c.id, p_status: "paid" }) }, "تم الدفع"));
+        else if (c.pay_status === "pending") bar.append(h("span", { class: "rv-mu" }, c.doctor_status === "accepted" ? "الدفع بعد موافقة العميل على الموعد" : "الدفع بعد قبول الدكتور وموافقة العميل على الموعد"));
         else if (c.prop_status === "none") bar.append(h("button", { class: "rv-btn ghost", onclick: () => act("admin_set_payment", { p_id: c.id, p_status: "pending" }) }, "في انتظار الدفع"));
         bar.append(reason, h("button", { class: "rv-btn bad", onclick: () => confirm("إلغاء الاستشارة؟") && act("admin_set_payment", { p_id: c.id, p_status: "cancelled", p_reason: reason.value }) }, "إلغاء"));
       }
-      if (c.state === "wait" && c.pay_status === "paid") {
+      if (c.state === "wait" && c.pay_status === "pending" && (c.doctor_status === "declined" || c.doctor_status === "expired")) {
+        const pick = h("select", { class: "rv-in" }, h("option", { value: "" }, "اختر طبيبًا بديلًا..."));
+        sb.rpc("admin_reassign_candidates", { p_id: c.id }).then(({ data: cand }) => (cand || []).forEach((d) => pick.append(h("option", { value: d.id }, d.name + (d.specialty ? " · " + d.specialty : "") + " · " + ({ chat: "شات", voice: "صوت", video: "فيديو" }[d.channel] || "") + " · " + d.price + " ج.م"))));
+        bar.append(pick, h("button", { class: "rv-btn", onclick: () => {
+          if (!pick.value) return alert("اختر الطبيب");
+          if (confirm("تحويل الطلب لهذا الطبيب وإبلاغه والعميل؟")) act("admin_reassign_consultation", { p_id: c.id, p_provider: pick.value });
+        } }, "تحويل لطبيب آخر"));
+      }
+      if (c.state === "wait" && c.pay_status !== "cancelled" && c.doctor_status === "accepted") {
         const when = h("input", { class: "rv-in", type: "datetime-local", dir: "ltr" });
         bar.append(when, h("button", { class: "rv-btn ghost", onclick: () => {
           if (!when.value) return alert("اختر التاريخ والوقت");
@@ -257,6 +268,42 @@
       if (c.rating && c.rating_ok) bar.append(h("button", { class: "rv-btn bad", onclick: () => confirm("إلغاء نشر التقييم من صفحة الدكتور؟") && act("admin_unpublish_rating", { p_id: c.id }) }, "إلغاء النشر"));
       if (bar.children.length) card.append(bar);
       return card;
+    }));
+  }
+
+  // ───────── حجوزات متأخرة (مؤكدة، موعدها عدّى، ولم تُغلق) ─────────
+  async function renderLate(root) {
+    root.append(h("div", { class: "rv-mu", style: "margin-bottom:10px" }, "حجوزات المقدم وافق عليها لكن لم يتم إغلاقها (مكتمل أو ملغي) بعد مرور 3 ساعات على نهاية فترة الموعد. المقدم بيوصله تنبيه بعد 3 ساعات وتنبيه تاني مع إنذار هنا بعد 24 ساعة. الإغلاق بيتم بقرار منك فقط."));
+    const list = h("div");
+    root.append(list);
+    const { data, error } = await sb.from("bookings").select("*, providers(name, phone)").eq("status", "confirmed").order("created_at", { ascending: false }).limit(500);
+    if (error) return list.replaceChildren(h("div", { class: "rv-empty" }, "خطأ: " + error.message));
+    const now = Date.now(), HR = 3600 * 1000;
+    // الحجوزات القديمة قبل إضافة appointment_at: الاستحقاق بعد يومين من وقت التسجيل
+    const rows = data.map((b) => ({ b, due: b.appointment_at ? new Date(b.appointment_at).getTime() : new Date(b.created_at).getTime() + 48 * HR, legacy: !b.appointment_at }))
+      .filter((r) => now - r.due > 3 * HR).sort((x, y) => x.due - y.due);
+    if (!rows.length) return list.replaceChildren(h("div", { class: "rv-empty" }, "لا توجد حجوزات متأخرة 👌"));
+    const close = async (id, status) => {
+      const patch = status === "cancelled" ? { status, cancel_reason: "أُغلق بواسطة الإدارة" } : { status };
+      const { error: e } = await sb.from("bookings").update(patch).eq("id", id);
+      if (e) alert("تعذّر: " + e.message);
+      refresh();
+    };
+    list.replaceChildren(...rows.map(({ b, due, legacy }) => {
+      const hours = Math.floor((now - due) / HR);
+      const late = hours >= 72 ? BAD : hours >= 24 ? AMBER : GOLD;
+      const prov = b.providers;
+      const wa = prov?.phone ? "https://wa.me/20" + String(prov.phone).replace(/\D/g, "").replace(/^0/, "") : null;
+      return h("div", { class: "rv-card" },
+        h("div", { class: "rv-row" }, h("b", {}, b.patient_name || "—"), badge("متأخر " + (hours >= 48 ? Math.floor(hours / 24) + " يوم" : hours + " ساعة"), late), legacy ? badge("حجز قديم", "#6b7c80") : null,
+          h("span", { class: "rv-sp" }), h("span", { class: "rv-mu" }, "سُجّل " + fmt(b.created_at))),
+        h("div", { class: "rv-mu" }, [b.service_type, b.sub_option, b.area].filter(Boolean).join(" · ")),
+        h("div", { class: "rv-mu" }, "الموعد: " + (b.appointment_time || "—") + (b.appointment_at ? " · " + fmt(b.appointment_at) : "")),
+        h("div", { class: "rv-row", style: "margin-top:6px" }, h("span", {}, "المقدم: " + (prov?.name || "—")), wa ? h("a", { href: wa, target: "_blank", rel: "noopener", style: "color:#8a6a14;font-weight:800" }, prov.phone) : null,
+          b.price != null ? h("span", { class: "rv-mu" }, b.price + " ج.م") : null),
+        h("div", { class: "rv-row", style: "margin-top:10px" },
+          h("button", { class: "rv-btn ok", onclick: () => confirm("تأكيد إن الخدمة تمت (مكتمل)؟ العميل هيوصله طلب تقييم.") && close(b.id, "completed") }, "تمت الخدمة (مكتمل)"),
+          h("button", { class: "rv-btn bad", onclick: () => confirm("إلغاء الحجز؟") && close(b.id, "cancelled") }, "إلغاء الحجز")));
     }));
   }
 
@@ -317,5 +364,107 @@
     applyFilter();
   }
 
-  window.RV = { load };
+  // ───────── العملاء (كل العملاء + نشاط كل عميل) ─────────
+  // جدول clients محمي (العميل يقرأ صفه بس)، فالقراءة من دالتين للأدمن بس: admin_clients / admin_client_detail
+  const BK_STATUS = { pending: "قيد الانتظار", confirmed: "مؤكد", on_way: "في الطريق", completed: "مكتمل", cancelled: "ملغي", rejected: "مرفوض" };
+  const BK_COLOR = { pending: AMBER, confirmed: BLUE, on_way: BLUE, completed: OK, cancelled: BAD, rejected: BAD };
+  const SRV = { chat: "شات", voice: "صوت", video: "فيديو" };
+  const conStatus = (k) => k.pay_status === "cancelled" ? ["ملغية", BAD]
+    : k.doctor_status === "pending" ? ["بانتظار رد الدكتور", AMBER]
+    : k.doctor_status === "declined" || k.doctor_status === "expired" ? ["الدكتور لم يقبل", BAD]
+    : k.state === "live" ? ["جارية", BLUE]
+    : k.state === "ended" ? [k.no_show ? "لم يحضر" : "منتهية", k.no_show ? BAD : OK]
+    : k.pay_status === "pending" ? [k.prop_status === "ok" ? "في انتظار الدفع" : "بانتظار الموعد", AMBER]
+    : ["مؤكدة", OK];
+  const ASK_STATUS = { new: "جديد", routed: "موجّه", answered: "تم الرد", expired: "انتهت المهلة", closed: "مغلق" };
+
+  async function loadClients() {
+    const page = document.getElementById("page-clients");
+    if (!page) return;
+    let root = document.getElementById("rv-clients-root");
+    if (!root) { root = h("div", { id: "rv-clients-root" }); page.replaceChildren(root); }
+    root.replaceChildren(h("div", { class: "rv-empty" }, "جاري التحميل…"));
+    if (!(await ensureAdmin())) return root.replaceChildren(h("div", { class: "rv-empty rv-bad" }, "هذا الحساب ليس أدمن (جدول admin_users)."));
+    const { data, error } = await sb.rpc("admin_clients");
+    if (error) return root.replaceChildren(h("div", { class: "rv-empty" }, "خطأ: " + error.message + " (شغّل ملف 40 على قاعدة البيانات)"));
+    const rows = data || [];
+    const st = { q: "", f: "all" };
+    const list = h("div");
+    const search = h("input", { class: "rv-in", placeholder: "بحث باسم أو إيميل أو هاتف…", style: "width:280px" });
+    const chips = h("div", { class: "rv-chips", style: "margin:0" });
+    const FILT = [["all", "الكل"], ["booking", "عندهم حجوزات"], ["consult", "عندهم استشارات"], ["none", "بدون نشاط"]];
+    const count = h("span", { class: "rv-mu" });
+
+    function draw() {
+      const q = st.q.toLowerCase();
+      const shown = rows.filter((c) =>
+        (!q || (c.name || "").toLowerCase().includes(q) || (c.email || "").toLowerCase().includes(q) || (c.phone || "").includes(q)) &&
+        (st.f === "all" || (st.f === "booking" && c.bookings_count > 0) || (st.f === "consult" && c.consults_count > 0) ||
+         (st.f === "none" && !c.bookings_count && !c.consults_count && !c.asks_count)));
+      count.textContent = `${shown.length} من ${rows.length} عميل`;
+      chips.replaceChildren(...FILT.map(([k, n]) => h("button", { class: "rv-chip" + (st.f === k ? " on" : ""), onclick: () => { st.f = k; draw(); } }, n)));
+      if (!shown.length) return list.replaceChildren(h("div", { class: "rv-empty" }, "لا يوجد عملاء"));
+      list.replaceChildren(...shown.map(clientCard));
+    }
+
+    function clientCard(c) {
+      const body = h("div");
+      let loaded = false;
+      const card = h("div", { class: "rv-card" });
+      const head = h("div", { class: "rv-row", style: "cursor:pointer" },
+        h("b", {}, c.name || "—"), badge(c.auth_id ? "مسجّل بحساب" : "ضيف (حجز بدون حساب)", c.auth_id ? OK : AMBER),
+        h("span", { class: "rv-sp" }),
+        h("span", { class: "rv-mu" }, `حجوزات ${c.bookings_count} · استشارات ${c.consults_count} · أسئلة ${c.asks_count}`));
+      card.append(head,
+        h("div", { class: "rv-mu" }, [c.phone, c.email].filter(Boolean).join(" · ")),
+        h("div", { class: "rv-mu" }, "سجّل: " + (c.created_at ? fmt(c.created_at) : "—") + (c.last_activity ? " · آخر نشاط: " + fmt(c.last_activity) : "")),
+        body);
+      head.addEventListener("click", async () => {
+        if (loaded) { body.hidden = !body.hidden; return; }
+        loaded = true;
+        body.replaceChildren(h("div", { class: "rv-mu" }, "جاري التحميل…"));
+        const { data: d, error: e } = await sb.rpc("admin_client_detail", { p_id: c.id });
+        if (e || !d) return body.replaceChildren(h("div", { class: "rv-bad" }, "خطأ: " + (e?.message || "تعذّر التحميل")));
+        renderDetail(body, c, d);
+      });
+      return card;
+    }
+
+    function renderDetail(body, c, d) {
+      const bkSel = h("select", { class: "rv-in" }, [["all", "كل حالات الحجوزات"], ...Object.entries(BK_STATUS)].map(([k, n]) => h("option", { value: k }, n)));
+      const bkList = h("div");
+      const drawBk = () => {
+        const items = d.bookings.filter((b) => bkSel.value === "all" || b.status === bkSel.value);
+        bkList.replaceChildren(...(items.length ? items.map((b) => h("div", { class: "rv-row", style: "padding:6px 0;border-top:1px solid var(--border)" },
+          h("b", {}, [b.service_type, b.sub_option].filter(Boolean).join(" · ")),
+          badge(BK_STATUS[b.status] || b.status, BK_COLOR[b.status]),
+          h("span", { class: "rv-sp" }),
+          h("span", { class: "rv-mu" }, [b.provider_name ? "الطبيب/المقدم: " + b.provider_name : "بدون مقدم", b.price != null ? b.price + " ج.م" : null,
+            b.appointment_at ? fmt(b.appointment_at) : b.appointment_time, "سُجّل " + fmt(b.created_at)].filter(Boolean).join(" · ")))) : [h("div", { class: "rv-mu" }, "لا توجد حجوزات")]));
+      };
+      bkSel.addEventListener("change", drawBk); drawBk();
+      const cons = d.consultations.length ? d.consultations.map((k) => { const [t, col] = conStatus(k); return h("div", { class: "rv-row", style: "padding:6px 0;border-top:1px solid var(--border)" },
+        h("b", {}, k.case_number), badge(t, col), h("span", { class: "rv-sp" }),
+        h("span", { class: "rv-mu" }, [SRV[k.channel], k.provider_name, k.price + " ج.م", k.appt_at ? fmt(k.appt_at) : null, "سُجّل " + fmt(k.created_at)].filter(Boolean).join(" · "))); })
+        : [h("div", { class: "rv-mu" }, "لا توجد استشارات")];
+      const asks = d.asks.length ? d.asks.map((a) => h("div", { class: "rv-row", style: "padding:6px 0;border-top:1px solid var(--border)" },
+        h("b", {}, a.case_number), badge(ASK_STATUS[a.status] || a.status), h("span", { class: "rv-sp" }), h("span", { class: "rv-mu" }, (a.message || "") + " · " + fmt(a.created_at))))
+        : [h("div", { class: "rv-mu" }, "لا توجد أسئلة")];
+      const del = typeof window.deleteClient === "function" ? h("button", { class: "rv-btn bad", onclick: () => window.deleteClient(c.id, c.email || "").then?.(() => loadClients()) }, "حذف العميل نهائيًا") : null;
+      body.replaceChildren(h("div", { class: "rv-sub" },
+        h("div", { class: "rv-row" }, h("b", {}, "الحجوزات المنزلية (" + d.bookings.length + ")"), h("span", { class: "rv-sp" }), bkSel), bkList,
+        h("b", { style: "display:block;margin-top:12px" }, "الاستشارات الأونلاين (" + d.consultations.length + ")"), ...cons,
+        h("b", { style: "display:block;margin-top:12px" }, "اسأل طبيب (" + d.asks.length + ")"), ...asks,
+        del ? h("div", { style: "margin-top:12px" }, del) : null));
+    }
+
+    search.addEventListener("input", () => { st.q = search.value; draw(); });
+    root.replaceChildren(
+      h("div", { class: "rv-row", style: "margin-bottom:12px" }, h("b", { style: "font-size:17px" }, "العملاء"), count, h("span", { class: "rv-sp" }), search),
+      chips, list);
+    draw();
+  }
+
+  window.RV = { load, loadClients };
+
 })();
