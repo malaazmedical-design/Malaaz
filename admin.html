@@ -250,6 +250,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     <div class="nav-item" onclick="showPage('rv-asks')"><i class="fas fa-comment-medical"></i><span>أسئلة المرضى</span></div>
     <div class="nav-item" onclick="showPage('rv-sources')"><i class="fas fa-chart-line"></i><span>مصدر التثبيت</span></div>
     <div class="nav-item" onclick="showPage('rv-names')"><i class="fas fa-language"></i><span>الأسماء بالإنجليزي</span></div>
+    <div class="nav-item" onclick="showPage('rv-featured')"><i class="fas fa-star"></i><span>مقدمو الرئيسية</span></div>
 
     <div class="nav-section">إدارة الخدمات</div>
     <div class="nav-item" onclick="showPage('services')"><i class="fas fa-layer-group"></i><span>الخدمات الرئيسية</span></div>
@@ -711,6 +712,8 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 <div class="page" id="page-rv-sources"><div id="rv-body-sources"></div></div>
 
 <div class="page" id="page-rv-names"><div id="rv-body-names"></div></div>
+
+<div class="page" id="page-rv-featured"><div id="rv-body-featured"></div></div>
 
 <!-- ======= NOTIFICATIONS PAGE ======= -->
 <div class="page" id="page-notifications">
@@ -1192,7 +1195,7 @@ const pageTitles = {
   blog:'المقالات',
   notifications:'الإشعارات',
   clients:'العملاء',
-  'rv-consults':'الاستشارات الأونلاين', 'rv-late':'حجوزات متأخرة', 'rv-asks':'أسئلة المرضى', 'rv-sources':'مصدر التثبيت', 'rv-names':'الأسماء بالإنجليزي'
+  'rv-consults':'الاستشارات الأونلاين', 'rv-late':'حجوزات متأخرة', 'rv-asks':'أسئلة المرضى', 'rv-sources':'مصدر التثبيت', 'rv-names':'الأسماء بالإنجليزي', 'rv-featured':'مقدمو الرئيسية'
 };
 
 function showPage(id) {
@@ -1214,7 +1217,7 @@ function showPage(id) {
     blog: loadBlogPosts, notifications: loadBroadcastLog,
     clients: () => (window.RV && RV.loadClients ? RV.loadClients() : loadClients()),
     'rv-consults': () => window.RV && RV.load('consults'), 'rv-late': () => window.RV && RV.load('late'), 'rv-asks': () => window.RV && RV.load('asks'),
-    'rv-sources': () => window.RV && RV.load('sources'), 'rv-names': () => window.RV && RV.load('names')
+    'rv-sources': () => window.RV && RV.load('sources'), 'rv-names': () => window.RV && RV.load('names'), 'rv-featured': () => window.RV && RV.load('featured')
   };
   if(loaders[id]) loaders[id]();
 }
