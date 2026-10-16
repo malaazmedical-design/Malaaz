@@ -543,15 +543,17 @@ function populateSub(sel, items) {
 
 async function loadAreas() {
   try {
-    const r = await fetch(`${URL_BASE}/coverage_areas?is_active=eq.true&order=name`, {headers:H});
+    const r = await fetch(`${URL_BASE}/coverage_areas?is_active=eq.true&order=city,name`, {headers:H});
     const data = await r.json();
     if (!data?.length) return;
     const sel = document.getElementById('inp-area');
     sel.innerHTML = '<option value="">اختر المنطقة</option>';
-    [['القاهرة', data.filter(a=>a.city==='القاهرة')], ['الجيزة', data.filter(a=>a.city==='الجيزة')]].forEach(([lbl,arr]) => {
-      if (!arr.length) return;
-      const og = document.createElement('optgroup'); og.label = lbl;
-      arr.forEach(a => { const o = document.createElement('option'); o.value=a.name; o.textContent=a.name; og.appendChild(o); });
+    const cities = [...new Set(data.map(a => a.city).filter(Boolean))];
+    cities.forEach(city => {
+      const areas = data.filter(a => a.city === city);
+      if (!areas.length) return;
+      const og = document.createElement('optgroup'); og.label = city;
+      areas.forEach(a => { const o = document.createElement('option'); o.value=a.name; o.textContent=a.name; og.appendChild(o); });
       sel.appendChild(og);
     });
   } catch(e) {}
