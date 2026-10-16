@@ -149,11 +149,22 @@ html,body{height:100%;font-family:'Cairo',sans-serif;}
   border-color:var(--accent);
   box-shadow:0 0 0 3px rgba(201,168,76,.12);
 }
+.select-with-loc{display:flex;gap:8px;align-items:center;}
+.select-with-loc .select-wrap{flex:1;}
 .select-wrap{position:relative;}
 .select-wrap::after{
   content:'▾';position:absolute;left:16px;top:50%;
   transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;
 }
+.loc-btn{
+  width:46px;height:46px;border-radius:12px;flex-shrink:0;
+  border:1.5px solid var(--border);background:var(--input-bg);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);transition:border-color .2s,color .2s,box-shadow .2s;
+}
+.loc-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px rgba(201,168,76,.12);}
+.loc-btn.spinning svg{animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
 #f-sub{display:none;animation:slideDown .2s ease;}
 #f-sub.visible{display:block;}
@@ -329,10 +340,17 @@ html,body{height:100%;font-family:'Cairo',sans-serif;}
 
         <div class="field" id="f-area">
           <label for="inp-area">المنطقة</label>
-          <div class="select-wrap">
-            <select id="inp-area">
-              <option value="">اختر المنطقة</option>
-            </select>
+          <div class="select-with-loc">
+            <div class="select-wrap">
+              <select id="inp-area">
+                <option value="">اختر المنطقة</option>
+              </select>
+            </div>
+            <button type="button" id="loc-btn" class="loc-btn" title="استخدم موقعي الحالي" aria-label="استخدم موقعي الحالي">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" opacity=".3"/>
+              </svg>
+            </button>
           </div>
           <div class="err">من فضلك اختر منطقتك</div>
         </div>
@@ -461,6 +479,43 @@ async function loadAreas() {
 loadAreas();
 
 function setErr(id, show) { document.getElementById(id).classList.toggle('has-error',show); return show; }
+
+document.getElementById('loc-btn').addEventListener('click', function() {
+  if (!navigator.geolocation) return;
+  const btn = this;
+  btn.classList.add('spinning');
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(async function(pos) {
+    try {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ar`,
+        { headers: { 'Accept-Language': 'ar' } }
+      );
+      const d = await r.json();
+      const candidates = [
+        d.address?.suburb, d.address?.neighbourhood,
+        d.address?.quarter, d.address?.city_district,
+        d.address?.county, d.address?.state_district,
+      ].filter(Boolean);
+      const sel = document.getElementById('inp-area');
+      const opts = Array.from(sel.options).filter(o => o.value);
+      let matched = false;
+      for (const c of candidates) {
+        const hit = opts.find(o =>
+          o.value.includes(c) || c.includes(o.value) ||
+          o.value.replace(/\s/g,'').includes(c.replace(/\s/g,''))
+        );
+        if (hit) { sel.value = hit.value; setErr('f-area', false); matched = true; break; }
+      }
+      if (!matched) alert('لم نتمكن من تحديد منطقتك تلقائياً — اختر من القائمة');
+    } catch(e) { alert('حدث خطأ أثناء تحديد الموقع'); }
+    btn.classList.remove('spinning'); btn.disabled = false;
+  }, function() {
+    alert('لم يتم السماح بالوصول للموقع');
+    btn.classList.remove('spinning'); btn.disabled = false;
+  }, { timeout: 10000 });
+});
 
 document.getElementById('booking-form').addEventListener('submit', async function(e) {
   e.preventDefault();
