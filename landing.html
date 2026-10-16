@@ -493,6 +493,26 @@ function setErr(id, show) { document.getElementById(id).classList.toggle('has-er
 
 let _lat = null, _lng = null;
 
+function arNorm(s) {
+  return (s || '')
+    .replace(/[ً-ٰٟ]/g, '') // حرك
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function arMatch(a, b) {
+  const na = arNorm(a), nb = arNorm(b);
+  if (na === nb) return true;
+  if (na.includes(nb) || nb.includes(na)) return true;
+  // word overlap: any shared word longer than 2 chars
+  const wa = na.split(' ');
+  const wb = new Set(nb.split(' '));
+  return wa.some(w => w.length > 2 && wb.has(w));
+}
+
 document.getElementById('loc-btn').addEventListener('click', function() {
   if (!navigator.geolocation) return;
   const btn = this;
@@ -503,32 +523,31 @@ document.getElementById('loc-btn').addEventListener('click', function() {
       _lat = pos.coords.latitude;
       _lng = pos.coords.longitude;
 
-      // show preview link immediately
       const preview = document.getElementById('loc-preview');
       preview.href = `https://www.google.com/maps?q=${_lat},${_lng}`;
       preview.style.display = 'flex';
 
       const r = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${_lat}&lon=${_lng}&format=json&accept-language=ar`,
-        { headers: { 'Accept-Language': 'ar' } }
+        `https://nominatim.openstreetmap.org/reverse?lat=${_lat}&lon=${_lng}&format=json&accept-language=ar`
       );
       const d = await r.json();
+      const addr = d.address || {};
       const candidates = [
-        d.address?.suburb, d.address?.neighbourhood,
-        d.address?.quarter, d.address?.city_district,
-        d.address?.county, d.address?.state_district,
+        addr.suburb, addr.neighbourhood, addr.quarter,
+        addr.city_district, addr.district, addr.county,
+        addr.state_district,
       ].filter(Boolean);
+
       const sel = document.getElementById('inp-area');
       const opts = Array.from(sel.options).filter(o => o.value);
       let matched = false;
       for (const c of candidates) {
-        const hit = opts.find(o =>
-          o.value.includes(c) || c.includes(o.value) ||
-          o.value.replace(/\s/g,'').includes(c.replace(/\s/g,''))
-        );
+        const hit = opts.find(o => arMatch(o.value, c));
         if (hit) { sel.value = hit.value; setErr('f-area', false); matched = true; break; }
       }
-      if (!matched) alert('لم نتمكن من تحديد منطقتك تلقائياً — اختر من القائمة');
+      if (!matched) {
+        preview.textContent = '📍 موقعك محفوظ — اختر المنطقة من القائمة';
+      }
     } catch(e) { alert('حدث خطأ أثناء تحديد الموقع'); }
     btn.classList.remove('spinning'); btn.disabled = false;
   }, function() {
