@@ -493,21 +493,24 @@ function setErr(id, show) { document.getElementById(id).classList.toggle('has-er
 
 let _lat = null, _lng = null;
 
+const AR_PREFIXES = /^(حي|قسم|منطقه|منطقة|مركز|ناحيه|ناحية|محافظه|محافظة|مدينه|شياخه|شياخة)\s+/g;
+
 function arNorm(s) {
   return (s || '')
-    .replace(/[ً-ٰٟ]/g, '') // حرك
+    .replace(/[ً-ٰٟ]/g, '')
     .replace(/[أإآٱ]/g, 'ا')
     .replace(/ة/g, 'ه')
     .replace(/ى/g, 'ي')
+    .replace(AR_PREFIXES, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
 function arMatch(a, b) {
   const na = arNorm(a), nb = arNorm(b);
+  if (!na || !nb) return false;
   if (na === nb) return true;
   if (na.includes(nb) || nb.includes(na)) return true;
-  // word overlap: any shared word longer than 2 chars
   const wa = na.split(' ');
   const wb = new Set(nb.split(' '));
   return wa.some(w => w.length > 2 && wb.has(w));
@@ -532,10 +535,13 @@ document.getElementById('loc-btn').addEventListener('click', function() {
       );
       const d = await r.json();
       const addr = d.address || {};
+      // display_name مقسّم على فواصل يدي كلمات إضافية
+      const fromDisplay = (d.display_name || '').split(',').map(s => s.trim()).filter(Boolean);
       const candidates = [
         addr.suburb, addr.neighbourhood, addr.quarter,
         addr.city_district, addr.district, addr.county,
         addr.state_district,
+        ...fromDisplay,
       ].filter(Boolean);
 
       const sel = document.getElementById('inp-area');
