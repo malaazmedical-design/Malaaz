@@ -30,9 +30,78 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ملاذ — رعاية طبية منزلية</title>
+<title>ملاذ — رعاية طبية منزلية في القاهرة والجيزة</title>
 <meta name="robots" content="index, follow">
-<meta name="description" content="ملاذ — رعاية طبية منزلية احترافية. أطباء، تمريض، وأشعة في بيتك بسهولة وأمان.">
+<meta name="description" content="ملاذ — احجز كشف طبي منزلي، تمريض منزلي، أو أشعة منزلية في القاهرة والجيزة. أطباء معتمدون يصلون إلى بيتك في أسرع وقت.">
+<link rel="canonical" href="https://malaaz.com/landing.html">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://malaaz.com/landing.html">
+<meta property="og:title" content="ملاذ — رعاية طبية منزلية في القاهرة والجيزة">
+<meta property="og:description" content="احجز كشف طبي، تمريض، أو أشعة في بيتك. أطباء معتمدون يصلون إليك في أسرع وقت.">
+<meta property="og:image" content="https://malaaz.com/og-image.jpg">
+<meta property="og:locale" content="ar_EG">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://malaaz.com/og-image.jpg">
+<!-- Schema: MedicalBusiness -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MedicalBusiness",
+  "name": "ملاذ للرعاية الطبية المنزلية",
+  "alternateName": "Malaaz",
+  "url": "https://malaaz.com",
+  "logo": "https://malaaz.com/favicon.png",
+  "image": "https://malaaz.com/og-image.jpg",
+  "description": "خدمات رعاية طبية منزلية في القاهرة والجيزة — كشف طبي، تمريض، وأشعة في بيتك.",
+  "telephone": "+201039097982",
+  "areaServed": [
+    {"@type": "City", "name": "القاهرة"},
+    {"@type": "City", "name": "الجيزة"}
+  ],
+  "medicalSpecialty": ["طب عام", "تمريض", "أشعة"],
+  "availableService": [
+    {"@type": "MedicalTherapy", "name": "كشف طبي منزلي"},
+    {"@type": "MedicalTherapy", "name": "تمريض منزلي"},
+    {"@type": "MedicalTherapy", "name": "أشعة منزلية"}
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+201039097982",
+    "contactType": "customer service",
+    "availableLanguage": "Arabic"
+  }
+}
+</script>
+<!-- Schema: FAQ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "ما هي خدمات ملاذ؟",
+      "acceptedAnswer": {"@type": "Answer", "text": "ملاذ تقدم كشف طبي منزلي، تمريض منزلي، وأشعة منزلية في القاهرة والجيزة."}
+    },
+    {
+      "@type": "Question",
+      "name": "كم يستغرق وصول الطبيب؟",
+      "acceptedAnswer": {"@type": "Answer", "text": "يصل مقدم الخدمة عادةً خلال ٣٠ إلى ٦٠ دقيقة من تأكيد الحجز."}
+    },
+    {
+      "@type": "Question",
+      "name": "هل الدفع مقدم؟",
+      "acceptedAnswer": {"@type": "Answer", "text": "لا، الدفع يكون بعد استلام الخدمة فقط — نقداً أو بطاقة."}
+    },
+    {
+      "@type": "Question",
+      "name": "ما المناطق التي تغطيها ملاذ؟",
+      "acceptedAnswer": {"@type": "Answer", "text": "نغطي معظم أحياء القاهرة والجيزة، وتتوسع المناطق باستمرار."}
+    }
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
 <style>
@@ -67,9 +136,9 @@ html,body{height:100%;font-family:'Cairo',sans-serif;}
   opacity:0;
   animation:brandSlide 18s infinite;
 }
-.brand-slide:nth-child(1){background-image:url('/images/hero-1.webp');animation-delay:0s;}
-.brand-slide:nth-child(2){background-image:url('/images/hero-2.webp');animation-delay:6s;}
-.brand-slide:nth-child(3){background-image:url('/images/hero-3.webp');animation-delay:12s;}
+.brand-slide:nth-child(1){background-image:url('/images/hero-1.webp');animation-delay:0s;} /* طبيب يزور مريضاً في المنزل */
+.brand-slide:nth-child(2){background-image:url('/images/hero-2.webp');animation-delay:6s;} /* رعاية طبية منزلية */
+.brand-slide:nth-child(3){background-image:url('/images/hero-3.webp');animation-delay:12s;} /* فريق ملاذ الطبي */
 @keyframes brandSlide{
   0%,4%{opacity:0;transform:scale(1.06);}
   8%,30%{opacity:1;transform:scale(1);}
@@ -296,11 +365,11 @@ html,body{height:100%;font-family:'Cairo',sans-serif;}
     <div class="brand-deco deco2"></div>
     <div class="brand-deco deco3"></div>
 
-    <div class="brand-headline">
+    <h1 class="brand-headline">
       <span class="line1">رعاية طبية منزلية</span>
       <span class="line2">كشف وتمريض وأشعة</span>
       <span class="line3">في بيتك</span>
-    </div>
+    </h1>
   </div>
 
   <!-- ===== FORM ===== -->
@@ -366,7 +435,7 @@ html,body{height:100%;font-family:'Cairo',sans-serif;}
           <div class="err">من فضلك اختر منطقتك</div>
         </div>
 
-        <button type="submit" class="submit-btn">تأكيد</button>
+        <button type="submit" class="submit-btn">احجز الآن</button>
       </form>
     </div>
 
@@ -609,6 +678,108 @@ document.getElementById('booking-form').addEventListener('submit', async functio
   }
 });
 </script>
+
+<!-- HOW IT WORKS -->
+<section class="hiw" aria-labelledby="hiw-title">
+  <div class="hiw-inner">
+    <h2 class="hiw-title" id="hiw-title">كيف يعمل ملاذ؟</h2>
+    <div class="hiw-steps">
+      <div class="hiw-step">
+        <div class="hiw-num">١</div>
+        <div class="hiw-text">
+          <strong>احجز في ثوانٍ</strong>
+          <p>اختر الخدمة ومنطقتك واملأ بياناتك — بدون تسجيل أو دفع مقدم</p>
+        </div>
+      </div>
+      <div class="hiw-arrow">←</div>
+      <div class="hiw-step">
+        <div class="hiw-num">٢</div>
+        <div class="hiw-text">
+          <strong>نختار لك الأقرب</strong>
+          <p>يصلك مقدم الخدمة المعتمد الأقرب لمنطقتك خلال ٣٠–٦٠ دقيقة</p>
+        </div>
+      </div>
+      <div class="hiw-arrow">←</div>
+      <div class="hiw-step">
+        <div class="hiw-num">٣</div>
+        <div class="hiw-text">
+          <strong>الدفع بعد الخدمة</strong>
+          <p>تستلم الخدمة في بيتك ثم تدفع نقداً أو بطاقة — بدون التزامات</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" aria-labelledby="faq-title">
+  <div class="faq-inner">
+    <h2 class="faq-title" id="faq-title">أسئلة شائعة</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>ما هي خدمات ملاذ؟</summary>
+        <p>ملاذ تقدم <strong>كشف طبي منزلي</strong> بأطباء متخصصين، <strong>تمريض منزلي</strong> بإقامات مرنة، و<strong>أشعة منزلية</strong> — كل ذلك في القاهرة والجيزة.</p>
+      </details>
+      <details class="faq-item">
+        <summary>كم يستغرق وصول الطبيب؟</summary>
+        <p>يصل مقدم الخدمة عادةً خلال <strong>٣٠ إلى ٦٠ دقيقة</strong> من تأكيد الحجز حسب منطقتك.</p>
+      </details>
+      <details class="faq-item">
+        <summary>هل الدفع مقدم؟</summary>
+        <p>لا، الدفع يكون <strong>بعد استلام الخدمة فقط</strong> — نقداً أو بطاقة.</p>
+      </details>
+      <details class="faq-item">
+        <summary>ما المناطق التي تغطيها ملاذ؟</summary>
+        <p>نغطي معظم أحياء القاهرة والجيزة وتتوسع المناطق باستمرار. اختر منطقتك في الفورم أعلاه للتأكد.</p>
+      </details>
+      <details class="faq-item">
+        <summary>هل الأطباء معتمدون؟</summary>
+        <p>نعم، جميع مقدمي الخدمة مرخّصون ومُوثَّقة بياناتهم لدى ملاذ قبل الانضمام للمنصة.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<style>
+/* HOW IT WORKS */
+.hiw { background:#fff; padding:64px 24px; direction:rtl; }
+.hiw-inner { max-width:860px; margin:0 auto; }
+.hiw-title, .faq-title {
+  font-family:'Tajawal',sans-serif; font-size:26px; font-weight:900;
+  color:#1a2e2b; text-align:center; margin-bottom:40px;
+}
+.hiw-steps { display:flex; align-items:flex-start; gap:16px; justify-content:center; flex-wrap:wrap; }
+.hiw-step { flex:1; min-width:200px; max-width:240px; text-align:center; }
+.hiw-num {
+  width:52px; height:52px; border-radius:50%;
+  background:#1a2e2b; color:#c9a84c;
+  font-family:'Tajawal',sans-serif; font-size:22px; font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 16px;
+}
+.hiw-text strong { display:block; font-size:15px; font-weight:700; color:#1a2e2b; margin-bottom:6px; }
+.hiw-text p { font-size:13px; color:#5a6f6d; line-height:1.7; }
+.hiw-arrow { font-size:22px; color:#c9a84c; padding-top:14px; }
+@media(max-width:640px){ .hiw-arrow{ display:none; } .hiw-steps{ gap:28px; } }
+
+/* FAQ */
+.faq { background:#f9f7f3; padding:64px 24px; direction:rtl; }
+.faq-inner { max-width:700px; margin:0 auto; }
+.faq-list { display:flex; flex-direction:column; gap:12px; }
+.faq-item {
+  background:#fff; border:1px solid #e0dbd0; border-radius:14px;
+  padding:18px 20px; cursor:pointer;
+}
+.faq-item summary {
+  font-size:15px; font-weight:700; color:#1a2e2b;
+  list-style:none; display:flex; justify-content:space-between; align-items:center;
+  cursor:pointer;
+}
+.faq-item summary::-webkit-details-marker { display:none; }
+.faq-item summary::after { content:'＋'; color:#c9a84c; font-size:18px; }
+.faq-item[open] summary::after { content:'−'; }
+.faq-item p { margin-top:12px; font-size:14px; color:#5a6f6d; line-height:1.8; }
+</style>
 
 <!-- APP DOWNLOAD -->
 <section class="app-dl">
