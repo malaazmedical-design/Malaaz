@@ -165,6 +165,13 @@ html,body{height:100%;font-family:'Cairo',sans-serif;}
 .loc-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px rgba(201,168,76,.12);}
 .loc-btn.spinning svg{animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
+.loc-preview{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:700;color:var(--accent);
+  text-decoration:none;margin-top:6px;
+  transition:opacity .2s;
+}
+.loc-preview:hover{opacity:.75;}
 
 #f-sub{display:none;animation:slideDown .2s ease;}
 #f-sub.visible{display:block;}
@@ -352,6 +359,10 @@ html,body{height:100%;font-family:'Cairo',sans-serif;}
               </svg>
             </button>
           </div>
+          <a id="loc-preview" class="loc-preview" target="_blank" rel="noopener" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/></svg>
+            تم تحديد موقعك — اضغط للتحقق
+          </a>
           <div class="err">من فضلك اختر منطقتك</div>
         </div>
 
@@ -480,6 +491,8 @@ loadAreas();
 
 function setErr(id, show) { document.getElementById(id).classList.toggle('has-error',show); return show; }
 
+let _lat = null, _lng = null;
+
 document.getElementById('loc-btn').addEventListener('click', function() {
   if (!navigator.geolocation) return;
   const btn = this;
@@ -487,9 +500,16 @@ document.getElementById('loc-btn').addEventListener('click', function() {
   btn.disabled = true;
   navigator.geolocation.getCurrentPosition(async function(pos) {
     try {
-      const { latitude: lat, longitude: lng } = pos.coords;
+      _lat = pos.coords.latitude;
+      _lng = pos.coords.longitude;
+
+      // show preview link immediately
+      const preview = document.getElementById('loc-preview');
+      preview.href = `https://www.google.com/maps?q=${_lat},${_lng}`;
+      preview.style.display = 'flex';
+
       const r = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ar`,
+        `https://nominatim.openstreetmap.org/reverse?lat=${_lat}&lon=${_lng}&format=json&accept-language=ar`,
         { headers: { 'Accept-Language': 'ar' } }
       );
       const d = await r.json();
@@ -547,7 +567,9 @@ document.getElementById('booking-form').addEventListener('submit', async functio
         appointment_time: 'أسرع وقت ممكن',
         notes: getUtmNotes(),
         status: 'pending',
-        payment_method: null
+        payment_method: null,
+        lat: _lat || null,
+        lng: _lng || null
       })
     });
   } catch(e) {}
