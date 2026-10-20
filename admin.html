@@ -264,6 +264,7 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
     <div class="nav-section">الإعدادات</div>
     <div class="nav-item" onclick="showPage('areas')"><i class="fas fa-map-marker-alt"></i><span>مناطق التغطية</span></div>
     <div class="nav-item" onclick="showPage('reviews')"><i class="fas fa-star"></i><span>التقييمات</span></div>
+    <div class="nav-item" onclick="showPage('visit-notes')"><i class="fas fa-notes-medical"></i><span>ملاحظات المزودين</span></div>
     <div class="nav-item" onclick="showPage('site-content')"><i class="fas fa-edit"></i><span>محتوى الموقع</span></div>
     <div class="nav-item" onclick="showPage('testimonials')"><i class="fas fa-quote-right"></i><span>آراء العملاء</span></div>
     <div class="nav-item" onclick="showPage('blog')"><i class="fas fa-newspaper"></i><span>المقالات</span></div>
@@ -585,15 +586,31 @@ body{font-family:'Cairo',sans-serif;color:var(--text);background:var(--bg);overf
 <!-- ============================
      PAGE: REVIEWS
      ============================ -->
+<div class="page" id="page-visit-notes">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">ملاحظات المزودين بعد الزيارة</div><div class="card-sub">ملاحظات يكتبها المزود بعد انتهاء الخدمة، بتظهر للإدارة فقط</div></div>
+      <select id="vn-provider-filter" onchange="renderVisitNotes()" style="padding:8px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;max-width:220px"><option value="">كل مقدمي الخدمة</option></select>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table class="tbl">
+        <thead><tr><th>التاريخ</th><th>مقدم الخدمة</th><th>الحجز</th><th>المريض</th><th>الملاحظة</th></tr></thead>
+        <tbody id="visit-notes-body"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-reviews">
   <div class="card">
     <div class="card-header">
       <div><div class="card-title">التقييمات</div><div class="card-sub">الموافقة على التقييمات قبل نشرها</div></div>
+      <select id="rev-provider-filter" onchange="renderReviews()" style="padding:8px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;max-width:220px"><option value="">كل مقدمي الخدمة</option></select>
     </div>
     <div class="card-body" style="padding:0">
       <table class="tbl">
         <thead><tr><th>العميل</th><th>مقدم الخدمة</th><th>الخدمة</th><th>التقييم</th><th>التعليق</th><th>الحالة</th><th>إجراء</th></tr></thead>
-        <tbody id="reviews-body"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
+        <tbody id="reviews-body"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1190,7 +1207,7 @@ const pageTitles = {
   overview:'نظرة عامة', bookings:'الحجوزات', services:'الخدمات الرئيسية',
   'sub-services':'الخدمات الفرعية', 'grade-prices':'أسعار الدرجات الطبية',
   providers:'مقدمو الخدمة', accounting:'المحاسبة والنسب',
-  areas:'مناطق التغطية', reviews:'التقييمات',
+  areas:'مناطق التغطية', reviews:'التقييمات', 'visit-notes':'ملاحظات المزودين بعد الزيارة',
   'site-content':'محتوى الموقع', testimonials:'آراء العملاء', settings:'الإعدادات',
   blog:'المقالات',
   notifications:'الإشعارات',
@@ -1212,7 +1229,7 @@ function showPage(id) {
     bookings: loadBookings, services: loadServices,
     'sub-services': loadSubServices, 'grade-prices': loadGradePrices,
     providers: loadProviders, accounting: loadAccounting,
-    areas: () => { loadGovernorates(); loadAreas(); }, reviews: loadReviews,
+    areas: () => { loadGovernorates(); loadAreas(); }, reviews: loadReviews, 'visit-notes': loadVisitNotes,
     'site-content': loadSiteContent, testimonials: loadTestimonials,
     blog: loadBlogPosts, notifications: loadBroadcastLog,
     clients: () => (window.RV && RV.loadClients ? RV.loadClients() : loadClients()),
@@ -1793,8 +1810,31 @@ function showProviderDetail(id) {
     </table>
     ${p.phone?`<div style="margin-top:14px;padding:10px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--muted);text-align:center">📱 رقم الموبايل: <strong style="color:var(--dark);direction:ltr;display:inline-block">${s(p.phone)}</strong> &nbsp;|&nbsp; ✉️ ${s(p.email||'—')}</div>`:''}
   `;
-  document.getElementById('provider-detail-content').innerHTML = html;
+  document.getElementById('provider-detail-content').innerHTML = html + '<div id="provider-reviews-box" style="margin-top:18px"><div style="font-size:13px;color:var(--muted);text-align:center">جاري تحميل التقييمات...</div></div>';
   document.getElementById('provider-detail-modal').classList.add('open');
+  loadProviderReviews(id);
+}
+async function loadProviderReviews(id) {
+  const box = document.getElementById('provider-reviews-box');
+  const { data } = await sb.from('reviews').select('*').eq('provider_id', id).order('created_at',{ascending:false});
+  if(!box || !document.getElementById('provider-detail-modal').classList.contains('open')) return;
+  const list = data || [];
+  const ok = list.filter(r => r.is_approved);
+  const avg = ok.length ? (ok.reduce((a,r)=>a+(r.rating||5),0)/ok.length).toFixed(1) : '—';
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:15px;font-weight:900;color:var(--dark)">التقييمات (${list.length})</div>
+      <div style="font-size:13px;color:var(--muted)">المتوسط (المعتمد): <strong style="color:var(--accent)">★ ${avg}</strong> من ${ok.length}</div>
+    </div>
+    ${list.length ? list.map(r => `
+      <div style="padding:10px 12px;background:var(--bg);border-radius:10px;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;gap:8px;font-size:13px">
+          <strong>${s(r.client_name||'مجهول')}</strong>
+          <span style="color:var(--accent)">${'★'.repeat(r.rating||5)}</span>
+        </div>
+        ${r.text?`<div style="font-size:12px;color:var(--text);margin-top:4px">${s(r.text)}</div>`:''}
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">${s(r.service_type||'')} · ${new Date(r.created_at).toLocaleDateString('ar-EG')} · ${r.is_approved?'<span style="color:#2e7d32">معتمد</span>':'<span style="color:#b26a00">بانتظار</span>'}</div>
+      </div>`).join('') : '<div style="font-size:13px;color:var(--muted);text-align:center">لا توجد تقييمات بعد</div>'}`;
 }
 
 function closeProviderDetail() {
@@ -1923,10 +1963,30 @@ async function deleteArea(id){ if(!confirm('حذف؟'))return; await sb.from('co
 // ============================================================
 // REVIEWS
 // ============================================================
+let allReviews = [];
 async function loadReviews() {
-  const { data } = await sb.from('reviews').select('*').order('created_at',{ascending:false}).limit(50);
+  // provider names must be available even if the providers/bookings pages were not opened yet
+  const [rRes, pRes] = await Promise.all([
+    sb.from('reviews').select('*').order('created_at',{ascending:false}).limit(500),
+    allProviders.length ? Promise.resolve({data: null}) : sb.from('providers').select('*')
+  ]);
+  if(pRes.data) allProviders = pRes.data;
+  allReviews = rRes.data || [];
+  const sel = document.getElementById('rev-provider-filter');
+  const cur = sel.value;
+  const ids = [...new Set(allReviews.map(r => r.provider_id).filter(Boolean))];
+  sel.innerHTML = '<option value="">كل مقدمي الخدمة</option>' + ids
+    .map(id => ({id, name: (allProviders.find(p => p.id === id)||{}).name || '—'}))
+    .sort((x,y) => x.name.localeCompare(y.name, 'ar'))
+    .map(o => `<option value="${o.id}">${s(o.name)}</option>`).join('');
+  sel.value = ids.includes(cur) ? cur : '';
+  renderReviews();
+}
+function renderReviews() {
   const tbody = document.getElementById('reviews-body');
-  if(!data?.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">لا توجد تقييمات من العملاء بعد</td></tr>'; return; }
+  const f = document.getElementById('rev-provider-filter').value;
+  const data = f ? allReviews.filter(r => r.provider_id === f) : allReviews;
+  if(!data.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">لا توجد تقييمات من العملاء بعد</td></tr>'; return; }
   const provMap = {};
   allProviders.forEach(p => { provMap[p.id] = p.name; });
   tbody.innerHTML = data.map(r => `
@@ -1942,6 +2002,52 @@ async function loadReviews() {
         <button class="act-btn delete" onclick="deleteReview('${r.id}')">حذف</button>
       </div></td>
     </tr>`).join('');
+}
+let allVisitNotes = [], visitNoteBookings = {};
+async function loadVisitNotes() {
+  const [nRes, pRes] = await Promise.all([
+    sb.from('booking_visit_notes').select('*').order('created_at',{ascending:false}).limit(500),
+    allProviders.length ? Promise.resolve({data: null}) : sb.from('providers').select('*')
+  ]);
+  if(pRes.data) allProviders = pRes.data;
+  if(nRes.error) {
+    document.getElementById('visit-notes-body').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--danger)">'+s(nRes.error.message)+'</td></tr>';
+    return;
+  }
+  allVisitNotes = nRes.data || [];
+  visitNoteBookings = {};
+  const ids = [...new Set(allVisitNotes.map(n => n.booking_id).filter(Boolean))];
+  if(ids.length) {
+    const { data } = await sb.from('bookings').select('id,booking_number,patient_name').in('id', ids);
+    (data||[]).forEach(b => { visitNoteBookings[b.id] = b; });
+  }
+  const sel = document.getElementById('vn-provider-filter');
+  const cur = sel.value;
+  const pids = [...new Set(allVisitNotes.map(n => n.provider_id).filter(Boolean))];
+  sel.innerHTML = '<option value="">كل مقدمي الخدمة</option>' + pids
+    .map(id => ({id, name: (allProviders.find(p => p.id === id)||{}).name || '—'}))
+    .sort((x,y) => x.name.localeCompare(y.name, 'ar'))
+    .map(o => `<option value="${o.id}">${s(o.name)}</option>`).join('');
+  sel.value = pids.includes(cur) ? cur : '';
+  renderVisitNotes();
+}
+function renderVisitNotes() {
+  const tbody = document.getElementById('visit-notes-body');
+  const f = document.getElementById('vn-provider-filter').value;
+  const data = f ? allVisitNotes.filter(n => n.provider_id === f) : allVisitNotes;
+  if(!data.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted)">لا توجد ملاحظات بعد</td></tr>'; return; }
+  const provMap = {};
+  allProviders.forEach(p => { provMap[p.id] = p.name; });
+  tbody.innerHTML = data.map(n => {
+    const b = visitNoteBookings[n.booking_id] || {};
+    return `<tr>
+      <td style="font-size:12px;color:var(--muted);white-space:nowrap">${new Date(n.created_at).toLocaleString('ar-EG')}</td>
+      <td style="font-size:12px;font-weight:600;color:var(--info)">${s(provMap[n.provider_id]||'—')}</td>
+      <td style="font-size:12px">${s(b.booking_number||(n.booking_id||'').slice(-6).toUpperCase()||'—')}</td>
+      <td>${s(b.patient_name||'—')}</td>
+      <td style="max-width:320px;font-size:13px;white-space:pre-wrap">${s(n.note||'')}</td>
+    </tr>`;
+  }).join('');
 }
 async function approveReview(id){ await sb.from('reviews').update({is_approved:true}).eq('id',id); showToast('✅ تم القبول','success'); loadReviews(); }
 async function deleteReview(id){ if(!confirm('حذف؟'))return; await sb.from('reviews').delete().eq('id',id); showToast('🗑 تم الحذف'); loadReviews(); }
